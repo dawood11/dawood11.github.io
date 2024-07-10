@@ -42,12 +42,8 @@ function App() {
         setName(data.name);
         setAddress(data.address);
       }
-
-      const model = await WorkspaceAPI.project.modelId;
-      const model2 = await WorkspaceAPI.model;
-      const api = await WorkspaceAPI;
-      console.log("model:", model, model2);
-      console.log("api: ", api)
+      const api = await WorkspaceAPI.viewer.getObjects();
+      console.log("viewer: ", api)
       console.log("----------------------------------------------------")
     });
   }
@@ -59,7 +55,7 @@ function App() {
           click me project info!!
         </button>
         <div className="App">
-          <h1>Hei på deg 3</h1>
+          <h1>Hei på deg 4</h1>
           <p>
             Project ID: {id} <br />
             Project Name: {name} <br />

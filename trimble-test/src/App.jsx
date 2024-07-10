@@ -44,9 +44,9 @@ function App() {
       }
       const api = await WorkspaceAPI;
       console.log("api: ", api);
-      await WorkspaceAPI.viewer.getObjects().then(async (viewerObjects) => {
+      await WorkspaceAPI.viewer.getObjects().then((viewerObjects) => {
         console.log("viewerObjects: ", viewerObjects);
-        await viewerObjects.forEach(async (modelObjectsSet) => {
+        viewerObjects.forEach((modelObjectsSet) => {
           console.log("modelObjectsSet: ", modelObjectsSet);
 
           const modelId = modelObjectsSet["modelId"];
@@ -56,8 +56,7 @@ function App() {
           console.log([modelObjectsSet["objects"]])
           console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
-          await modelObjectsSet["objects"].forEach(async (modelObject) => {
-            console.log("modelObject: ", modelObject);
+          modelObjectsSet["objects"].forEach(async (modelObject) => {
             const properties = await WorkspaceAPI.viewer
               .getObjectProperties(modelId, [modelObjectsSet["objects"]])
               .then((objectProperties) => {

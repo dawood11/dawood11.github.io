@@ -61,7 +61,7 @@ function App() {
       <div>
         <button onClick={setMenu}>click me!!222</button>
         <button onClick={getCurrentProjectFromTrimple}>
-          click me project info!!
+          Trykk på meg da!
         </button>
         <div className="App">
           <h1>Hei på deg</h1>

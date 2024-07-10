@@ -58,7 +58,7 @@ function App() {
           modelObjectsSet["objects"].forEach((modelObject) => {
             console.log("modelObject: ", modelObject);
             WorkspaceAPI.viewer
-              .getObjectProperties(modelId, [modelObjectsSet["modelId"]])
+              .getObjectProperties(modelId, [modelObjectsSet["objects"]])
               .then((objectProperties) => {
                 console.log("objectProps:");
                 console.log(objectProperties);

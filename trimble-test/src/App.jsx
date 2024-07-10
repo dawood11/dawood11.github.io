@@ -76,7 +76,7 @@ function App() {
           await WorkspaceAPI.viewer
             .setSelection(
               { modelObjectIds: modelObjectIdsList, selected: true },
-              "set"
+              "add"
             )
             .then((response) => {
               console.log("response: ", response);
@@ -97,7 +97,7 @@ function App() {
           click me project info!!
         </button>
         <div className="App">
-          <h1>Hei på deg 7</h1>
+          <h1>Hei på deg 8</h1>
           <p>
             Project ID: {id} <br />
             Project Name: {name} <br />

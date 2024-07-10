@@ -51,10 +51,10 @@ function App() {
 
           const modelId = modelObjectsSet["modelId"];
           console.log("modelID: ", modelId);
-          console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-          console.log([modelObjectsSet["modelId"]])
-          console.log([modelObjectsSet["objects"]]) //////
-          console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+          console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+          console.log([modelObjectsSet["modelId"]]);
+          console.log([modelObjectsSet["objects"]]); //////
+          console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
           let modelObjectIdsList = [];
           modelObjectsSet["objects"].forEach((modelObject) => {
@@ -62,17 +62,28 @@ function App() {
           });
           console.log("modelObjectIdsList", modelObjectIdsList);
           const properties = await WorkspaceAPI.viewer
-          .getObjectProperties(modelId, modelObjectIdsList)
-          .then((objectProperties) => {
-            console.log("objectProps:");
-            console.log(objectProperties);
+            .getObjectProperties(modelId, modelObjectIdsList)
+            .then((objectProperties) => {
+              console.log("objectProps:", objectProperties);
 
-            return objectProperties;
-          })
-          .catch((err) => {
-            console.log("catch: ", err);
-          });
+              return objectProperties;
+            })
+            .catch((err) => {
+              console.log("catch: ", err);
+            });
           console.log("PROPERTIES!!: ", properties);
+
+          await WorkspaceAPI.viewer
+            .setSelection(
+              { modelObjectIds: modelObjectsSet["objects"], selected: true },
+              { SelectorMode: "set" }
+            )
+            .then((response) => {
+              console.log("response: ", response);
+            })
+            .catch((err) => {
+              console.log("res catch: ", err);
+            });
         });
       });
       console.log("----------------------------------------------------");

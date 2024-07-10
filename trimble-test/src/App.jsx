@@ -44,7 +44,10 @@ function App() {
       }
 
       const model = await WorkspaceAPI.project.modelId;
-      console.log("model:", model);
+      const model2 = await WorkspaceAPI.model;
+      const api = await WorkspaceAPI;
+      console.log("model:", model, model2);
+      console.log("api: ", api)
       console.log("----------------------------------------------------")
     });
   }

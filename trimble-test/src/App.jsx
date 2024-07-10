@@ -48,9 +48,9 @@ function App() {
   //   });
   // }
 
-  function getCurrentProjectFromTrimple() {
-    console.log("GET PROJECT INFOOOO- 1");
-    dotConnect().then(async (WorkspaceAPI) => {
+  async function getCurrentProjectFromTrimple() {
+    console.log("GET PROJECT INFOOOO");
+    await dotConnect().then(async (WorkspaceAPI) => {
       const data = await WorkspaceAPI.project.getCurrentProject();
       console.log(data);
       alert(data);
@@ -65,7 +65,7 @@ function App() {
           click me project info!!
         </button>
         <div className="App">
-          <h1>Hei på deg</h1>
+          <h1>Hei på deg 2</h1>
         </div>
       </div>
     </>

@@ -64,7 +64,7 @@ function App() {
           click me project info!!
         </button>
         <div className="App">
-          <h1>Welcome to Trimble Connect Extension</h1>
+          <h1>Hei på deg</h1>
         </div>
       </div>
     </>

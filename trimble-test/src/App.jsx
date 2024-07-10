@@ -2,7 +2,14 @@ import "./App.css";
 
 import * as Extensions from "trimble-connect-project-workspace-api";
 
+import { useState } from "react";
+
 function App() {
+  const [id, setId] = useState("");
+  const [location, setLocation] = useState("");
+  const [address, setAddress] = useState("");
+  const [name, setName] = useState("");
+
   async function dotConnect() {
     return await Extensions.connect(
       window.parent,
@@ -24,48 +31,34 @@ function App() {
     );
   }
 
-  // const setMenu = () => {
-  //   alert("MENYYY");
-  //   dotConnect().then((WorkspaceAPI) => {
-  //     const mainMenuObject = {
-  //       title: "DET - TC-Extensions",
-  //       icon: "https://de-tech.no/trimble-connect-web-extensions/favicon.png",
-  //       command: "main_nav_menu_cliked",
-  //       subMenus: [
-  //         {
-  //           title: "IFC-Tool",
-  //           icon: "https://de-tech.no/trimble-connect-web-extensions/submenu_1.png",
-  //           command: "submenu_1_clicked",
-  //         },
-  //         {
-  //           title: "DWG-Tool",
-  //           icon: "https://de-tech.no/trimble-connect-web-extensions/submenu_2.png",
-  //           command: "submenu_2_clicked",
-  //         },
-  //       ],
-  //     };
-  //     WorkspaceAPI.ui.setMenu(mainMenuObject);
-  //   });
-  // }
-
   async function getCurrentProjectFromTrimple() {
     console.log("GET PROJECT INFOOOO");
     await dotConnect().then(async (WorkspaceAPI) => {
       const data = await WorkspaceAPI.project.getCurrentProject();
       console.log(data);
-      alert(data);
+      if (data !== null || data !== undefined) {
+        setId(data.id);
+        setLocation(data.location);
+        setName(data.name);
+        setAddress(data.address);
+      }
     });
   }
 
   return (
     <>
       <div>
-        {/* <button onClick={setMenu}>click me!!222</button> */}
         <button onClick={getCurrentProjectFromTrimple}>
           click me project info!!
         </button>
         <div className="App">
-          <h1>Hei på deg 2</h1>
+          <h1>Hei på deg 3</h1>
+          <p>
+            Project ID: {id} <br />
+            Project Name: {name} <br />
+            Project Location: {location} <br />
+            Project Address: {address} <br />
+          </p>
         </div>
       </div>
     </>

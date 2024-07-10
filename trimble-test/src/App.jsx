@@ -3,6 +3,7 @@ import "./App.css";
 import * as Extensions from "trimble-connect-project-workspace-api";
 
 function App() {
+
   async function dotConnect() {
     return await Extensions.connect(
       window.parent,
@@ -47,10 +48,10 @@ function App() {
       WorkspaceAPI.ui.setMenu(mainMenuObject);
     });
   }
-  async function getCurrentProjectFromTrimple() {
+  function getCurrentProjectFromTrimple() {
     console.log("GET PROJECT INFOOOO");
-    await dotConnect().then(async (WorkspaceAPI) => {
-      const data = await WorkspaceAPI.project.getCurrentProject();
+    dotConnect().then((WorkspaceAPI) => {
+      const data = WorkspaceAPI.project.getCurrentProject();
       console.log(data);
       alert(data);
     });

@@ -1,0 +1,8 @@
+{
+    "icon": "https://de-tech.io/trimble-connect-web-extensions/favicon.png",
+    "title": "TEEEEST",
+    "url": "https://dawood11.github.io/trimble-test/dist/index.html",
+    "description": "Extentions to vanilla Trimble Connect Web Viewer",
+    "configCommand": "do_config",
+    "enabled": true
+}

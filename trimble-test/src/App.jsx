@@ -62,7 +62,7 @@ function App() {
           });
           console.log("modelObjectIdsList", modelObjectIdsList);
           const properties = await WorkspaceAPI.viewer
-          .getObjectProperties(modelId, [modelObjectsSet["objects"]])
+          .getObjectProperties(modelId, modelObjectIdsList)
           .then((objectProperties) => {
             console.log("objectProps:");
             console.log(objectProperties);
@@ -84,7 +84,7 @@ function App() {
           click me project info!!
         </button>
         <div className="App">
-          <h1>Hei på deg 6</h1>
+          <h1>Hei på deg 7</h1>
           <p>
             Project ID: {id} <br />
             Project Name: {name} <br />

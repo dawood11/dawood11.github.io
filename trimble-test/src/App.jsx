@@ -64,8 +64,6 @@ function App() {
           const properties = await WorkspaceAPI.viewer
             .getObjectProperties(modelId, modelObjectIdsList)
             .then((objectProperties) => {
-              console.log("objectProps:", objectProperties);
-
               return objectProperties;
             })
             .catch((err) => {
@@ -76,7 +74,7 @@ function App() {
           await WorkspaceAPI.viewer
             .setSelection(
               { modelObjectIds: modelObjectsSet, selected: true },
-              "set"
+              "add"
             )
             .then((response) => {
               console.log("response: ", response);

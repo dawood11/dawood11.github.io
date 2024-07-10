@@ -75,8 +75,8 @@ function App() {
 
           await WorkspaceAPI.viewer
             .setSelection(
-              { modelObjectIds: modelObjectsSet["objects"], selected: true },
-              { SelectorMode: "set" }
+              {selector: { modelObjectIds: modelObjectsSet["objects"], selected: true }},
+              {mode: { SelectorMode: "set" }}
             )
             .then((response) => {
               console.log("response: ", response);

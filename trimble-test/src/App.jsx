@@ -43,9 +43,9 @@ function App() {
         setAddress(data.address);
       }
       const api = await WorkspaceAPI
-      const viewer = await WorkspaceAPI.viewer.getObjects();
-      console.log("viewer: ", viewer)
+      const viewer = await WorkspaceAPI.viewer.getObjectProperties();
       console.log("api: ", api)
+      console.log("viewer: ", viewer)
       console.log("----------------------------------------------------")
     });
   }

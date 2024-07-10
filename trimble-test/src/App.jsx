@@ -42,6 +42,9 @@ function App() {
         setName(data.name);
         setAddress(data.address);
       }
+
+      const model = await WorkspaceAPI.project.modelId;
+      console.log(model);
     });
   }
 

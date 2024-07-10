@@ -62,7 +62,7 @@ function App() {
   return (
     <>
       <div>
-        <button onClick={setMenu}>click me!!222</button>
+        {/* <button onClick={setMenu}>click me!!222</button> */}
         <button onClick={getCurrentProjectFromTrimple}>
           click me project info!!
         </button>

@@ -42,11 +42,32 @@ function App() {
         setName(data.name);
         setAddress(data.address);
       }
-      const api = await WorkspaceAPI
-      const viewer = await WorkspaceAPI.viewer.getObjectProperties();
-      console.log("api: ", api)
-      console.log("viewer: ", viewer)
-      console.log("----------------------------------------------------")
+      const api = await WorkspaceAPI;
+      console.log("api: ", api);
+      await WorkspaceAPI.viewer.getObjects().then((viewerObjects) => {
+        console.log("viewerObjects: ", viewerObjects);
+        viewerObjects.forEach((modelObjectsSet) => {
+          console.log("modelObjectsSet: ", modelObjectsSet);
+
+          const modelId = modelObjectsSet["modelId"];
+          console.log("modelID: ", modelId);
+
+          modelObjectsSet["objects"].forEach((modelObject) => {
+            console.log("modelObject: ", modelObject);
+            WorkspaceAPI.viewer
+              .getObjectProperties(modelId, [modelObjectsSet["modelId"]])
+              .then((objectProperties) => {
+                console.log("objectProps:");
+                console.log(objectProperties);
+              })
+              .catch((err) => {
+                console.logg("catch: ", err);
+              });
+          });
+        });
+      });
+      // });      console.log("viewer: ", viewer)
+      console.log("----------------------------------------------------");
     });
   }
 

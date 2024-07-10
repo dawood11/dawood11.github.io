@@ -47,10 +47,10 @@ function App() {
       WorkspaceAPI.ui.setMenu(mainMenuObject);
     });
   }
-  function getCurrentProjectFromTrimple() {
+  async function getCurrentProjectFromTrimple() {
     console.log("GET PROJECT INFOOOO");
     alert("GET PROJECT INFOOOO");
-    dotConnect().then((WorkspaceAPI) => {
+    await dotConnect().then((WorkspaceAPI) => {
       console.log(WorkspaceAPI.project.getCurrentProject());
       alert(WorkspaceAPI.project.getCurrentProject());
     });

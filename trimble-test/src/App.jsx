@@ -87,11 +87,15 @@ function App() {
       console.log("----------------------------------------------------");
     });
   }
-
+async function yasin(){
+  await dotConnect().then(async (WorkspaceAPI) => {
+    await WorkspaceAPI.viewer.getObjects().then((response) => {console.log("response: ", response);})
+  })
+}
   return (
     <>
       <div>
-        <button onClick={getCurrentProjectFromTrimple}>
+        <button onClick={yasin}>
           click me project info!!
         </button>
         <div className="App">

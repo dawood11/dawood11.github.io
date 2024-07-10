@@ -60,6 +60,7 @@ function App() {
           modelObjectsSet["objects"].forEach((modelObject) => {
             modelObjectIdsList.push(modelObject.id);
           });
+          console.log("modelObjectIdsList", modelObjectIdsList);
           const properties = await WorkspaceAPI.viewer
           .getObjectProperties(modelId, [modelObjectsSet["objects"]])
           .then((objectProperties) => {

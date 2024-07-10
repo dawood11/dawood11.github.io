@@ -49,7 +49,7 @@ function App() {
   // }
 
   function getCurrentProjectFromTrimple() {
-    console.log("GET PROJECT INFOOOO");
+    console.log("GET PROJECT INFOOOO- 1");
     dotConnect().then(async (WorkspaceAPI) => {
       const data = await WorkspaceAPI.project.getCurrentProject();
       console.log(data);

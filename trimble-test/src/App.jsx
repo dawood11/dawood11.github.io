@@ -51,6 +51,9 @@ function App() {
 
           const modelId = modelObjectsSet["modelId"];
           console.log("modelID: ", modelId);
+          console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+          console.log([modelObjectsSet["modelId"]])
+          console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
           modelObjectsSet["objects"].forEach((modelObject) => {
             console.log("modelObject: ", modelObject);

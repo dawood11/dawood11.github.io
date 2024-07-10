@@ -46,7 +46,7 @@ function App() {
       console.log("api: ", api);
       await WorkspaceAPI.viewer.getObjects().then((viewerObjects) => {
         console.log("viewerObjects: ", viewerObjects);
-        viewerObjects.forEach((modelObjectsSet) => {
+        viewerObjects.forEach(async (modelObjectsSet) => {
           console.log("modelObjectsSet: ", modelObjectsSet);
 
           const modelId = modelObjectsSet["modelId"];
@@ -56,18 +56,20 @@ function App() {
           console.log([modelObjectsSet["objects"]])
           console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
-          modelObjectsSet["objects"].forEach(async (modelObject) => {
-            const properties = await WorkspaceAPI.viewer
-              .getObjectProperties(modelId, [modelObjectsSet["objects"]])
-              .then((objectProperties) => {
-                console.log("objectProps:");
-                console.log(objectProperties);
-              })
-              .catch((err) => {
-                console.log("catch: ", err);
-              });
-              console.log("PROPERTIES: ", properties);
+          let modelObjectIdsList = [];
+          modelObjectsSet["objects"].forEach((modelObject) => {
+            modelObjectIdsList.push(modelObject.id);
           });
+          const properties = await WorkspaceAPI.viewer
+          .getObjectProperties(modelId, [modelObjectsSet["objects"]])
+          .then((objectProperties) => {
+            console.log("objectProps:");
+            console.log(objectProperties);
+          })
+          .catch((err) => {
+            console.log("catch: ", err);
+          });
+          console.log("PROPERTIES!!: ", properties);
         });
       });
       console.log("----------------------------------------------------");

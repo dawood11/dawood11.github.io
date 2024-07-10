@@ -84,7 +84,7 @@ function App() {
           click me project info!!
         </button>
         <div className="App">
-          <h1>Hei på deg 5</h1>
+          <h1>Hei på deg 6</h1>
           <p>
             Project ID: {id} <br />
             Project Name: {name} <br />

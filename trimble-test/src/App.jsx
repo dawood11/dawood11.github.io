@@ -53,7 +53,7 @@ function App() {
           console.log("modelID: ", modelId);
           console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
           console.log([modelObjectsSet["modelId"]])
-          console.log([modelObjectsSet["objects"]])
+          console.log([modelObjectsSet["objects"]]) //////
           console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
           let modelObjectIdsList = [];
@@ -66,6 +66,8 @@ function App() {
           .then((objectProperties) => {
             console.log("objectProps:");
             console.log(objectProperties);
+
+            return objectProperties;
           })
           .catch((err) => {
             console.log("catch: ", err);

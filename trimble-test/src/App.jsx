@@ -44,9 +44,9 @@ function App() {
       }
       const api = await WorkspaceAPI;
       console.log("api: ", api);
-      await WorkspaceAPI.viewer.getObjects().then((viewerObjects) => {
+      await WorkspaceAPI.viewer.getObjects().then(async (viewerObjects) => {
         console.log("viewerObjects: ", viewerObjects);
-        viewerObjects.forEach((modelObjectsSet) => {
+        await viewerObjects.forEach(async (modelObjectsSet) => {
           console.log("modelObjectsSet: ", modelObjectsSet);
 
           const modelId = modelObjectsSet["modelId"];
@@ -56,21 +56,21 @@ function App() {
           console.log([modelObjectsSet["objects"]])
           console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
-          modelObjectsSet["objects"].forEach((modelObject) => {
+          await modelObjectsSet["objects"].forEach(async (modelObject) => {
             console.log("modelObject: ", modelObject);
-            WorkspaceAPI.viewer
+            const properties = await WorkspaceAPI.viewer
               .getObjectProperties(modelId, [modelObjectsSet["objects"]])
               .then((objectProperties) => {
                 console.log("objectProps:");
                 console.log(objectProperties);
               })
               .catch((err) => {
-                console.logg("catch: ", err);
+                console.log("catch: ", err);
               });
+              console.log("PROPERTIES: ", properties);
           });
         });
       });
-      // });      console.log("viewer: ", viewer)
       console.log("----------------------------------------------------");
     });
   }
@@ -82,7 +82,7 @@ function App() {
           click me project info!!
         </button>
         <div className="App">
-          <h1>Hei på deg 4</h1>
+          <h1>Hei på deg 5</h1>
           <p>
             Project ID: {id} <br />
             Project Name: {name} <br />

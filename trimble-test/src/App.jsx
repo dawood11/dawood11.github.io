@@ -53,6 +53,7 @@ function App() {
           console.log("modelID: ", modelId);
           console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
           console.log([modelObjectsSet["modelId"]])
+          console.log([modelObjectsSet["objects"]])
           console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
           modelObjectsSet["objects"].forEach((modelObject) => {

@@ -48,15 +48,13 @@ function App() {
   //   });
   // }
 
-  function getCurrentProjectFromTrimple() {
+  async function getCurrentProjectFromTrimple() {
     console.log("GET PROJECT INFOOOO");
     alert("GET PROJECT INFOOOO");
-    const data = dotConnect();
-    console.log(data)
-    // .then((WorkspaceAPI) => {
-    //   console.log(WorkspaceAPI.project.getCurrentProject());
-    //   alert(WorkspaceAPI.project.getCurrentProject());
-    // });
+    await dotConnect().then((WorkspaceAPI) => {
+      console.log(WorkspaceAPI.project.getCurrentProject());
+      alert(WorkspaceAPI.project.getCurrentProject());
+    });
   }
 
   return (

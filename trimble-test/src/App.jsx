@@ -3,7 +3,6 @@ import "./App.css";
 import * as Extensions from "trimble-connect-project-workspace-api";
 
 function App() {
-
   async function dotConnect() {
     return await Extensions.connect(
       window.parent,
@@ -50,10 +49,10 @@ function App() {
   }
   function getCurrentProjectFromTrimple() {
     console.log("GET PROJECT INFOOOO");
+    alert("GET PROJECT INFOOOO");
     dotConnect().then((WorkspaceAPI) => {
-      const data = WorkspaceAPI.project.getCurrentProject();
-      console.log(data);
-      alert(data);
+      console.log(WorkspaceAPI.project.getCurrentProject());
+      alert(WorkspaceAPI.project.getCurrentProject());
     });
   }
 
@@ -62,7 +61,7 @@ function App() {
       <div>
         <button onClick={setMenu}>click me!!222</button>
         <button onClick={getCurrentProjectFromTrimple}>
-          Trykk på meg da!
+          click me project info!!
         </button>
         <div className="App">
           <h1>Hei på deg</h1>

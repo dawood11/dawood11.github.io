@@ -92,9 +92,11 @@ function App() {
   return (
     <>
       <div>
+        <header>
         <button onClick={getCurrentProjectFromTrimple}>
           Trykk her
         </button>
+        </header> 
         <div className="App">
           <h1>TC Proto 1</h1>
           <p>

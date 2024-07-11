@@ -79,34 +79,36 @@ function App() {
 
     const selectedData = attributeData.filter(obj => obj.value === value);
     if (isChecked) {
-      await selectAndIsolateObjects(api, selectedData);
+      await selectObjects(api, selectedData);
     } else {
-      await clearIsolatedObjects(api);
+      await deselectObjects(api, selectedData);
     }
   };
 
-  const selectAndIsolateObjects = async (api, objects) => {
+  const selectObjects = async (api, objects) => {
     const modelEntities = objects.map(obj => ({
       modelId: obj.modelId,
       objectRuntimeIds: [obj.id]
     }));
 
-    await api.viewer.isolateEntities(modelEntities);
-    console.log(`Isolated entities.`);
+    const objectSelector = {
+      modelObjectIds: modelEntities
+    };
+    await api.viewer.setSelection(objectSelector, "add");
+    console.log(`Objects selected.`);
   };
 
-  const clearIsolatedObjects = async (api) => {
-    // Clears isolation by showing all objects again
-    const allObjects = await api.viewer.getObjects();
-    const allModelEntities = allObjects.flatMap(objSet => 
-      objSet.objects.map(obj => ({
-        modelId: objSet.modelId,
-        objectRuntimeIds: [obj.id]
-      }))
-    );
+  const deselectObjects = async (api, objects) => {
+    const modelEntities = objects.map(obj => ({
+      modelId: obj.modelId,
+      objectRuntimeIds: [obj.id]
+    }));
 
-    await api.viewer.isolateEntities(allModelEntities);
-    console.log(`Cleared isolated entities, showing all objects.`);
+    const objectSelector = {
+      modelObjectIds: modelEntities
+    };
+    await api.viewer.setSelection(objectSelector, "remove");
+    console.log(`Objects deselected.`);
   };
 
   const createView = async () => {
@@ -133,6 +135,24 @@ function App() {
 
     await api.view.setView(viewSpec.id);
     console.log(`View set as active.`);
+  };
+
+  const fitToView = async () => {
+    const api = await dotConnect();
+    const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
+
+    if (selectedData.length === 0) {
+      console.log("No objects selected to fit view.");
+      return;
+    }
+
+    const modelEntities = selectedData.map(obj => ({
+      modelId: obj.modelId,
+      objectRuntimeIds: [obj.id]
+    }));
+
+    const fitSuccess = await api.viewer.zoomToFitRatio(modelEntities, 1.2);
+    console.log(`View fitted to selected objects:`, fitSuccess);
   };
 
   const groupAttributeData = (data = attributeData) => {
@@ -176,7 +196,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 33</h1>
+          <h1>Tatta 34</h1>
         </header>
         <div className="content">
           <div>
@@ -200,6 +220,7 @@ function App() {
           </div>
           <button onClick={getAttributeDataFromTrimble}>Generate</button>
           {renderGroupedAttributeObjects()}
+          <button onClick={fitToView}>Fit to View</button>
           <button onClick={createView}>Create View</button>
         </div>
       </div>

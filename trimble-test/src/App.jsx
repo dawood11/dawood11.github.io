@@ -112,7 +112,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta2</h1>
+          <h1>Tatta 3</h1>
         </header>
         <div className="content">
           <button onClick={getCurrentProjectFromTrimble}>Trykk her</button>

@@ -13,7 +13,7 @@ function App() {
   async function dotConnect() {
     return await Extensions.connect(
       window.parent,
-      (event, args) => {
+      (event) => {
         switch (event) {
           case "extension.command":
             //"Command executed by the user: args.data"
@@ -32,7 +32,7 @@ function App() {
   }
 
   async function getCurrentProjectFromTrimple() {
-    console.log("GET PROJECT INFOOOO");
+    console.log("GET PROJECT INFO");
     await dotConnect().then(async (WorkspaceAPI) => {
       const data = await WorkspaceAPI.project.getCurrentProject();
       console.log(data);
@@ -71,31 +71,16 @@ function App() {
             });
           console.log("PROPERTIES!!: ", properties);
 
-          await WorkspaceAPI.viewer
-            .setSelection(
-              { modelObjectIds: [{modelId: modelId, modelObjectIdsList}], selected: true },
-              "add"
-            )
-            .then((response) => {
-              console.log("response: ", response);
-            })
-            .catch((err) => {
-              console.log("res catch: ", err);
-            });
+        
         });
       });
       console.log("----------------------------------------------------");
     });
-  }
-async function yasin(){
-  await dotConnect().then(async (WorkspaceAPI) => {
-    await WorkspaceAPI.viewer.getObjects().then((response) => {console.log("response: ", response);})
-  })
 }
   return (
     <>
       <div>
-        <button onClick={yasin}>
+        <button onClick={getCurrentProjectFromTrimple}>
           click me project info!!
         </button>
         <div className="App">

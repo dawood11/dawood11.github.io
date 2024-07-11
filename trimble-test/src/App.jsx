@@ -126,7 +126,7 @@ function App() {
     }));
 
     const viewInfo = {
-      name: `View for ${selectedData[0].value}`, // Use the value of the selected attribute as the view name
+      name: selectedData[0].value, // Use the value of the selected attribute as the view name
       objects: modelEntities
     };
 
@@ -196,7 +196,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 35</h1>
+          <h1>Tatta 36</h1>
         </header>
         <div className="content">
           <div>

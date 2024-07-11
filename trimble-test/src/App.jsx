@@ -3,10 +3,9 @@ import { useState } from "react";
 import './index.css'; // Import the CSS file
 
 function App() {
-  const [projectData, setProjectData] = useState(null);
-  const [mmiData, setMmiData] = useState([]);
-  const [psetName, setPsetName] = useState("AndfjordSalmon");
-  const [attribute, setAttribute] = useState("A22 MMI");
+  const [attributeData, setAttributeData] = useState([]);
+  const [psetName, setPsetName] = useState("Example: AndfjordSalmon");
+  const [attribute, setAttribute] = useState("Example: A22 MMI");
 
   async function dotConnect() {
     return await Extensions.connect(
@@ -14,13 +13,10 @@ function App() {
       (event, args) => {
         switch (event) {
           case "extension.command":
-            // "Command executed by the user: args.data"
             break;
           case "extension.accessToken":
-            // "Access token or status: args.data"
             break;
           case "extension.userSettingsChanged":
-            // "User settings changed!"
             break;
           default:
         }
@@ -29,17 +25,8 @@ function App() {
     );
   }
 
-  async function getCurrentProjectFromTrimble() {
-    console.log("GET PROJECT INFOOOO");
-    await dotConnect().then(async (WorkspaceAPI) => {
-      const data = await WorkspaceAPI.project.getCurrentProject();
-      console.log(data);
-      setProjectData(data);
-    });
-  }
-
-  async function getMMIObjectsFromTrimble() {
-    console.log("GET MMI OBJECTS");
+  async function getAttributeDataFromTrimble() {
+    console.log("GET ATTRIBUTE DATA");
     await dotConnect().then(async (WorkspaceAPI) => {
       const api = await WorkspaceAPI;
       console.log("api: ", api);
@@ -47,7 +34,7 @@ function App() {
       const viewerObjects = await api.viewer.getObjects();
       console.log("viewerObjects: ", viewerObjects);
 
-      const mmiObjects = [];
+      const attributeObjects = [];
 
       for (const modelObjectsSet of viewerObjects) {
         const modelId = modelObjectsSet["modelId"];
@@ -62,12 +49,12 @@ function App() {
           if (propertySet.properties) {
             propertySet.properties.forEach((prop) => {
               console.log("prop:", prop);
-              if (prop.name === psetName) { // Use user-defined PSET NAME
+              if (prop.name === psetName) {
                 prop.properties.forEach((subProp) => {
                   console.log("subProp:", subProp);
-                  if (subProp.name === attribute) { // Use user-defined ATTRIBUTE
-                    console.log("Found MMI property:", subProp);
-                    mmiObjects.push({ id: propertySet.id, class: propertySet.class, mmi: subProp.value });
+                  if (subProp.name === attribute) {
+                    console.log("Found attribute:", subProp);
+                    attributeObjects.push({ id: propertySet.id, class: propertySet.class, value: subProp.value });
                   }
                 });
               }
@@ -76,41 +63,22 @@ function App() {
         });
       }
 
-      setMmiData(mmiObjects);
-      console.log("MMI Objects: ", mmiObjects);
+      setAttributeData(attributeObjects);
+      console.log("Attribute Objects: ", attributeObjects);
     });
   }
 
-  const getMMIColor = (mmi) => {
-    switch (mmi) {
-      case 100:
-        return 'red';
-      case 200:
-        return 'orange';
-      case 300:
-        return 'yellow';
-      case 350:
-        return 'lightgreen';
-      case 400:
-        return 'green';
-      case 500:
-        return 'blue';
-      default:
-        return 'grey';
-    }
-  };
-
-  const renderMMIObjects = () => {
-    if (!mmiData || mmiData.length === 0) return <p>No MMI data available.</p>;
+  const renderAttributeObjects = () => {
+    if (!attributeData || attributeData.length === 0) return <p>No data available.</p>;
 
     return (
       <div>
-        {mmiData.map(obj => (
-          <div key={obj.id} style={{ color: getMMIColor(obj.mmi) }}>
+        {attributeData.map(obj => (
+          <div key={obj.id}>
             <p>
               ID: {obj.id} <br />
               Class: {obj.class} <br />
-              {attribute}: {obj.mmi} <br />
+              {attribute}: {obj.value} <br />
             </p>
           </div>
         ))}
@@ -122,7 +90,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 4</h1>
+          <h1>Tatta 8</h1>
         </header>
         <div className="content">
           <div>
@@ -144,20 +112,8 @@ function App() {
               />
             </label>
           </div>
-          <button onClick={getCurrentProjectFromTrimble}>Get Project Info</button>
-          <button onClick={getMMIObjectsFromTrimble}>Get MMI Objects</button>
-          {projectData && (
-            <div>
-              <h2>Project Information</h2>
-              <p>
-                Project ID: {projectData.id} <br />
-                Project Name: {projectData.name} <br />
-                Project Location: {projectData.location} <br />
-                Project Address: {projectData.address} <br />
-              </p>
-            </div>
-          )}
-          {renderMMIObjects()}
+          <button onClick={getAttributeDataFromTrimble}>Generate</button>
+          {renderAttributeObjects()}
         </div>
       </div>
     </>

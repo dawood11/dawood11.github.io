@@ -45,15 +45,11 @@ function App() {
         console.log("Fetched properties:", properties);
 
         properties.forEach((propertySet) => {
-          console.log("propertySet:", propertySet);
           if (propertySet.properties) {
             propertySet.properties.forEach((prop) => {
-              console.log("prop:", prop);
               if (prop.name === psetName) {
                 prop.properties.forEach((subProp) => {
-                  console.log("subProp:", subProp);
                   if (subProp.name === attribute) {
-                    console.log("Found attribute:", subProp);
                     attributeObjects.push({ id: propertySet.id, class: propertySet.class, value: subProp.value });
                   }
                 });
@@ -68,18 +64,38 @@ function App() {
     });
   }
 
-  const renderAttributeObjects = () => {
-    if (!attributeData || attributeData.length === 0) return <p>No data available.</p>;
+  const groupAttributeData = () => {
+    const groupedData = attributeData.reduce((acc, obj) => {
+      const { value } = obj;
+      if (!acc[value]) {
+        acc[value] = { value, count: 0, objects: [] };
+      }
+      acc[value].count += 1;
+      acc[value].objects.push(obj);
+      return acc;
+    }, {});
+
+    return Object.values(groupedData);
+  };
+
+  const renderGroupedAttributeObjects = () => {
+    const groupedData = groupAttributeData();
+    if (groupedData.length === 0) return <p>No data available.</p>;
 
     return (
       <div>
-        {attributeData.map(obj => (
-          <div key={obj.id}>
+        {groupedData.map(group => (
+          <div key={group.value}>
             <p>
-              ID: {obj.id} <br />
-              Class: {obj.class} <br />
-              {attribute}: {obj.value} <br />
+              {attribute}: {group.value} <br />
+              Count: {group.count}
             </p>
+            {group.objects.map(obj => (
+              <p key={obj.id}>
+                ID: {obj.id} <br />
+                Class: {obj.class}
+              </p>
+            ))}
           </div>
         ))}
       </div>
@@ -90,7 +106,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 8</h1>
+          <h1>Tatta 9</h1>
         </header>
         <div className="content">
           <div>
@@ -113,7 +129,7 @@ function App() {
             </label>
           </div>
           <button onClick={getAttributeDataFromTrimble}>Generate</button>
-          {renderAttributeObjects()}
+          {renderGroupedAttributeObjects()}
         </div>
       </div>
     </>

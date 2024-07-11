@@ -33,51 +33,6 @@ function App() {
       const data = await WorkspaceAPI.project.getCurrentProject();
       console.log(data);
       setProjectData(data);
-
-      if (data !== null && data !== undefined) {
-        const api = await WorkspaceAPI;
-        console.log("api: ", api);
-        await WorkspaceAPI.viewer.getObjects().then(async (viewerObjects) => {
-          console.log("viewerObjects: ", viewerObjects);
-          for (const modelObjectsSet of viewerObjects) {
-            console.log("modelObjectsSet: ", modelObjectsSet);
-
-            const modelId = modelObjectsSet["modelId"];
-            console.log("modelID: ", modelId);
-            console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-            console.log([modelObjectsSet["modelId"]]);
-            console.log([modelObjectsSet["objects"]]);
-
-            let modelObjectIdsList = [];
-            modelObjectsSet["objects"].forEach((modelObject) => {
-              modelObjectIdsList.push(modelObject.id);
-            });
-            console.log("modelObjectIdsList", modelObjectIdsList);
-            const properties = await WorkspaceAPI.viewer
-              .getObjectProperties(modelId, modelObjectIdsList)
-              .then((objectProperties) => {
-                return objectProperties;
-              })
-              .catch((err) => {
-                console.log("catch: ", err);
-              });
-            console.log("PROPERTIES!!: ", properties);
-
-            await WorkspaceAPI.viewer
-              .setSelection(
-                { modelObjectIds: modelObjectsSet, selected: true },
-                "add"
-              )
-              .then((response) => {
-                console.log("response: ", response);
-              })
-              .catch((err) => {
-                console.log("res catch: ", err);
-              });
-          }
-          console.log("----------------------------------------------------");
-        });
-      }
     });
   }
 
@@ -86,42 +41,53 @@ function App() {
     await dotConnect().then(async (WorkspaceAPI) => {
       const api = await WorkspaceAPI;
       console.log("api: ", api);
-      await WorkspaceAPI.viewer.getObjects().then(async (viewerObjects) => {
-        console.log("viewerObjects: ", viewerObjects);
-        const mmiObjects = [];
 
-        for (const modelObjectsSet of viewerObjects) {
-          const modelId = modelObjectsSet["modelId"];
-          let modelObjectIdsList = [];
-          modelObjectsSet["objects"].forEach((modelObject) => {
-            modelObjectIdsList.push(modelObject.id);
+      const currentProject = await api.project.getCurrentProject();
+      console.log("Current Project: ", currentProject);
+
+      const projectProperties = await api.project.getProperties(currentProject.id);
+      console.log("Project Properties: ", projectProperties);
+
+      const viewerObjects = await api.viewer.getObjects();
+      console.log("viewerObjects: ", viewerObjects);
+
+      const mmiObjects = [];
+
+      for (const modelObjectsSet of viewerObjects) {
+        const modelId = modelObjectsSet["modelId"];
+        let modelObjectIdsList = [];
+        modelObjectsSet["objects"].forEach((modelObject) => {
+          modelObjectIdsList.push(modelObject.id);
+        });
+        console.log("Fetching properties for model ID:", modelId);
+
+        const properties = await api.viewer
+          .getObjectProperties(modelId, modelObjectIdsList)
+          .then((objectProperties) => {
+            return objectProperties;
+          })
+          .catch((err) => {
+            console.log("catch: ", err);
           });
-          console.log("Fetching properties for model ID:", modelId);
-          const properties = await WorkspaceAPI.viewer
-            .getObjectProperties(modelId, modelObjectIdsList)
-            .then((objectProperties) => {
-              return objectProperties;
-            })
-            .catch((err) => {
-              console.log("catch: ", err);
+        console.log("Fetched properties:", properties);
+
+        properties.forEach((propertySet) => {
+          if (propertySet.properties) {
+            propertySet.properties.forEach((prop) => {
+              if (prop.name === 'A22 MMI') {
+                console.log("Found MMI property:", prop);
+                mmiObjects.push({ id: propertySet.id, class: propertySet.class, mmi: prop.value });
+              }
             });
-          console.log("Fetched properties:", properties);
+          }
+        });
+      }
 
-          properties.forEach((propertySet) => {
-            if (propertySet.properties) {
-              propertySet.properties.forEach((prop) => {
-                if (prop.name === 'A22 MMI') {
-                  console.log("Found MMI property:", prop);
-                  mmiObjects.push({ id: propertySet.id, class: propertySet.class, mmi: prop.value });
-                }
-              });
-            }
-          });
-        }
+      const selection = await api.viewer.getSelection();
+      console.log("Selection: ", selection);
 
-        setMmiData(mmiObjects);
-        console.log("MMI Objects: ", mmiObjects);
-      });
+      setMmiData(mmiObjects);
+      console.log("MMI Objects: ", mmiObjects);
     });
   }
 
@@ -166,7 +132,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 8</h1>
+          <h1>Tatta 6</h1>
         </header>
         <div className="content">
           <button onClick={getCurrentProjectFromTrimble}>Get Project Info</button>

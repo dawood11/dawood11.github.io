@@ -94,7 +94,7 @@ function App() {
       if (isChecked) {
         updatedGroups[value] = true;
       } else {
-        updatedGroups[value] = false;
+        delete updatedGroups[value];
       }
       return updatedGroups;
     });
@@ -129,6 +129,7 @@ function App() {
 
     // Clear selection state if action is remove
     if (action === "remove") {
+      await api.viewer.setSelection({ modelObjectIds: [] }, "clear"); // Clear all selections
       setSelectedGroups({});
     }
   };
@@ -161,7 +162,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 18</h1>
+          <h1>Tatta 19</h1>
         </header>
         <div className="content">
           <div>

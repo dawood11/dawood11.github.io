@@ -94,44 +94,42 @@ function App() {
       if (isChecked) {
         updatedGroups[value] = true;
       } else {
-        delete updatedGroups[value];
+        updatedGroups[value] = false;
       }
       return updatedGroups;
     });
   };
 
+  // Function to process batch of models for selection/deselection
+  const processBatch = async (api, batch, action) => {
+    const objectSelector = {
+      modelObjectIds: batch.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
+    };
+    await api.viewer.setSelection(objectSelector, action);
+  };
+
   // Function to select/unselect models in Trimble Connect Viewer
-  const updateSelectionInViewer = async () => {
+  const updateSelectionInViewer = async (action) => {
     const api = await dotConnect();
-    const modelsToSelect = [];
-    const modelsToDeselect = [];
+    const modelsToProcess = [];
 
     // Loop through attribute data and add selected/deselected models to the lists
     attributeData.forEach(obj => {
-      if (selectedGroups[obj.value]) {
-        modelsToSelect.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
-      } else {
-        modelsToDeselect.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
+      if (selectedGroups[obj.value] === (action === "add")) {
+        modelsToProcess.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
       }
     });
 
-    // Function to process batch of models
-    const processBatch = async (batch, action) => {
-      const objectSelector = {
-        modelObjectIds: batch.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
-      };
-      await api.viewer.setSelection(objectSelector, action);
-    };
-
     // Process models in batches
     const batchSize = 50; // Adjust the batch size as needed
-    for (let i = 0; i < modelsToSelect.length; i += batchSize) {
-      const batch = modelsToSelect.slice(i, i + batchSize);
-      await processBatch(batch, "add");
+    for (let i = 0; i < modelsToProcess.length; i += batchSize) {
+      const batch = modelsToProcess.slice(i, i + batchSize);
+      await processBatch(api, batch, action);
     }
-    for (let i = 0; i < modelsToDeselect.length; i += batchSize) {
-      const batch = modelsToDeselect.slice(i, i + batchSize);
-      await processBatch(batch, "remove");
+
+    // Clear selection state if action is remove
+    if (action === "remove") {
+      setSelectedGroups({});
     }
   };
 
@@ -146,6 +144,7 @@ function App() {
           <div key={group.value}>
             <input
               type="checkbox"
+              checked={selectedGroups[group.value] === true}
               onChange={(e) => handleGroupCheckboxChange(group.value, e.target.checked)}
             />
             <label>
@@ -162,7 +161,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 17</h1>
+          <h1>Tatta 18</h1>
         </header>
         <div className="content">
           <div>
@@ -185,7 +184,8 @@ function App() {
             </label>
           </div>
           <button onClick={getAttributeDataFromTrimble}>Generate</button>
-          <button onClick={updateSelectionInViewer}>Select Objects</button>
+          <button onClick={() => updateSelectionInViewer("add")}>Select Objects</button>
+          <button onClick={() => updateSelectionInViewer("remove")}>Remove Selected Objects</button>
           {renderGroupedAttributeObjects()}
         </div>
       </div>

@@ -94,7 +94,7 @@ function App() {
       if (isChecked) {
         updatedGroups[value] = true;
       } else {
-        updatedGroups[value] = false;
+        delete updatedGroups[value];
       }
       return updatedGroups;
     });
@@ -116,18 +116,22 @@ function App() {
     });
 
     // Use ObjectSelector to specify the selection criteria
-    if (modelsToSelect.length > 0) {
-      const objectSelector = {
-        modelObjectIds: modelsToSelect.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
-      };
-      await api.viewer.setSelection(objectSelector, "add");
-    }
+    try {
+      if (modelsToSelect.length > 0) {
+        const objectSelector = {
+          modelObjectIds: modelsToSelect.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
+        };
+        await api.viewer.setSelection(objectSelector, "add");
+      }
 
-    if (modelsToDeselect.length > 0) {
-      const objectDeselector = {
-        modelObjectIds: modelsToDeselect.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
-      };
-      await api.viewer.setSelection(objectDeselector, "remove");
+      if (modelsToDeselect.length > 0) {
+        const objectDeselector = {
+          modelObjectIds: modelsToDeselect.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
+        };
+        await api.viewer.setSelection(objectDeselector, "remove");
+      }
+    } catch (error) {
+      console.error("Error selecting/deselecting objects:", error);
     }
   };
 
@@ -158,7 +162,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 15</h1>
+          <h1>Tatta 16</h1>
         </header>
         <div className="content">
           <div>
@@ -181,7 +185,7 @@ function App() {
             </label>
           </div>
           <button onClick={getAttributeDataFromTrimble}>Generate</button>
-          <button onClick={updateSelectionInViewer}>Update Selection</button>
+          <button onClick={updateSelectionInViewer}>Select Objects</button>
           {renderGroupedAttributeObjects()}
         </div>
       </div>

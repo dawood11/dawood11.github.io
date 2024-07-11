@@ -77,24 +77,24 @@ function App() {
 
   // Function to create and set views for each attribute value
   const createAndSetViews = async (api, group) => {
+    const modelEntities = group.models.map(obj => ({
+      modelId: obj.modelId,
+      objectRuntimeIds: [obj.id]
+    }));
+
+    await api.viewer.isolateEntities(modelEntities);
+    console.log(`Isolated entities for '${group.value}'`);
+
     const viewInfo = {
       name: `${group.value}`, // Only the value as the name
-      objects: group.models.map(obj => ({ modelId: obj.modelId, objectRuntimeIds: [obj.id] })),
+      objects: modelEntities
     };
 
     const viewSpec = await api.view.createView(viewInfo);
     console.log(`View '${group.value}' created with objects:`, viewSpec.objects);
 
-    await api.view.setView(viewSpec);
+    await api.view.setView(viewSpec.id);
     console.log(`View '${group.value}' set as active.`);
-
-    await api.viewer.setSelection({ modelObjectIds: [] }, "clear"); // Deselect all objects
-
-    const objectSelector = {
-      modelObjectIds: group.models.map(m => ({ modelId: m.modelId, objectRuntimeIds: [m.id] }))
-    };
-    await api.viewer.setSelection(objectSelector, "add");
-    console.log(`Objects for '${group.value}' selected.`);
   };
 
   // Function to handle group actions (create views and select objects)
@@ -188,7 +188,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 26</h1>
+          <h1>Tatta 27</h1>
         </header>
         <div className="content">
           <div>

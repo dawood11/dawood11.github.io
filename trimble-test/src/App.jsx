@@ -5,6 +5,8 @@ import './index.css'; // Import the CSS file
 function App() {
   const [projectData, setProjectData] = useState(null);
   const [mmiData, setMmiData] = useState([]);
+  const [psetName, setPsetName] = useState("AndfjordSalmon");
+  const [attribute, setAttribute] = useState("A22 MMI");
 
   async function dotConnect() {
     return await Extensions.connect(
@@ -60,10 +62,10 @@ function App() {
           if (propertySet.properties) {
             propertySet.properties.forEach((prop) => {
               console.log("prop:", prop);
-              if (prop.name === 'AndfjordSalmon') {
+              if (prop.name === psetName) { // Use user-defined PSET NAME
                 prop.properties.forEach((subProp) => {
                   console.log("subProp:", subProp);
-                  if (subProp.name === 'A22 MMI') {
+                  if (subProp.name === attribute) { // Use user-defined ATTRIBUTE
                     console.log("Found MMI property:", subProp);
                     mmiObjects.push({ id: propertySet.id, class: propertySet.class, mmi: subProp.value });
                   }
@@ -108,7 +110,7 @@ function App() {
             <p>
               ID: {obj.id} <br />
               Class: {obj.class} <br />
-              MMI: {obj.mmi} <br />
+              {attribute}: {obj.mmi} <br />
             </p>
           </div>
         ))}
@@ -120,9 +122,28 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 2</h1>
+          <h1>Tatta 4</h1>
         </header>
         <div className="content">
+          <div>
+            <label>
+              PSET NAME:
+              <input
+                type="text"
+                value={psetName}
+                onChange={(e) => setPsetName(e.target.value)}
+              />
+            </label>
+            <br />
+            <label>
+              ATTRIBUTE:
+              <input
+                type="text"
+                value={attribute}
+                onChange={(e) => setAttribute(e.target.value)}
+              />
+            </label>
+          </div>
           <button onClick={getCurrentProjectFromTrimble}>Get Project Info</button>
           <button onClick={getMMIObjectsFromTrimble}>Get MMI Objects</button>
           {projectData && (

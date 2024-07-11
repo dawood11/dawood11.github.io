@@ -4,7 +4,7 @@ import './index.css'; // Import the CSS file
 
 function App() {
   const [projectData, setProjectData] = useState(null);
-  const [mmiData, setMmiData] = useState(null);
+  const [mmiData, setMmiData] = useState([]);
 
   async function dotConnect() {
     return await Extensions.connect(
@@ -108,12 +108,11 @@ function App() {
           console.log("Fetched properties:", properties);
 
           properties.forEach((propertySet) => {
-            console.log("Checking property set:", propertySet);
             if (propertySet.properties) {
               propertySet.properties.forEach((prop) => {
-                console.log("Checking property:", prop);
                 if (prop.name === 'A22 MMI') {
-                  mmiObjects.push({ ...propertySet, mmi: prop.value });
+                  console.log("Found MMI property:", prop);
+                  mmiObjects.push({ id: propertySet.id, class: propertySet.class, mmi: prop.value });
                 }
               });
             }
@@ -156,7 +155,6 @@ function App() {
               ID: {obj.id} <br />
               Class: {obj.class} <br />
               MMI: {obj.mmi} <br />
-              Product: {obj.product?.name || 'N/A'} <br />
             </p>
           </div>
         ))}
@@ -168,7 +166,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 4</h1>
+          <h1>Tatta 5</h1>
         </header>
         <div className="content">
           <button onClick={getCurrentProjectFromTrimble}>Get Project Info</button>

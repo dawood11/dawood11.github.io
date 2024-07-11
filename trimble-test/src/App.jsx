@@ -115,23 +115,23 @@ function App() {
       }
     });
 
-    // Use ObjectSelector to specify the selection criteria
-    try {
-      if (modelsToSelect.length > 0) {
-        const objectSelector = {
-          modelObjectIds: modelsToSelect.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
-        };
-        await api.viewer.setSelection(objectSelector, "add");
-      }
+    // Function to process batch of models
+    const processBatch = async (batch, action) => {
+      const objectSelector = {
+        modelObjectIds: batch.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
+      };
+      await api.viewer.setSelection(objectSelector, action);
+    };
 
-      if (modelsToDeselect.length > 0) {
-        const objectDeselector = {
-          modelObjectIds: modelsToDeselect.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
-        };
-        await api.viewer.setSelection(objectDeselector, "remove");
-      }
-    } catch (error) {
-      console.error("Error selecting/deselecting objects:", error);
+    // Process models in batches
+    const batchSize = 50; // Adjust the batch size as needed
+    for (let i = 0; i < modelsToSelect.length; i += batchSize) {
+      const batch = modelsToSelect.slice(i, i + batchSize);
+      await processBatch(batch, "add");
+    }
+    for (let i = 0; i < modelsToDeselect.length; i += batchSize) {
+      const batch = modelsToDeselect.slice(i, i + batchSize);
+      await processBatch(batch, "remove");
     }
   };
 
@@ -162,7 +162,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 16</h1>
+          <h1>Tatta 17</h1>
         </header>
         <div className="content">
           <div>

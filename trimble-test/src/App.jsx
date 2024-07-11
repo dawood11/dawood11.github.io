@@ -37,17 +37,16 @@ function App() {
       if (data !== null && data !== undefined) {
         const api = await WorkspaceAPI;
         console.log("api: ", api);
-        await WorkspaceAPI.viewer.getObjects().then((viewerObjects) => {
+        await WorkspaceAPI.viewer.getObjects().then(async (viewerObjects) => {
           console.log("viewerObjects: ", viewerObjects);
-          viewerObjects.forEach(async (modelObjectsSet) => {
+          for (const modelObjectsSet of viewerObjects) {
             console.log("modelObjectsSet: ", modelObjectsSet);
 
             const modelId = modelObjectsSet["modelId"];
             console.log("modelID: ", modelId);
             console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
             console.log([modelObjectsSet["modelId"]]);
-            console.log([modelObjectsSet["objects"]]); //////
-            console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+            console.log([modelObjectsSet["objects"]]);
 
             let modelObjectIdsList = [];
             modelObjectsSet["objects"].forEach((modelObject) => {
@@ -75,9 +74,9 @@ function App() {
               .catch((err) => {
                 console.log("res catch: ", err);
               });
-          });
+          }
+          console.log("----------------------------------------------------");
         });
-        console.log("----------------------------------------------------");
       }
     });
   }
@@ -87,16 +86,33 @@ function App() {
     await dotConnect().then(async (WorkspaceAPI) => {
       const api = await WorkspaceAPI;
       console.log("api: ", api);
-      await WorkspaceAPI.viewer.getObjects().then((viewerObjects) => {
+      await WorkspaceAPI.viewer.getObjects().then(async (viewerObjects) => {
         console.log("viewerObjects: ", viewerObjects);
-        const mmiObjects = viewerObjects.flatMap(modelObjectsSet => {
-          return modelObjectsSet.objects.flatMap(obj => {
-            const properties = obj.properties || [];
-            return properties
-              .filter(prop => prop.name === 'A22 MMI')
-              .map(prop => ({ ...obj, mmi: prop.value }));
+        const mmiObjects = [];
+
+        for (const modelObjectsSet of viewerObjects) {
+          const modelId = modelObjectsSet["modelId"];
+          let modelObjectIdsList = [];
+          modelObjectsSet["objects"].forEach((modelObject) => {
+            modelObjectIdsList.push(modelObject.id);
           });
-        });
+          const properties = await WorkspaceAPI.viewer
+            .getObjectProperties(modelId, modelObjectIdsList)
+            .then((objectProperties) => {
+              return objectProperties;
+            })
+            .catch((err) => {
+              console.log("catch: ", err);
+            });
+
+          properties.forEach((propertySet) => {
+            propertySet.properties.forEach((prop) => {
+              if (prop.name === 'A22 MMI') {
+                mmiObjects.push({ ...propertySet, mmi: prop.value });
+              }
+            });
+          });
+        }
 
         setMmiData(mmiObjects);
         console.log("MMI Objects: ", mmiObjects);
@@ -146,7 +162,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>TC Proto 1</h1>
+          <h1>TC Proto 2</h1>
         </header>
         <div className="content">
           <button onClick={getCurrentProjectFromTrimble}>Get Project Info</button>

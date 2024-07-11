@@ -1,4 +1,4 @@
-import * as Extensions from "trimble-connect-project-workspace-api";
+import * as Extensions from "trimble-connect-workspace-api";
 import { useState } from "react";
 import './index.css'; // Import the CSS file
 
@@ -11,13 +11,13 @@ function App() {
       (event, args) => {
         switch (event) {
           case "extension.command":
-            //"Command executed by the user: args.data"
+            // "Command executed by the user: args.data"
             break;
           case "extension.accessToken":
-            //"Accestoken or status: args.data"
+            // "Access token or status: args.data"
             break;
           case "extension.userSettingsChanged":
-            //"User settings changed!"
+            // "User settings changed!"
             break;
           default:
         }
@@ -86,7 +86,7 @@ function App() {
 
     const mmiObjects = projectData.viewerObjects.flatMap(model =>
       model.objects.flatMap(obj =>
-        obj.properties
+        (obj.properties || []) // Ensure properties exist
           .filter(prop => prop.name === 'A22 MMI')
           .map(prop => ({ ...obj, mmi: prop.value }))
       )
@@ -112,7 +112,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>TC Proto 1</h1>
+          <h1>Tatta2</h1>
         </header>
         <div className="content">
           <button onClick={getCurrentProjectFromTrimble}>Trykk her</button>

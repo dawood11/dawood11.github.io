@@ -69,52 +69,95 @@ function App() {
 
       setAttributeData(attributeObjects);
       console.log("Attribute Objects: ", attributeObjects);
-
-      // Automatically create views and select objects in the viewer
-      await handleGroupActions(api, groupAttributeData(attributeObjects));
     });
   }
 
-  // Function to create and set views for each attribute value
-  const createAndSetViews = async (api, group) => {
-    const modelEntities = group.models.map(obj => ({
+  // Function to handle checkbox change for group selection
+  const handleGroupCheckboxChange = async (value, isChecked) => {
+    const api = await dotConnect();
+    setSelectedGroups((prevSelectedGroups) => {
+      const updatedGroups = { ...prevSelectedGroups };
+      if (isChecked) {
+        updatedGroups[value] = true;
+      } else {
+        delete updatedGroups[value];
+      }
+      return updatedGroups;
+    });
+
+    const selectedData = attributeData.filter(obj => obj.value === value);
+    if (isChecked) {
+      await selectAndIsolateObjects(api, selectedData);
+    } else {
+      await removeSelectionFromViewer(api, selectedData);
+    }
+  };
+
+  // Function to select and isolate objects
+  const selectAndIsolateObjects = async (api, objects) => {
+    const modelEntities = objects.map(obj => ({
       modelId: obj.modelId,
       objectRuntimeIds: [obj.id]
     }));
 
     // Select objects
     const objectSelector = {
-      modelObjectIds: group.models.map(m => ({ modelId: m.modelId, objectRuntimeIds: [m.id] }))
+      modelObjectIds: modelEntities
     };
     await api.viewer.setSelection(objectSelector, "add");
-    console.log(`Objects for '${group.value}' selected.`);
+    console.log(`Objects selected.`);
 
     // Isolate selected objects
     await api.viewer.isolateEntities(modelEntities);
-    console.log(`Isolated entities for '${group.value}'`);
+    console.log(`Isolated entities.`);
+  };
 
-    // Create view
+  // Function to create a view based on selected objects
+  const createView = async () => {
+    const api = await dotConnect();
+    const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
+
+    if (selectedData.length === 0) {
+      console.log("No objects selected to create a view.");
+      return;
+    }
+
+    const modelEntities = selectedData.map(obj => ({
+      modelId: obj.modelId,
+      objectRuntimeIds: [obj.id]
+    }));
+
     const viewInfo = {
-      name: `${group.value}`, // Only the value as the name
+      name: `View for ${attribute}`, // Create a general view name
       objects: modelEntities
     };
 
     const viewSpec = await api.view.createView(viewInfo);
-    console.log(`View '${group.value}' created with objects:`, viewSpec.objects);
+    console.log(`View created with objects:`, viewSpec.objects);
 
     // Set view as active
     await api.view.setView(viewSpec.id);
-    console.log(`View '${group.value}' set as active.`);
-
-    // Deselect all objects
-    await api.viewer.setSelection({ modelObjectIds: [] }, "clear");
+    console.log(`View set as active.`);
   };
 
-  // Function to handle group actions (create views and select objects)
-  const handleGroupActions = async (api, groupedData) => {
-    for (const group of groupedData) {
-      await createAndSetViews(api, group);
+  // Function to remove selection from the viewer
+  const removeSelectionFromViewer = async (api, objects) => {
+    const modelsToProcess = objects.map(obj => ({ modelId: obj.modelId, objectRuntimeIds: [obj.id] }));
+
+    // Process models in batches
+    const batchSize = 50; // Adjust the batch size as needed
+    for (let i = 0; i < modelsToProcess.length; i += batchSize) {
+      const batch = modelsToProcess.slice(i, i + batchSize);
+      await processBatch(api, batch, "remove");
     }
+  };
+
+  // Function to process batch of models for selection/deselection
+  const processBatch = async (api, batch, action) => {
+    const objectSelector = {
+      modelObjectIds: batch.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
+    };
+    await api.viewer.setSelection(objectSelector, action);
   };
 
   // Function to group attribute data by value
@@ -156,52 +199,11 @@ function App() {
     );
   };
 
-  // Function to handle checkbox change for group selection
-  const handleGroupCheckboxChange = async (value, isChecked) => {
-    const api = await dotConnect();
-    setSelectedGroups((prevSelectedGroups) => {
-      const updatedGroups = { ...prevSelectedGroups };
-      if (isChecked) {
-        updatedGroups[value] = true;
-      } else {
-        delete updatedGroups[value];
-      }
-      return updatedGroups;
-    });
-
-    const selectedData = attributeData.filter(obj => obj.value === value);
-    if (isChecked) {
-      await handleGroupActions(api, groupAttributeData(selectedData));
-    } else {
-      await removeSelectionFromViewer(api, selectedData);
-    }
-  };
-
-  // Function to remove selection from the viewer
-  const removeSelectionFromViewer = async (api, objects) => {
-    const modelsToProcess = objects.map(obj => ({ modelId: obj.modelId, objectRuntimeIds: [obj.id] }));
-
-    // Process models in batches
-    const batchSize = 50; // Adjust the batch size as needed
-    for (let i = 0; i < modelsToProcess.length; i += batchSize) {
-      const batch = modelsToProcess.slice(i, i + batchSize);
-      await processBatch(api, batch, "remove");
-    }
-  };
-
-  // Function to process batch of models for selection/deselection
-  const processBatch = async (api, batch, action) => {
-    const objectSelector = {
-      modelObjectIds: batch.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
-    };
-    await api.viewer.setSelection(objectSelector, action);
-  };
-
   return (
     <>
       <div className="container">
         <header>
-          <h1>Tatta 29</h1>
+          <h1>Tatta 30</h1>
         </header>
         <div className="content">
           <div>
@@ -225,6 +227,7 @@ function App() {
           </div>
           <button onClick={getAttributeDataFromTrimble}>Generate</button>
           {renderGroupedAttributeObjects()}
+          <button onClick={createView}>Create View</button>
         </div>
       </div>
     </>

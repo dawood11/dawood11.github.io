@@ -85,7 +85,7 @@ function App() {
     const viewSpec = await api.view.createView(viewInfo);
     console.log(`View '${group.value}' created with objects:`, viewSpec.objects);
 
-    await api.view.setView(viewSpec.id);
+    await api.view.setView(viewSpec);
     console.log(`View '${group.value}' set as active.`);
 
     await api.viewer.setSelection({ modelObjectIds: [] }, "clear"); // Deselect all objects
@@ -188,7 +188,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 25</h1>
+          <h1>Tatta 26</h1>
         </header>
         <div className="content">
           <div>

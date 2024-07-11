@@ -108,11 +108,15 @@ function App() {
           console.log("Fetched properties:", properties);
 
           properties.forEach((propertySet) => {
-            propertySet.properties.forEach((prop) => {
-              if (prop.name === 'A22 MMI') {
-                mmiObjects.push({ ...propertySet, mmi: prop.value });
-              }
-            });
+            console.log("Checking property set:", propertySet);
+            if (propertySet.properties) {
+              propertySet.properties.forEach((prop) => {
+                console.log("Checking property:", prop);
+                if (prop.name === 'A22 MMI') {
+                  mmiObjects.push({ ...propertySet, mmi: prop.value });
+                }
+              });
+            }
           });
         }
 
@@ -152,7 +156,7 @@ function App() {
               ID: {obj.id} <br />
               Class: {obj.class} <br />
               MMI: {obj.mmi} <br />
-              Product: {obj.product.name} <br />
+              Product: {obj.product?.name || 'N/A'} <br />
             </p>
           </div>
         ))}

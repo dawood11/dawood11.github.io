@@ -126,7 +126,7 @@ function App() {
     }));
 
     const viewInfo = {
-      name: `View for ${attribute}`, // Create a general view name
+      name: `View for ${selectedData[0].value}`, // Use the value of the selected attribute as the view name
       objects: modelEntities
     };
 
@@ -151,8 +151,8 @@ function App() {
       objectRuntimeIds: [obj.id]
     }));
 
-    const fitSuccess = await api.viewer.zoomToFitRatio(modelEntities, 1.2);
-    console.log(`View fitted to selected objects:`, fitSuccess);
+    await api.viewer.fitToView({ modelObjectIds: modelEntities });
+    console.log(`View fitted to selected objects.`);
   };
 
   const groupAttributeData = (data = attributeData) => {
@@ -196,7 +196,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 34</h1>
+          <h1>Tatta 35</h1>
         </header>
         <div className="content">
           <div>

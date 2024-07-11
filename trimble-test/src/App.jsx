@@ -196,7 +196,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 36</h1>
+          <h1>Tatta 37</h1>
         </header>
         <div className="content">
           <div>

@@ -112,10 +112,12 @@ function App() {
       }
     });
 
-    await api.viewer.setSelection({
-      clear: true,
-      models: modelsToSelect
-    });
+    // Use ObjectSelector to specify the selection criteria
+    const objectSelector = {
+      modelObjectIds: modelsToSelect.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
+    };
+
+    await api.viewer.setSelection(objectSelector, "add");
   };
 
   // Function to render grouped attribute objects

@@ -6,6 +6,7 @@ function App() {
   const [attributeData, setAttributeData] = useState([]);
   const [psetName, setPsetName] = useState("Example: AndfjordSalmon");
   const [attribute, setAttribute] = useState("Example: A22 MMI");
+  const [selectedModels, setSelectedModels] = useState([]);
 
   async function dotConnect() {
     return await Extensions.connect(
@@ -50,7 +51,7 @@ function App() {
               if (prop.name === psetName.replace("Example: ", "")) {
                 prop.properties.forEach((subProp) => {
                   if (subProp.name === attribute.replace("Example: ", "")) {
-                    attributeObjects.push({ value: subProp.value });
+                    attributeObjects.push({ modelId, id: propertySet.id, class: propertySet.class, value: subProp.value });
                   }
                 });
               }
@@ -68,13 +69,32 @@ function App() {
     const groupedData = attributeData.reduce((acc, obj) => {
       const { value } = obj;
       if (!acc[value]) {
-        acc[value] = { value, count: 0 };
+        acc[value] = { value, count: 0, models: [] };
       }
       acc[value].count += 1;
+      acc[value].models.push(obj);
       return acc;
     }, {});
 
     return Object.values(groupedData);
+  };
+
+  const handleCheckboxChange = (modelId, id, isChecked) => {
+    setSelectedModels((prevSelectedModels) => {
+      if (isChecked) {
+        return [...prevSelectedModels, { modelId, id }];
+      } else {
+        return prevSelectedModels.filter(model => model.id !== id);
+      }
+    });
+  };
+
+  const selectModelsInViewer = async () => {
+    const api = await dotConnect();
+    await api.viewer.setSelection({
+      clear: true,
+      models: selectedModels
+    });
   };
 
   const renderGroupedAttributeObjects = () => {
@@ -89,6 +109,15 @@ function App() {
               {attribute}: {group.value} <br />
               Count: {group.count}
             </p>
+            {group.models.map(obj => (
+              <div key={obj.id}>
+                <input
+                  type="checkbox"
+                  onChange={(e) => handleCheckboxChange(obj.modelId, obj.id, e.target.checked)}
+                />
+                <label>ID: {obj.id}, Class: {obj.class}</label>
+              </div>
+            ))}
           </div>
         ))}
       </div>
@@ -122,6 +151,7 @@ function App() {
             </label>
           </div>
           <button onClick={getAttributeDataFromTrimble}>Generate</button>
+          <button onClick={selectModelsInViewer}>Select Models</button>
           {renderGroupedAttributeObjects()}
         </div>
       </div>

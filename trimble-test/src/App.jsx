@@ -9,6 +9,7 @@ function App() {
   const [location, setLocation] = useState("");
   const [address, setAddress] = useState("");
   const [name, setName] = useState("");
+  
 
   async function dotConnect() {
     return await Extensions.connect(
@@ -92,15 +93,16 @@ function App() {
     <>
       <div>
         <button onClick={getCurrentProjectFromTrimple}>
-          click me project info!!
+          Trykk her
         </button>
         <div className="App">
-          <h1>Hei på deg 8</h1>
+          <h1>TC Proto 1</h1>
           <p>
             Project ID: {id} <br />
             Project Name: {name} <br />
             Project Location: {location} <br />
             Project Address: {address} <br />
+
           </p>
         </div>
       </div>

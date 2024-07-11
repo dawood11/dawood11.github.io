@@ -96,6 +96,7 @@ function App() {
           modelObjectsSet["objects"].forEach((modelObject) => {
             modelObjectIdsList.push(modelObject.id);
           });
+          console.log("Fetching properties for model ID:", modelId);
           const properties = await WorkspaceAPI.viewer
             .getObjectProperties(modelId, modelObjectIdsList)
             .then((objectProperties) => {
@@ -104,6 +105,7 @@ function App() {
             .catch((err) => {
               console.log("catch: ", err);
             });
+          console.log("Fetched properties:", properties);
 
           properties.forEach((propertySet) => {
             propertySet.properties.forEach((prop) => {
@@ -140,7 +142,7 @@ function App() {
   };
 
   const renderMMIObjects = () => {
-    if (!mmiData) return null;
+    if (!mmiData || mmiData.length === 0) return <p>No MMI data available.</p>;
 
     return (
       <div>
@@ -162,7 +164,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 3</h1>
+          <h1>Tatta 4</h1>
         </header>
         <div className="content">
           <button onClick={getCurrentProjectFromTrimble}>Get Project Info</button>

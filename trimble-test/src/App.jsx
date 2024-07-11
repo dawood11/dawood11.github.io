@@ -1,7 +1,5 @@
 import "./App.css";
-
 import * as Extensions from "trimble-connect-project-workspace-api";
-
 import { useState } from "react";
 
 function App() {
@@ -9,7 +7,7 @@ function App() {
   const [location, setLocation] = useState("");
   const [address, setAddress] = useState("");
   const [name, setName] = useState("");
-  
+  const [mmiCount, setMmiCount] = useState(0);
 
   async function dotConnect() {
     return await Extensions.connect(
@@ -45,6 +43,8 @@ function App() {
       }
       const api = await WorkspaceAPI;
       console.log("api: ", api);
+      let mmiObjectCount = 0;
+      
       await WorkspaceAPI.viewer.getObjects().then((viewerObjects) => {
         console.log("viewerObjects: ", viewerObjects);
         viewerObjects.forEach(async (modelObjectsSet) => {
@@ -72,6 +72,13 @@ function App() {
             });
           console.log("PROPERTIES!!: ", properties);
 
+          // Check for MMI in properties
+          properties.forEach((property) => {
+            if (property.value && property.value.includes("MMI")) {
+              mmiObjectCount++;
+            }
+          });
+
           await WorkspaceAPI.viewer
             .setSelection(
               { modelObjectIds: modelObjectsSet, selected: true },
@@ -85,6 +92,7 @@ function App() {
             });
         });
       });
+      setMmiCount(mmiObjectCount);
       console.log("----------------------------------------------------");
     });
   }
@@ -93,18 +101,18 @@ function App() {
     <>
       <div>
         <header>
-        <button onClick={getCurrentProjectFromTrimple}>
-          Trykk her
-        </button>
+          <button onClick={getCurrentProjectFromTrimple}>
+            Trykk her
+          </button>
         </header> 
         <div className="App">
-          <h1>TC Proto 1</h1>
+          <h1>TC Proto 2</h1>
           <p>
             Project ID: {id} <br />
             Project Name: {name} <br />
             Project Location: {location} <br />
             Project Address: {address} <br />
-
+            Objects with MMI: {mmiCount} <br />
           </p>
         </div>
       </div>

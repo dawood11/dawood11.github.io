@@ -81,7 +81,7 @@ function App() {
     if (isChecked) {
       await selectAndIsolateObjects(api, selectedData);
     } else {
-      await removeSelectionFromViewer(api, selectedData);
+      await clearIsolatedObjects(api);
     }
   };
 
@@ -93,6 +93,20 @@ function App() {
 
     await api.viewer.isolateEntities(modelEntities);
     console.log(`Isolated entities.`);
+  };
+
+  const clearIsolatedObjects = async (api) => {
+    // Clears isolation by showing all objects again
+    const allObjects = await api.viewer.getObjects();
+    const allModelEntities = allObjects.flatMap(objSet => 
+      objSet.objects.map(obj => ({
+        modelId: objSet.modelId,
+        objectRuntimeIds: [obj.id]
+      }))
+    );
+
+    await api.viewer.isolateEntities(allModelEntities);
+    console.log(`Cleared isolated entities, showing all objects.`);
   };
 
   const createView = async () => {
@@ -119,23 +133,6 @@ function App() {
 
     await api.view.setView(viewSpec.id);
     console.log(`View set as active.`);
-  };
-
-  const removeSelectionFromViewer = async (api, objects) => {
-    const modelsToProcess = objects.map(obj => ({ modelId: obj.modelId, objectRuntimeIds: [obj.id] }));
-
-    const batchSize = 50;
-    for (let i = 0; i < modelsToProcess.length; i += batchSize) {
-      const batch = modelsToProcess.slice(i, i + batchSize);
-      await processBatch(api, batch, "remove");
-    }
-  };
-
-  const processBatch = async (api, batch, action) => {
-    const objectSelector = {
-      modelObjectIds: batch.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
-    };
-    await api.viewer.setSelection(objectSelector, action);
   };
 
   const groupAttributeData = (data = attributeData) => {
@@ -179,7 +176,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 32</h1>
+          <h1>Tatta 33</h1>
         </header>
         <div className="content">
           <div>

@@ -6,7 +6,7 @@ function App() {
   const [attributeData, setAttributeData] = useState([]);
   const [psetName, setPsetName] = useState("Example: AndfjordSalmon");
   const [attribute, setAttribute] = useState("Example: A22 MMI");
-  const [selectedModels, setSelectedModels] = useState([]);
+  const [selectedGroups, setSelectedGroups] = useState({});
 
   async function dotConnect() {
     return await Extensions.connect(
@@ -79,21 +79,31 @@ function App() {
     return Object.values(groupedData);
   };
 
-  const handleCheckboxChange = (modelId, id, isChecked) => {
-    setSelectedModels((prevSelectedModels) => {
+  const handleGroupCheckboxChange = (value, isChecked) => {
+    setSelectedGroups((prevSelectedGroups) => {
+      const updatedGroups = { ...prevSelectedGroups };
       if (isChecked) {
-        return [...prevSelectedModels, { modelId, id }];
+        updatedGroups[value] = true;
       } else {
-        return prevSelectedModels.filter(model => model.id !== id);
+        delete updatedGroups[value];
       }
+      return updatedGroups;
     });
   };
 
   const selectModelsInViewer = async () => {
     const api = await dotConnect();
+    const modelsToSelect = [];
+
+    attributeData.forEach(obj => {
+      if (selectedGroups[obj.value]) {
+        modelsToSelect.push({ modelId: obj.modelId, id: obj.id });
+      }
+    });
+
     await api.viewer.setSelection({
       clear: true,
-      models: selectedModels
+      models: modelsToSelect
     });
   };
 
@@ -105,19 +115,14 @@ function App() {
       <div>
         {groupedData.map(group => (
           <div key={group.value}>
-            <p>
+            <input
+              type="checkbox"
+              onChange={(e) => handleGroupCheckboxChange(group.value, e.target.checked)}
+            />
+            <label>
               {attribute}: {group.value} <br />
               Count: {group.count}
-            </p>
-            {group.models.map(obj => (
-              <div key={obj.id}>
-                <input
-                  type="checkbox"
-                  onChange={(e) => handleCheckboxChange(obj.modelId, obj.id, e.target.checked)}
-                />
-                <label>ID: {obj.id}, Class: {obj.class}</label>
-              </div>
-            ))}
+            </label>
           </div>
         ))}
       </div>
@@ -128,7 +133,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 11</h1>
+          <h1>Tatta 12</h1>
         </header>
         <div className="content">
           <div>

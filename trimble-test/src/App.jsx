@@ -56,11 +56,18 @@ function App() {
         console.log("Fetched properties:", properties);
 
         properties.forEach((propertySet) => {
+          console.log("propertySet:", propertySet);
           if (propertySet.properties) {
             propertySet.properties.forEach((prop) => {
-              if (prop.name === 'A22 MMI') {
-                console.log("Found MMI property:", prop);
-                mmiObjects.push({ id: propertySet.id, class: propertySet.class, mmi: prop.value });
+              console.log("prop:", prop);
+              if (prop.name === 'AndfjordSalmon') {
+                prop.properties.forEach((subProp) => {
+                  console.log("subProp:", subProp);
+                  if (subProp.name === 'A22 MMI') {
+                    console.log("Found MMI property:", subProp);
+                    mmiObjects.push({ id: propertySet.id, class: propertySet.class, mmi: subProp.value });
+                  }
+                });
               }
             });
           }
@@ -113,7 +120,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 1</h1>
+          <h1>Tatta 2</h1>
         </header>
         <div className="content">
           <button onClick={getCurrentProjectFromTrimble}>Get Project Info</button>

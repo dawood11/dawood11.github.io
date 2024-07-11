@@ -86,7 +86,7 @@ function App() {
         objects: group.models.map(obj => ({ modelId: obj.modelId, objectRuntimeIds: [obj.id] })),
       };
 
-      const viewSpec = await api.viewer.createView(viewInfo);
+      const viewSpec = await api.view.createView(viewInfo);
       console.log(`View '${group.value}' created with objects:`, viewSpec.objects);
     }
   };
@@ -167,7 +167,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 22</h1>
+          <h1>Tatta 23</h1>
         </header>
         <div className="content">
           <div>

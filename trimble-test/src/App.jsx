@@ -3,10 +3,7 @@ import { useState } from "react";
 import './index.css'; // Import the CSS file
 
 function App() {
-  const [id, setId] = useState("");
-  const [location, setLocation] = useState("");
-  const [address, setAddress] = useState("");
-  const [name, setName] = useState("");
+  const [projectData, setProjectData] = useState(null);
 
   async function dotConnect() {
     return await Extensions.connect(
@@ -29,77 +26,108 @@ function App() {
     );
   }
 
-  async function getCurrentProjectFromTrimple() {
+  async function getCurrentProjectFromTrimble() {
     console.log("GET PROJECT INFOOOO");
     await dotConnect().then(async (WorkspaceAPI) => {
       const data = await WorkspaceAPI.project.getCurrentProject();
       console.log(data);
-      if (data !== null || data !== undefined) {
-        setId(data.id);
-        setLocation(data.location);
-        setName(data.name);
-        setAddress(data.address);
-      }
-      const api = await WorkspaceAPI;
-      console.log("api: ", api);
-      await WorkspaceAPI.viewer.getObjects().then((viewerObjects) => {
+      setProjectData(data);
+
+      if (data !== null && data !== undefined) {
+        const viewerObjects = await WorkspaceAPI.viewer.getObjects();
         console.log("viewerObjects: ", viewerObjects);
-        viewerObjects.forEach(async (modelObjectsSet) => {
-          console.log("modelObjectsSet: ", modelObjectsSet);
-
+        
+        const processedData = viewerObjects.map(modelObjectsSet => {
           const modelId = modelObjectsSet["modelId"];
-          console.log("modelID: ", modelId);
-          console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-          console.log([modelObjectsSet["modelId"]]);
-          console.log([modelObjectsSet["objects"]]); //////
-          console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-
-          let modelObjectIdsList = [];
-          modelObjectsSet["objects"].forEach((modelObject) => {
-            modelObjectIdsList.push(modelObject.id);
-          });
-          console.log("modelObjectIdsList", modelObjectIdsList);
-          const properties = await WorkspaceAPI.viewer
-            .getObjectProperties(modelId, modelObjectIdsList)
-            .then((objectProperties) => {
-              return objectProperties;
-            })
-            .catch((err) => {
-              console.log("catch: ", err);
-            });
-          console.log("PROPERTIES!!: ", properties);
-
-          await WorkspaceAPI.viewer
-            .setSelection(
-              { modelObjectIds: modelObjectsSet, selected: true },
-              "add"
-            )
-            .then((response) => {
-              console.log("response: ", response);
-            })
-            .catch((err) => {
-              console.log("res catch: ", err);
-            });
+          const objects = modelObjectsSet["objects"];
+          return {
+            modelId,
+            objects: objects.map(obj => ({
+              id: obj.id,
+              class: obj.class,
+              product: obj.product,
+              properties: obj.properties,
+              position: obj.position
+            }))
+          };
         });
-      });
-      console.log("----------------------------------------------------");
+
+        setProjectData({
+          ...data,
+          viewerObjects: processedData
+        });
+
+        console.log("Processed Data: ", processedData);
+      }
     });
   }
+
+  const getMMIColor = (mmi) => {
+    switch (mmi) {
+      case 100:
+        return 'red';
+      case 200:
+        return 'orange';
+      case 300:
+        return 'yellow';
+      case 350:
+        return 'lightgreen';
+      case 400:
+        return 'green';
+      case 500:
+        return 'blue';
+      default:
+        return 'grey';
+    }
+  };
+
+  const renderMMIObjects = () => {
+    if (!projectData || !projectData.viewerObjects) return null;
+
+    const mmiObjects = projectData.viewerObjects.flatMap(model =>
+      model.objects.flatMap(obj =>
+        obj.properties
+          .filter(prop => prop.name === 'A22 MMI')
+          .map(prop => ({ ...obj, mmi: prop.value }))
+      )
+    );
+
+    return (
+      <div>
+        {mmiObjects.map(obj => (
+          <div key={obj.id} style={{ color: getMMIColor(obj.mmi) }}>
+            <p>
+              ID: {obj.id} <br />
+              Class: {obj.class} <br />
+              MMI: {obj.mmi} <br />
+              Product: {obj.product.name} <br />
+            </p>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <>
       <div className="container">
         <header>
-          <h1>TC Proto 2</h1>
+          <h1>TC Proto 1</h1>
         </header>
         <div className="content">
-          <p>
-            Project ID: {id} <br />
-            Project Name: {name} <br />
-            Project Location: {location} <br />
-            Project Address: {address} <br />
-          </p>
-          <button onClick={getCurrentProjectFromTrimple}>Trykk her</button>
+          <button onClick={getCurrentProjectFromTrimble}>Trykk her</button>
+          {projectData && (
+            <div>
+              <h2>Project Information</h2>
+              <p>
+                Project ID: {projectData.id} <br />
+                Project Name: {projectData.name} <br />
+                Project Location: {projectData.location} <br />
+                Project Address: {projectData.address} <br />
+              </p>
+              {renderMMIObjects()}
+            </div>
+          )}
         </div>
       </div>
     </>

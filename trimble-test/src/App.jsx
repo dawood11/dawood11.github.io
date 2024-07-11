@@ -94,30 +94,41 @@ function App() {
       if (isChecked) {
         updatedGroups[value] = true;
       } else {
-        delete updatedGroups[value];
+        updatedGroups[value] = false;
       }
       return updatedGroups;
     });
   };
 
-  // Function to select models in Trimble Connect Viewer
-  const selectModelsInViewer = async () => {
+  // Function to select/unselect models in Trimble Connect Viewer
+  const updateSelectionInViewer = async () => {
     const api = await dotConnect();
     const modelsToSelect = [];
+    const modelsToDeselect = [];
 
-    // Loop through attribute data and add selected models to the list
+    // Loop through attribute data and add selected/deselected models to the lists
     attributeData.forEach(obj => {
       if (selectedGroups[obj.value]) {
         modelsToSelect.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
+      } else {
+        modelsToDeselect.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
       }
     });
 
     // Use ObjectSelector to specify the selection criteria
-    const objectSelector = {
-      modelObjectIds: modelsToSelect.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
-    };
+    if (modelsToSelect.length > 0) {
+      const objectSelector = {
+        modelObjectIds: modelsToSelect.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
+      };
+      await api.viewer.setSelection(objectSelector, "add");
+    }
 
-    await api.viewer.setSelection(objectSelector, "add");
+    if (modelsToDeselect.length > 0) {
+      const objectDeselector = {
+        modelObjectIds: modelsToDeselect.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
+      };
+      await api.viewer.setSelection(objectDeselector, "remove");
+    }
   };
 
   // Function to render grouped attribute objects
@@ -147,7 +158,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 14</h1>
+          <h1>Tatta 15</h1>
         </header>
         <div className="content">
           <div>
@@ -170,7 +181,7 @@ function App() {
             </label>
           </div>
           <button onClick={getAttributeDataFromTrimble}>Generate</button>
-          <button onClick={selectModelsInViewer}>Select Models</button>
+          <button onClick={updateSelectionInViewer}>Update Selection</button>
           {renderGroupedAttributeObjects()}
         </div>
       </div>

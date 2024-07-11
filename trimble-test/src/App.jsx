@@ -97,7 +97,7 @@ function App() {
 
     attributeData.forEach(obj => {
       if (selectedGroups[obj.value]) {
-        modelsToSelect.push({ modelId: obj.modelId, id: obj.id });
+        modelsToSelect.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
       }
     });
 
@@ -133,7 +133,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 12</h1>
+          <h1>Tatta 13</h1>
         </header>
         <div className="content">
           <div>

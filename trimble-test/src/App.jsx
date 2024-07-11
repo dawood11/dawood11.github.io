@@ -3,11 +3,13 @@ import { useState } from "react";
 import './index.css'; // Import the CSS file
 
 function App() {
+  // State to store attribute data, PSET name, attribute, and selected groups
   const [attributeData, setAttributeData] = useState([]);
   const [psetName, setPsetName] = useState("Example: AndfjordSalmon");
   const [attribute, setAttribute] = useState("Example: A22 MMI");
   const [selectedGroups, setSelectedGroups] = useState({});
 
+  // Function to connect to Trimble Connect Workspace API
   async function dotConnect() {
     return await Extensions.connect(
       window.parent,
@@ -26,6 +28,7 @@ function App() {
     );
   }
 
+  // Function to get attribute data from Trimble Connect
   async function getAttributeDataFromTrimble() {
     console.log("GET ATTRIBUTE DATA");
     await dotConnect().then(async (WorkspaceAPI) => {
@@ -37,6 +40,7 @@ function App() {
 
       const attributeObjects = [];
 
+      // Loop through each model object set
       for (const modelObjectsSet of viewerObjects) {
         const modelId = modelObjectsSet["modelId"];
         let modelObjectIdsList = modelObjectsSet["objects"].map((obj) => obj.id);
@@ -45,10 +49,13 @@ function App() {
         const properties = await api.viewer.getObjectProperties(modelId, modelObjectIdsList);
         console.log("Fetched properties:", properties);
 
+        // Loop through each property set
         properties.forEach((propertySet) => {
           if (propertySet.properties) {
+            // Loop through each property
             propertySet.properties.forEach((prop) => {
               if (prop.name === psetName.replace("Example: ", "")) {
+                // Loop through each sub-property
                 prop.properties.forEach((subProp) => {
                   if (subProp.name === attribute.replace("Example: ", "")) {
                     attributeObjects.push({ modelId, id: propertySet.id, class: propertySet.class, value: subProp.value });
@@ -65,6 +72,7 @@ function App() {
     });
   }
 
+  // Function to group attribute data by value
   const groupAttributeData = () => {
     const groupedData = attributeData.reduce((acc, obj) => {
       const { value } = obj;
@@ -79,6 +87,7 @@ function App() {
     return Object.values(groupedData);
   };
 
+  // Function to handle checkbox change for group selection
   const handleGroupCheckboxChange = (value, isChecked) => {
     setSelectedGroups((prevSelectedGroups) => {
       const updatedGroups = { ...prevSelectedGroups };
@@ -91,10 +100,12 @@ function App() {
     });
   };
 
+  // Function to select models in Trimble Connect Viewer
   const selectModelsInViewer = async () => {
     const api = await dotConnect();
     const modelsToSelect = [];
 
+    // Loop through attribute data and add selected models to the list
     attributeData.forEach(obj => {
       if (selectedGroups[obj.value]) {
         modelsToSelect.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
@@ -107,6 +118,7 @@ function App() {
     });
   };
 
+  // Function to render grouped attribute objects
   const renderGroupedAttributeObjects = () => {
     const groupedData = groupAttributeData();
     if (groupedData.length === 0) return <p>No data available.</p>;
@@ -133,7 +145,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 13</h1>
+          <h1>Tatta 14</h1>
         </header>
         <div className="content">
           <div>

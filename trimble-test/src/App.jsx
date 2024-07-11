@@ -69,17 +69,11 @@ function App() {
 
       setAttributeData(attributeObjects);
       console.log("Attribute Objects: ", attributeObjects);
-
-      // Create views for each attribute value
-      await createViews(api, groupAttributeData(attributeObjects));
-
-      // Automatically select the objects in the viewer
-      await selectObjectsInViewer(api, attributeObjects);
     });
   }
 
-  // Function to create views for each attribute value
-  const createViews = async (api, groupedData) => {
+  // Function to create and set views for each attribute value
+  const createAndSetViews = async (api, groupedData) => {
     for (const group of groupedData) {
       const viewInfo = {
         name: `${group.value}`, // Only the value as the name
@@ -88,6 +82,9 @@ function App() {
 
       const viewSpec = await api.view.createView(viewInfo);
       console.log(`View '${group.value}' created with objects:`, viewSpec.objects);
+
+      await api.view.setView(viewSpec.id);
+      console.log(`View '${group.value}' set as active.`);
     }
   };
 
@@ -107,7 +104,8 @@ function App() {
   };
 
   // Function to handle checkbox change for group selection
-  const handleGroupCheckboxChange = (value, isChecked) => {
+  const handleGroupCheckboxChange = async (value, isChecked) => {
+    const api = await dotConnect();
     setSelectedGroups((prevSelectedGroups) => {
       const updatedGroups = { ...prevSelectedGroups };
       if (isChecked) {
@@ -117,9 +115,16 @@ function App() {
       }
       return updatedGroups;
     });
+
+    const selectedData = attributeData.filter(obj => obj.value === value);
+    if (isChecked) {
+      await createAndSetViews(api, groupAttributeData(selectedData));
+    } else {
+      await removeSelectionFromViewer(api, selectedData);
+    }
   };
 
-  // Function to process batch of models for selection
+  // Function to process batch of models for selection/deselection
   const processBatch = async (api, batch, action) => {
     const objectSelector = {
       modelObjectIds: batch.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
@@ -127,15 +132,15 @@ function App() {
     await api.viewer.setSelection(objectSelector, action);
   };
 
-  // Function to select models in Trimble Connect Viewer
-  const selectObjectsInViewer = async (api, objects) => {
+  // Function to remove selection from the viewer
+  const removeSelectionFromViewer = async (api, objects) => {
     const modelsToProcess = objects.map(obj => ({ modelId: obj.modelId, objectRuntimeIds: [obj.id] }));
 
     // Process models in batches
     const batchSize = 50; // Adjust the batch size as needed
     for (let i = 0; i < modelsToProcess.length; i += batchSize) {
       const batch = modelsToProcess.slice(i, i + batchSize);
-      await processBatch(api, batch, "add");
+      await processBatch(api, batch, "remove");
     }
   };
 
@@ -167,7 +172,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 23</h1>
+          <h1>Tatta 24</h1>
         </header>
         <div className="content">
           <div>

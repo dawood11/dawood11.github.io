@@ -1,13 +1,12 @@
 import * as Extensions from "trimble-connect-project-workspace-api";
-
 import { useState } from "react";
+import './index.css'; // Import the CSS file
 
 function App() {
   const [id, setId] = useState("");
   const [location, setLocation] = useState("");
   const [address, setAddress] = useState("");
   const [name, setName] = useState("");
-  
 
   async function dotConnect() {
     return await Extensions.connect(
@@ -89,21 +88,18 @@ function App() {
 
   return (
     <>
-      <div>
+      <div className="container">
         <header>
-        <button onClick={getCurrentProjectFromTrimple}>
-          Trykk her
-        </button>
-        </header> 
-        <div className="App">
-          <h1>TC Proto 1</h1>
+          <h1>TC Proto 2</h1>
+        </header>
+        <div className="content">
           <p>
             Project ID: {id} <br />
             Project Name: {name} <br />
             Project Location: {location} <br />
             Project Address: {address} <br />
-
           </p>
+          <button onClick={getCurrentProjectFromTrimple}>Trykk her</button>
         </div>
       </div>
     </>

@@ -42,9 +42,6 @@ function App() {
       const api = await WorkspaceAPI;
       console.log("api: ", api);
 
-      const currentProject = await api.project.getCurrentProject();
-      console.log("Current Project: ", currentProject);
-
       const viewerObjects = await api.viewer.getObjects();
       console.log("viewerObjects: ", viewerObjects);
 
@@ -52,19 +49,10 @@ function App() {
 
       for (const modelObjectsSet of viewerObjects) {
         const modelId = modelObjectsSet["modelId"];
-        let modelObjectIdsList = [];
-        modelObjectsSet["objects"].forEach((modelObject) => {
-          modelObjectIdsList.push(modelObject.id);
-        });
+        let modelObjectIdsList = modelObjectsSet["objects"].map((obj) => obj.id);
         console.log("Fetching properties for model ID:", modelId);
 
-        const properties = await api.viewer.getObjectProperties(modelId, modelObjectIdsList)
-          .then((objectProperties) => {
-            return objectProperties;
-          })
-          .catch((err) => {
-            console.log("catch: ", err);
-          });
+        const properties = await api.viewer.getObjectProperties(modelId, modelObjectIdsList);
         console.log("Fetched properties:", properties);
 
         properties.forEach((propertySet) => {
@@ -78,9 +66,6 @@ function App() {
           }
         });
       }
-
-      const selection = await api.viewer.getSelection();
-      console.log("Selection: ", selection);
 
       setMmiData(mmiObjects);
       console.log("MMI Objects: ", mmiObjects);
@@ -128,7 +113,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 7</h1>
+          <h1>Tatta 1</h1>
         </header>
         <div className="content">
           <button onClick={getCurrentProjectFromTrimble}>Get Project Info</button>

@@ -3,18 +3,11 @@ import { useState, useEffect } from "react";
 import './index.css'; // Import the CSS file
 
 function App() {
-  // State to store attribute data, PSET name, attribute, selected groups, and user-defined input
+  // State to store attribute data, PSET name, attribute, and selected groups
   const [attributeData, setAttributeData] = useState([]);
   const [psetName, setPsetName] = useState("Example: AndfjordSalmon");
   const [attribute, setAttribute] = useState("Example: A22 MMI");
   const [selectedGroups, setSelectedGroups] = useState({});
-  const [userDefinedInput, setUserDefinedInput] = useState("");
-
-  useEffect(() => {
-    if (userDefinedInput) {
-      getAttributeDataFromTrimble();
-    }
-  }, [userDefinedInput]);
 
   // Function to connect to Trimble Connect Workspace API
   async function dotConnect() {
@@ -79,34 +72,23 @@ function App() {
 
       // Create views for each attribute value
       await createViews(api, groupAttributeData(attributeObjects));
+
+      // Automatically select the objects in the viewer
+      await selectObjectsInViewer(api, attributeObjects);
     });
   }
 
   // Function to create views for each attribute value
   const createViews = async (api, groupedData) => {
-    const mainViewGroup = await createMainViewGroup(api);
-
     for (const group of groupedData) {
       const viewInfo = {
         name: `${group.value}`, // Only the value as the name
         objects: group.models.map(obj => ({ modelId: obj.modelId, objectRuntimeIds: [obj.id] })),
-        parentViewGroupId: mainViewGroup.id,
       };
 
       const viewSpec = await api.viewer.createView(viewInfo);
       console.log(`View '${group.value}' created with objects:`, viewSpec.objects);
     }
-  };
-
-  // Function to create the main view group named "Armering"
-  const createMainViewGroup = async (api) => {
-    const viewGroup = {
-      name: "Armering",
-      objects: []
-    };
-    const mainViewGroup = await api.viewer.createViewGroup(viewGroup);
-    console.log("Main view group 'Armering' created.");
-    return mainViewGroup;
   };
 
   // Function to group attribute data by value
@@ -137,7 +119,7 @@ function App() {
     });
   };
 
-  // Function to process batch of models for selection/deselection
+  // Function to process batch of models for selection
   const processBatch = async (api, batch, action) => {
     const objectSelector = {
       modelObjectIds: batch.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
@@ -145,29 +127,15 @@ function App() {
     await api.viewer.setSelection(objectSelector, action);
   };
 
-  // Function to select/unselect models in Trimble Connect Viewer
-  const updateSelectionInViewer = async (action) => {
-    const api = await dotConnect();
-    const modelsToProcess = [];
-
-    // Loop through attribute data and add selected/deselected models to the lists
-    attributeData.forEach(obj => {
-      if (selectedGroups[obj.value] === (action === "add")) {
-        modelsToProcess.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
-      }
-    });
+  // Function to select models in Trimble Connect Viewer
+  const selectObjectsInViewer = async (api, objects) => {
+    const modelsToProcess = objects.map(obj => ({ modelId: obj.modelId, objectRuntimeIds: [obj.id] }));
 
     // Process models in batches
     const batchSize = 50; // Adjust the batch size as needed
     for (let i = 0; i < modelsToProcess.length; i += batchSize) {
       const batch = modelsToProcess.slice(i, i + batchSize);
-      await processBatch(api, batch, action);
-    }
-
-    // Clear selection state if action is remove
-    if (action === "remove") {
-      await api.viewer.setSelection({ modelObjectIds: [] }, "clear"); // Clear all selections
-      setSelectedGroups({});
+      await processBatch(api, batch, "add");
     }
   };
 
@@ -199,7 +167,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 20</h1>
+          <h1>Tatta 21</h1>
         </header>
         <div className="content">
           <div>
@@ -220,19 +188,8 @@ function App() {
                 onChange={(e) => setAttribute(e.target.value)}
               />
             </label>
-            <br />
-            <label>
-              USER DEFINED INPUT:
-              <input
-                type="text"
-                value={userDefinedInput}
-                onChange={(e) => setUserDefinedInput(e.target.value)}
-              />
-            </label>
           </div>
           <button onClick={getAttributeDataFromTrimble}>Generate</button>
-          <button onClick={() => updateSelectionInViewer("add")}>Select Objects</button>
-          <button onClick={() => updateSelectionInViewer("remove")}>Remove Selected Objects</button>
           {renderGroupedAttributeObjects()}
         </div>
       </div>

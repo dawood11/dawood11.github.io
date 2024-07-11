@@ -4,6 +4,7 @@ import './index.css'; // Import the CSS file
 
 function App() {
   const [projectData, setProjectData] = useState(null);
+  const [mmiData, setMmiData] = useState(null);
 
   async function dotConnect() {
     return await Extensions.connect(
@@ -34,31 +35,72 @@ function App() {
       setProjectData(data);
 
       if (data !== null && data !== undefined) {
-        const viewerObjects = await WorkspaceAPI.viewer.getObjects();
-        console.log("viewerObjects: ", viewerObjects);
-        
-        const processedData = viewerObjects.map(modelObjectsSet => {
-          const modelId = modelObjectsSet["modelId"];
-          const objects = modelObjectsSet["objects"];
-          return {
-            modelId,
-            objects: objects.map(obj => ({
-              id: obj.id,
-              class: obj.class,
-              product: obj.product,
-              properties: obj.properties,
-              position: obj.position
-            }))
-          };
-        });
+        const api = await WorkspaceAPI;
+        console.log("api: ", api);
+        await WorkspaceAPI.viewer.getObjects().then((viewerObjects) => {
+          console.log("viewerObjects: ", viewerObjects);
+          viewerObjects.forEach(async (modelObjectsSet) => {
+            console.log("modelObjectsSet: ", modelObjectsSet);
 
-        setProjectData({
-          ...data,
-          viewerObjects: processedData
-        });
+            const modelId = modelObjectsSet["modelId"];
+            console.log("modelID: ", modelId);
+            console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+            console.log([modelObjectsSet["modelId"]]);
+            console.log([modelObjectsSet["objects"]]); //////
+            console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
-        console.log("Processed Data: ", processedData);
+            let modelObjectIdsList = [];
+            modelObjectsSet["objects"].forEach((modelObject) => {
+              modelObjectIdsList.push(modelObject.id);
+            });
+            console.log("modelObjectIdsList", modelObjectIdsList);
+            const properties = await WorkspaceAPI.viewer
+              .getObjectProperties(modelId, modelObjectIdsList)
+              .then((objectProperties) => {
+                return objectProperties;
+              })
+              .catch((err) => {
+                console.log("catch: ", err);
+              });
+            console.log("PROPERTIES!!: ", properties);
+
+            await WorkspaceAPI.viewer
+              .setSelection(
+                { modelObjectIds: modelObjectsSet, selected: true },
+                "add"
+              )
+              .then((response) => {
+                console.log("response: ", response);
+              })
+              .catch((err) => {
+                console.log("res catch: ", err);
+              });
+          });
+        });
+        console.log("----------------------------------------------------");
       }
+    });
+  }
+
+  async function getMMIObjectsFromTrimble() {
+    console.log("GET MMI OBJECTS");
+    await dotConnect().then(async (WorkspaceAPI) => {
+      const api = await WorkspaceAPI;
+      console.log("api: ", api);
+      await WorkspaceAPI.viewer.getObjects().then((viewerObjects) => {
+        console.log("viewerObjects: ", viewerObjects);
+        const mmiObjects = viewerObjects.flatMap(modelObjectsSet => {
+          return modelObjectsSet.objects.flatMap(obj => {
+            const properties = obj.properties || [];
+            return properties
+              .filter(prop => prop.name === 'A22 MMI')
+              .map(prop => ({ ...obj, mmi: prop.value }));
+          });
+        });
+
+        setMmiData(mmiObjects);
+        console.log("MMI Objects: ", mmiObjects);
+      });
     });
   }
 
@@ -82,19 +124,11 @@ function App() {
   };
 
   const renderMMIObjects = () => {
-    if (!projectData || !projectData.viewerObjects) return null;
-
-    const mmiObjects = projectData.viewerObjects.flatMap(model =>
-      model.objects.flatMap(obj =>
-        (obj.properties || []) // Ensure properties exist
-          .filter(prop => prop.name === 'A22 MMI')
-          .map(prop => ({ ...obj, mmi: prop.value }))
-      )
-    );
+    if (!mmiData) return null;
 
     return (
       <div>
-        {mmiObjects.map(obj => (
+        {mmiData.map(obj => (
           <div key={obj.id} style={{ color: getMMIColor(obj.mmi) }}>
             <p>
               ID: {obj.id} <br />
@@ -112,10 +146,11 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 3</h1>
+          <h1>TC Proto 1</h1>
         </header>
         <div className="content">
-          <button onClick={getCurrentProjectFromTrimble}>Trykk her</button>
+          <button onClick={getCurrentProjectFromTrimble}>Get Project Info</button>
+          <button onClick={getMMIObjectsFromTrimble}>Get MMI Objects</button>
           {projectData && (
             <div>
               <h2>Project Information</h2>
@@ -125,9 +160,9 @@ function App() {
                 Project Location: {projectData.location} <br />
                 Project Address: {projectData.address} <br />
               </p>
-              {renderMMIObjects()}
             </div>
           )}
+          {renderMMIObjects()}
         </div>
       </div>
     </>

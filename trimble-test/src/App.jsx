@@ -69,22 +69,38 @@ function App() {
 
       setAttributeData(attributeObjects);
       console.log("Attribute Objects: ", attributeObjects);
+
+      // Automatically create views and select objects in the viewer
+      await handleGroupActions(api, groupAttributeData(attributeObjects));
     });
   }
 
   // Function to create and set views for each attribute value
-  const createAndSetViews = async (api, groupedData) => {
+  const createAndSetViews = async (api, group) => {
+    const viewInfo = {
+      name: `${group.value}`, // Only the value as the name
+      objects: group.models.map(obj => ({ modelId: obj.modelId, objectRuntimeIds: [obj.id] })),
+    };
+
+    const viewSpec = await api.view.createView(viewInfo);
+    console.log(`View '${group.value}' created with objects:`, viewSpec.objects);
+
+    await api.view.setView(viewSpec.id);
+    console.log(`View '${group.value}' set as active.`);
+
+    await api.viewer.setSelection({ modelObjectIds: [] }, "clear"); // Deselect all objects
+
+    const objectSelector = {
+      modelObjectIds: group.models.map(m => ({ modelId: m.modelId, objectRuntimeIds: [m.id] }))
+    };
+    await api.viewer.setSelection(objectSelector, "add");
+    console.log(`Objects for '${group.value}' selected.`);
+  };
+
+  // Function to handle group actions (create views and select objects)
+  const handleGroupActions = async (api, groupedData) => {
     for (const group of groupedData) {
-      const viewInfo = {
-        name: `${group.value}`, // Only the value as the name
-        objects: group.models.map(obj => ({ modelId: obj.modelId, objectRuntimeIds: [obj.id] })),
-      };
-
-      const viewSpec = await api.view.createView(viewInfo);
-      console.log(`View '${group.value}' created with objects:`, viewSpec.objects);
-
-      await api.view.setView(viewSpec.id);
-      console.log(`View '${group.value}' set as active.`);
+      await createAndSetViews(api, group);
     }
   };
 
@@ -101,47 +117,6 @@ function App() {
     }, {});
 
     return Object.values(groupedData);
-  };
-
-  // Function to handle checkbox change for group selection
-  const handleGroupCheckboxChange = async (value, isChecked) => {
-    const api = await dotConnect();
-    setSelectedGroups((prevSelectedGroups) => {
-      const updatedGroups = { ...prevSelectedGroups };
-      if (isChecked) {
-        updatedGroups[value] = true;
-      } else {
-        delete updatedGroups[value];
-      }
-      return updatedGroups;
-    });
-
-    const selectedData = attributeData.filter(obj => obj.value === value);
-    if (isChecked) {
-      await createAndSetViews(api, groupAttributeData(selectedData));
-    } else {
-      await removeSelectionFromViewer(api, selectedData);
-    }
-  };
-
-  // Function to process batch of models for selection/deselection
-  const processBatch = async (api, batch, action) => {
-    const objectSelector = {
-      modelObjectIds: batch.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
-    };
-    await api.viewer.setSelection(objectSelector, action);
-  };
-
-  // Function to remove selection from the viewer
-  const removeSelectionFromViewer = async (api, objects) => {
-    const modelsToProcess = objects.map(obj => ({ modelId: obj.modelId, objectRuntimeIds: [obj.id] }));
-
-    // Process models in batches
-    const batchSize = 50; // Adjust the batch size as needed
-    for (let i = 0; i < modelsToProcess.length; i += batchSize) {
-      const batch = modelsToProcess.slice(i, i + batchSize);
-      await processBatch(api, batch, "remove");
-    }
   };
 
   // Function to render grouped attribute objects
@@ -168,11 +143,52 @@ function App() {
     );
   };
 
+  // Function to handle checkbox change for group selection
+  const handleGroupCheckboxChange = async (value, isChecked) => {
+    const api = await dotConnect();
+    setSelectedGroups((prevSelectedGroups) => {
+      const updatedGroups = { ...prevSelectedGroups };
+      if (isChecked) {
+        updatedGroups[value] = true;
+      } else {
+        delete updatedGroups[value];
+      }
+      return updatedGroups;
+    });
+
+    const selectedData = attributeData.filter(obj => obj.value === value);
+    if (isChecked) {
+      await handleGroupActions(api, groupAttributeData(selectedData));
+    } else {
+      await removeSelectionFromViewer(api, selectedData);
+    }
+  };
+
+  // Function to remove selection from the viewer
+  const removeSelectionFromViewer = async (api, objects) => {
+    const modelsToProcess = objects.map(obj => ({ modelId: obj.modelId, objectRuntimeIds: [obj.id] }));
+
+    // Process models in batches
+    const batchSize = 50; // Adjust the batch size as needed
+    for (let i = 0; i < modelsToProcess.length; i += batchSize) {
+      const batch = modelsToProcess.slice(i, i + batchSize);
+      await processBatch(api, batch, "remove");
+    }
+  };
+
+  // Function to process batch of models for selection/deselection
+  const processBatch = async (api, batch, action) => {
+    const objectSelector = {
+      modelObjectIds: batch.map(m => ({ modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds }))
+    };
+    await api.viewer.setSelection(objectSelector, action);
+  };
+
   return (
     <>
       <div className="container">
         <header>
-          <h1>Tatta 24</h1>
+          <h1>Tatta 25</h1>
         </header>
         <div className="content">
           <div>

@@ -93,10 +93,6 @@ function App() {
     await api.viewer.isolateEntities(modelEntities);
     console.log(`Isolated entities for '${group.value}'`);
 
-    // Fit view to selected objects
-    await api.viewer.fitToView();
-    console.log(`Fitted view to '${group.value}'`);
-
     // Create view
     const viewInfo = {
       name: `${group.value}`, // Only the value as the name
@@ -205,7 +201,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 28</h1>
+          <h1>Tatta 29</h1>
         </header>
         <div className="content">
           <div>

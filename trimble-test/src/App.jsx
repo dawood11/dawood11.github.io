@@ -50,7 +50,7 @@ function App() {
               if (prop.name === psetName) {
                 prop.properties.forEach((subProp) => {
                   if (subProp.name === attribute) {
-                    attributeObjects.push({ id: propertySet.id, class: propertySet.class, value: subProp.value });
+                    attributeObjects.push({ value: subProp.value });
                   }
                 });
               }
@@ -68,10 +68,9 @@ function App() {
     const groupedData = attributeData.reduce((acc, obj) => {
       const { value } = obj;
       if (!acc[value]) {
-        acc[value] = { value, count: 0, objects: [] };
+        acc[value] = { value, count: 0 };
       }
       acc[value].count += 1;
-      acc[value].objects.push(obj);
       return acc;
     }, {});
 
@@ -90,12 +89,6 @@ function App() {
               {attribute}: {group.value} <br />
               Count: {group.count}
             </p>
-            {group.objects.map(obj => (
-              <p key={obj.id}>
-                ID: {obj.id} <br />
-                Class: {obj.class}
-              </p>
-            ))}
           </div>
         ))}
       </div>
@@ -106,7 +99,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 9</h1>
+          <h1>Tatta 10</h1>
         </header>
         <div className="content">
           <div>

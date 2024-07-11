@@ -1,13 +1,20 @@
 import * as Extensions from "trimble-connect-workspace-api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import './index.css'; // Import the CSS file
 
 function App() {
-  // State to store attribute data, PSET name, attribute, and selected groups
+  // State to store attribute data, PSET name, attribute, selected groups, and user-defined input
   const [attributeData, setAttributeData] = useState([]);
   const [psetName, setPsetName] = useState("Example: AndfjordSalmon");
   const [attribute, setAttribute] = useState("Example: A22 MMI");
   const [selectedGroups, setSelectedGroups] = useState({});
+  const [userDefinedInput, setUserDefinedInput] = useState("");
+
+  useEffect(() => {
+    if (userDefinedInput) {
+      getAttributeDataFromTrimble();
+    }
+  }, [userDefinedInput]);
 
   // Function to connect to Trimble Connect Workspace API
   async function dotConnect() {
@@ -69,12 +76,42 @@ function App() {
 
       setAttributeData(attributeObjects);
       console.log("Attribute Objects: ", attributeObjects);
+
+      // Create views for each attribute value
+      await createViews(api, groupAttributeData(attributeObjects));
     });
   }
 
+  // Function to create views for each attribute value
+  const createViews = async (api, groupedData) => {
+    const mainViewGroup = await createMainViewGroup(api);
+
+    for (const group of groupedData) {
+      const viewInfo = {
+        name: `${group.value}`, // Only the value as the name
+        objects: group.models.map(obj => ({ modelId: obj.modelId, objectRuntimeIds: [obj.id] })),
+        parentViewGroupId: mainViewGroup.id,
+      };
+
+      const viewSpec = await api.viewer.createView(viewInfo);
+      console.log(`View '${group.value}' created with objects:`, viewSpec.objects);
+    }
+  };
+
+  // Function to create the main view group named "Armering"
+  const createMainViewGroup = async (api) => {
+    const viewGroup = {
+      name: "Armering",
+      objects: []
+    };
+    const mainViewGroup = await api.viewer.createViewGroup(viewGroup);
+    console.log("Main view group 'Armering' created.");
+    return mainViewGroup;
+  };
+
   // Function to group attribute data by value
-  const groupAttributeData = () => {
-    const groupedData = attributeData.reduce((acc, obj) => {
+  const groupAttributeData = (data = attributeData) => {
+    const groupedData = data.reduce((acc, obj) => {
       const { value } = obj;
       if (!acc[value]) {
         acc[value] = { value, count: 0, models: [] };
@@ -162,7 +199,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 19</h1>
+          <h1>Tatta 20</h1>
         </header>
         <div className="content">
           <div>
@@ -181,6 +218,15 @@ function App() {
                 type="text"
                 value={attribute}
                 onChange={(e) => setAttribute(e.target.value)}
+              />
+            </label>
+            <br />
+            <label>
+              USER DEFINED INPUT:
+              <input
+                type="text"
+                value={userDefinedInput}
+                onChange={(e) => setUserDefinedInput(e.target.value)}
               />
             </label>
           </div>

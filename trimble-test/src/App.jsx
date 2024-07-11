@@ -45,9 +45,6 @@ function App() {
       const currentProject = await api.project.getCurrentProject();
       console.log("Current Project: ", currentProject);
 
-      const projectProperties = await api.project.getProperties(currentProject.id);
-      console.log("Project Properties: ", projectProperties);
-
       const viewerObjects = await api.viewer.getObjects();
       console.log("viewerObjects: ", viewerObjects);
 
@@ -61,8 +58,7 @@ function App() {
         });
         console.log("Fetching properties for model ID:", modelId);
 
-        const properties = await api.viewer
-          .getObjectProperties(modelId, modelObjectIdsList)
+        const properties = await api.viewer.getObjectProperties(modelId, modelObjectIdsList)
           .then((objectProperties) => {
             return objectProperties;
           })
@@ -132,7 +128,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 6</h1>
+          <h1>Tatta 7</h1>
         </header>
         <div className="content">
           <button onClick={getCurrentProjectFromTrimble}>Get Project Info</button>

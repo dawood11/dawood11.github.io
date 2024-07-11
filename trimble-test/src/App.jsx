@@ -47,9 +47,9 @@ function App() {
         properties.forEach((propertySet) => {
           if (propertySet.properties) {
             propertySet.properties.forEach((prop) => {
-              if (prop.name === psetName) {
+              if (prop.name === psetName.replace("Example: ", "")) {
                 prop.properties.forEach((subProp) => {
-                  if (subProp.name === attribute) {
+                  if (subProp.name === attribute.replace("Example: ", "")) {
                     attributeObjects.push({ value: subProp.value });
                   }
                 });
@@ -99,7 +99,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 10</h1>
+          <h1>Tatta 11</h1>
         </header>
         <div className="content">
           <div>

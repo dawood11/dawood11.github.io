@@ -1,6 +1,6 @@
 import * as Extensions from "trimble-connect-workspace-api";
 import { useState } from "react";
-import './index.css'; // Ensure this is linked to the updated styles
+import './index.css'; // Import the CSS file for styling
 
 function App() {
   const [attributeData, setAttributeData] = useState([]);
@@ -27,19 +27,15 @@ function App() {
   }
 
   async function fetchAttributeData() {
-    console.log("Fetching Attribute Data");
     const api = await dotConnect();
     const viewerObjects = await api.viewer.getObjects();
-    console.log("Viewer Objects: ", viewerObjects);
 
     const attributeObjects = [];
 
     for (const modelObjectsSet of viewerObjects) {
       const modelId = modelObjectsSet["modelId"];
       const objectIds = modelObjectsSet["objects"].map((obj) => obj.id);
-
       const properties = await api.viewer.getObjectProperties(modelId, objectIds);
-      console.log("Properties:", properties);
 
       properties.forEach(propertySet => {
         propertySet.properties.forEach(prop => {
@@ -58,68 +54,36 @@ function App() {
     }
 
     setAttributeData(attributeObjects);
-    console.log("Attribute Objects: ", attributeObjects);
   }
-
-  const handleSelectionChange = async (value, isSelected) => {
-    const api = await dotConnect();
-    const relevantData = attributeData.filter(item => item.value === value);
-    const modelEntities = relevantData.map(item => ({
-      modelId: item.modelId,
-      objectRuntimeIds: [item.objectId]
-    }));
-
-    if (isSelected) {
-      await api.viewer.setSelection({ modelObjectIds: modelEntities }, "add");
-    } else {
-      await api.viewer.setSelection({ modelObjectIds: modelEntities }, "remove");
-    }
-  };
-
-  const renderAttributeBlocks = () => {
-    const groupedData = attributeData.reduce((acc, item) => {
-      acc[item.value] = acc[item.value] || { value: item.value, count: 0, items: [] };
-      acc[item.value].count++;
-      acc[item.value].items.push(item);
-      return acc;
-    }, {});
-
-    return Object.values(groupedData).map(group => (
-      <div key={group.value} className="attribute-block">
-        <input
-          type="checkbox"
-          checked={selectedGroups[group.value] || false}
-          onChange={e => handleSelectionChange(group.value, e.target.checked)}
-        />
-        <label>{group.value} ({group.count})</label>
-      </div>
-    ));
-  };
 
   return (
     <div className="app-container">
       <nav className="app-navbar">
-        <h1>POS.Flow</h1>
-        <div>
-          <button onClick={fetchAttributeData}>Start</button>
-          <button onClick={() => {}}>Lag Visning</button>
-          <button onClick={() => {}}>Generer</button>
+        <div className="navbar-content">
+          <h1 className="title">POS.Flow 1</h1>
+          <div className="navbar-buttons">
+            <button onClick={fetchAttributeData}>Start</button>
+            <button onClick={() => {}}>Lag Visning</button>
+            <button onClick={() => {}}>Generer</button>
+          </div>
+        </div>
+        <div className="input-fields">
+          <input
+            type="text"
+            placeholder="Legg inn PSET"
+            value={psetName}
+            onChange={e => setPsetName(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Legg inn attributt"
+            value={attribute}
+            onChange={e => setAttribute(e.target.value)}
+          />
         </div>
       </nav>
       <main className="main-content">
-        <input
-          type="text"
-          placeholder="Legg inn PSET"
-          value={psetName}
-          onChange={e => setPsetName(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Legg inn attributt"
-          value={attribute}
-          onChange={e => setAttribute(e.target.value)}
-        />
-        {renderAttributeBlocks()}
+        {/* Content that shows attribute data would go here */}
       </main>
     </div>
   );

@@ -28,54 +28,53 @@ function App() {
 
   async function getAttributeDataFromTrimble() {
     console.log("GET ATTRIBUTE DATA");
-    await dotConnect().then(async (WorkspaceAPI) => {
-      const api = await WorkspaceAPI;
-      console.log("api: ", api);
+    const api = await dotConnect();
+    const viewerObjects = await api.viewer.getObjects();
+    const attributeObjects = [];
 
-      const viewerObjects = await api.viewer.getObjects();
-      console.log("viewerObjects: ", viewerObjects);
+    for (const modelObjectsSet of viewerObjects) {
+      const modelId = modelObjectsSet["modelId"];
+      const modelObjectIdsList = modelObjectsSet["objects"].map((obj) => obj.id);
 
-      const attributeObjects = [];
+      const properties = await api.viewer.getObjectProperties(modelId, modelObjectIdsList);
+      properties.forEach((propertySet) => {
+        if (propertySet.properties) {
+          propertySet.properties.forEach((prop) => {
+            if (prop.name === psetName.replace("Example: ", "")) {
+              const additionalValues = {};
+              prop.properties.forEach((subProp) => {
+                if (subProp.name === attribute.replace("Example: ", "")) {
+                  // Check for diameter and dimensions
+                  prop.properties.forEach((dimProp) => {
+                    if (["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"].includes(dimProp.name)) {
+                      additionalValues[dimProp.name] = dimProp.value;
+                    }
+                  });
 
-      for (const modelObjectsSet of viewerObjects) {
-        const modelId = modelObjectsSet["modelId"];
-        let modelObjectIdsList = modelObjectsSet["objects"].map((obj) => obj.id);
-        console.log("Fetching properties for model ID:", modelId);
+                  attributeObjects.push({
+                    modelId,
+                    id: propertySet.id,
+                    class: propertySet.class,
+                    value: subProp.value,
+                    additionalValues
+                  });
+                }
+              });
+            }
+          });
+        }
+      });
+    }
 
-        const properties = await api.viewer.getObjectProperties(modelId, modelObjectIdsList);
-        console.log("Fetched properties:", properties);
-
-        properties.forEach((propertySet) => {
-          if (propertySet.properties) {
-            propertySet.properties.forEach((prop) => {
-              if (prop.name === psetName.replace("Example: ", "")) {
-                prop.properties.forEach((subProp) => {
-                  if (subProp.name === attribute.replace("Example: ", "")) {
-                    attributeObjects.push({ modelId, id: propertySet.id, class: propertySet.class, value: subProp.value });
-                  }
-                });
-              }
-            });
-          }
-        });
-      }
-
-      setAttributeData(attributeObjects);
-      console.log("Attribute Objects: ", attributeObjects);
-    });
+    setAttributeData(attributeObjects);
   }
 
   const handleGroupCheckboxChange = async (value, isChecked) => {
     const api = await dotConnect();
-    setSelectedGroups((prevSelectedGroups) => {
-      const updatedGroups = { ...prevSelectedGroups };
-      if (isChecked) {
-        updatedGroups[value] = true;
-      } else {
-        delete updatedGroups[value];
-      }
-      return updatedGroups;
-    });
+    setSelectedGroups((prevSelectedGroups) => ({
+      ...prevSelectedGroups,
+      [value]: isChecked
+    }));
 
     const selectedData = attributeData.filter(obj => obj.value === value);
     if (isChecked) {
@@ -86,91 +85,27 @@ function App() {
   };
 
   const selectObjects = async (api, objects) => {
-    const modelEntities = objects.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id]
-    }));
-
     const objectSelector = {
-      modelObjectIds: modelEntities
+      modelObjectIds: objects.map(obj => ({
+        modelId: obj.modelId,
+        objectRuntimeIds: [obj.id]
+      }))
     };
     await api.viewer.setSelection(objectSelector, "add");
-    console.log(`Objects selected.`);
   };
 
   const deselectObjects = async (api, objects) => {
-    const modelEntities = objects.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id]
-    }));
-
     const objectSelector = {
-      modelObjectIds: modelEntities
+      modelObjectIds: objects.map(obj => ({
+        modelId: obj.modelId,
+        objectRuntimeIds: [obj.id]
+      }))
     };
     await api.viewer.setSelection(objectSelector, "remove");
-    console.log(`Objects deselected.`);
-  };
-
-  const createView = async () => {
-    const api = await dotConnect();
-    const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
-
-    if (selectedData.length === 0) {
-      console.log("No objects selected to create a view.");
-      return;
-    }
-
-    const modelEntities = selectedData.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id]
-    }));
-
-    const viewInfo = {
-      name: selectedData[0].value, // Use the value of the selected attribute as the view name
-      objects: modelEntities
-    };
-
-    const viewSpec = await api.view.createView(viewInfo);
-    console.log(`View created with objects:`, viewSpec.objects);
-
-    await api.view.setView(viewSpec.id);
-    console.log(`View set as active.`);
-  };
-
-  const fitToView = async () => {
-    const api = await dotConnect();
-    const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
-
-    if (selectedData.length === 0) {
-      console.log("No objects selected to fit view.");
-      return;
-    }
-
-    const modelEntities = selectedData.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id]
-    }));
-
-    await api.viewer.fitToView({ modelObjectIds: modelEntities });
-    console.log(`View fitted to selected objects.`);
-  };
-
-  const groupAttributeData = (data = attributeData) => {
-    const groupedData = data.reduce((acc, obj) => {
-      const { value } = obj;
-      if (!acc[value]) {
-        acc[value] = { value, count: 0, models: [] };
-      }
-      acc[value].count += 1;
-      acc[value].models.push(obj);
-      return acc;
-    }, {});
-
-    return Object.values(groupedData);
   };
 
   const renderGroupedAttributeObjects = () => {
-    const groupedData = groupAttributeData();
+    const groupedData = groupAttributeData(attributeData);
     if (groupedData.length === 0) return <p>No data available.</p>;
 
     return (
@@ -179,12 +114,16 @@ function App() {
           <div key={group.value}>
             <input
               type="checkbox"
-              checked={selectedGroups[group.value] === true}
+              checked={selectedGroups[group.value]}
               onChange={(e) => handleGroupCheckboxChange(group.value, e.target.checked)}
             />
             <label>
-              {attribute}: {group.value} <br />
-              Count: {group.count}
+              {attribute}: {group.value} ({group.count})
+              <div>
+                {Object.entries(group.models[0].additionalValues).map(([key, val]) => (
+                  <p key={key}>{key}: {val}</p>
+                ))}
+              </div>
             </label>
           </div>
         ))}
@@ -196,32 +135,22 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 37</h1>
+          <h1>Tatta 38</h1>
         </header>
         <div className="content">
           <div>
             <label>
               PSET NAME:
-              <input
-                type="text"
-                value={psetName}
-                onChange={(e) => setPsetName(e.target.value)}
-              />
+              <input type="text" value={psetName} onChange={(e) => setPsetName(e.target.value)} />
             </label>
             <br />
             <label>
               ATTRIBUTE:
-              <input
-                type="text"
-                value={attribute}
-                onChange={(e) => setAttribute(e.target.value)}
-              />
+              <input type="text" value={attribute} onChange={(e) => setAttribute(e.target.value)} />
             </label>
           </div>
           <button onClick={getAttributeDataFromTrimble}>Generate</button>
           {renderGroupedAttributeObjects()}
-          <button onClick={fitToView}>Fit to View</button>
-          <button onClick={createView}>Create View</button>
         </div>
       </div>
     </>
@@ -229,3 +158,19 @@ function App() {
 }
 
 export default App;
+
+function groupAttributeData(data) {
+  return data.reduce((acc, obj) => {
+    if (!acc[obj.value]) {
+      acc[obj.value] = {
+        value: obj.value,
+        count: 0,
+        models: [obj]
+      };
+    } else {
+      acc[obj.value].count++;
+      acc[obj.value].models.push(obj);
+    }
+    return acc;
+  }, {});
+}

@@ -59,8 +59,7 @@ function App() {
             propertySet.properties.forEach((prop) => {
               if (prop.name === psetName.replace("Example: ", "")) {
                 prop.properties.forEach((subProp) => {
-                  if (
-                    subProp.name === attribute.replace("Example: ", "") ||
+                  if (subProp.name === attribute.replace("Example: ", "") || subProp.name === "POS.NR" ||
                     dimensionAttributes.some(dimAttr => subProp.name.includes(dimAttr))
                   ) {
                     attributeObjects.push({ 
@@ -245,7 +244,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 37</h1>
+          <h1>Tatta 38</h1>
         </header>
         <div className="content">
           <div>

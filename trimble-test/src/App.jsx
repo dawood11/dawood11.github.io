@@ -8,12 +8,6 @@ function App() {
   const [attribute, setAttribute] = useState("Example: A22 MMI");
   const [selectedGroups, setSelectedGroups] = useState({});
 
-  const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
-
-  /**
-   * Connects to Trimble Extensions API.
-   * @returns {Promise} Connection promise to the Trimble Extensions API.
-   */
   async function dotConnect() {
     return await Extensions.connect(
       window.parent,
@@ -32,9 +26,6 @@ function App() {
     );
   }
 
-  /**
-   * Fetches attribute data from Trimble and sets the state with the data.
-   */
   async function getAttributeDataFromTrimble() {
     console.log("GET ATTRIBUTE DATA");
     await dotConnect().then(async (WorkspaceAPI) => {
@@ -59,16 +50,8 @@ function App() {
             propertySet.properties.forEach((prop) => {
               if (prop.name === psetName.replace("Example: ", "")) {
                 prop.properties.forEach((subProp) => {
-                  if (subProp.name === attribute.replace("Example: ", "") || subProp.name === "POS.NR" ||
-                    dimensionAttributes.some(dimAttr => subProp.name.includes(dimAttr))
-                  ) {
-                    attributeObjects.push({ 
-                      modelId, 
-                      id: propertySet.id, 
-                      class: propertySet.class, 
-                      name: subProp.name,
-                      value: subProp.value 
-                    });
+                  if (subProp.name === attribute.replace("Example: ", "")) {
+                    attributeObjects.push({ modelId, id: propertySet.id, class: propertySet.class, value: subProp.value });
                   }
                 });
               }
@@ -82,12 +65,6 @@ function App() {
     });
   }
 
-  /**
-   * Handles the change event for group checkboxes.
-   * Selects or deselects objects based on the checkbox state.
-   * @param {string} value - The value of the group.
-   * @param {boolean} isChecked - Checkbox checked state.
-   */
   const handleGroupCheckboxChange = async (value, isChecked) => {
     const api = await dotConnect();
     setSelectedGroups((prevSelectedGroups) => {
@@ -108,11 +85,6 @@ function App() {
     }
   };
 
-  /**
-   * Selects objects in the Trimble viewer.
-   * @param {object} api - The Trimble Extensions API instance.
-   * @param {array} objects - The objects to be selected.
-   */
   const selectObjects = async (api, objects) => {
     const modelEntities = objects.map(obj => ({
       modelId: obj.modelId,
@@ -126,11 +98,6 @@ function App() {
     console.log(`Objects selected.`);
   };
 
-  /**
-   * Deselects objects in the Trimble viewer.
-   * @param {object} api - The Trimble Extensions API instance.
-   * @param {array} objects - The objects to be deselected.
-   */
   const deselectObjects = async (api, objects) => {
     const modelEntities = objects.map(obj => ({
       modelId: obj.modelId,
@@ -144,9 +111,6 @@ function App() {
     console.log(`Objects deselected.`);
   };
 
-  /**
-   * Creates a view in the Trimble viewer based on selected objects.
-   */
   const createView = async () => {
     const api = await dotConnect();
     const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
@@ -173,9 +137,6 @@ function App() {
     console.log(`View set as active.`);
   };
 
-  /**
-   * Fits the Trimble viewer to the selected objects.
-   */
   const fitToView = async () => {
     const api = await dotConnect();
     const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
@@ -194,11 +155,6 @@ function App() {
     console.log(`View fitted to selected objects.`);
   };
 
-  /**
-   * Groups attribute data by their values.
-   * @param {array} data - The attribute data to be grouped.
-   * @returns {array} - The grouped attribute data.
-   */
   const groupAttributeData = (data = attributeData) => {
     const groupedData = data.reduce((acc, obj) => {
       const { value } = obj;
@@ -213,10 +169,6 @@ function App() {
     return Object.values(groupedData);
   };
 
-  /**
-   * Renders the grouped attribute objects with checkboxes.
-   * @returns {JSX.Element} - The rendered grouped attribute objects.
-   */
   const renderGroupedAttributeObjects = () => {
     const groupedData = groupAttributeData();
     if (groupedData.length === 0) return <p>No data available.</p>;
@@ -231,7 +183,7 @@ function App() {
               onChange={(e) => handleGroupCheckboxChange(group.value, e.target.checked)}
             />
             <label>
-              {group.name}: {group.value} <br />
+              {attribute}: {group.value} <br />
               Count: {group.count}
             </label>
           </div>
@@ -244,7 +196,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 38</h1>
+          <h1>Tatta 37</h1>
         </header>
         <div className="content">
           <div>
@@ -278,4 +230,4 @@ function App() {
 
 export default App;
 
-// Denne koden fungerer med select/deselct + legg inn egenskapsverdi som viser i gruppe med antall som har samme verdi.
+// Denne koden fungerer med select/deselct + legg inn egenskapsverdi som viser i gruppe med antall som har samme verdi. 

@@ -211,8 +211,7 @@ function App() {
               onChange={(e) => handleGroupCheckboxChange(group.value, e.target.checked)}
             />
             <label>
-              <strong>Beskrivelse</strong><br />
-              {attribute}: {group.value} <br />
+              <strong>{attribute}: {group.value}</strong><br />
               Antall: {group.antall} <br />
               Diameter: {group.dimensions["Diameter"]} <br />
               DIM A: {group.dimensions["DIM A"]} <br />

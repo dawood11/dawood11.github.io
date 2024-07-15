@@ -249,7 +249,7 @@ function App() {
             </nav>
           </div>
         </header>
-        <div className="content">
+        <main className="content">
           <div className="input-section">
             <input
               type="text"
@@ -270,7 +270,7 @@ function App() {
           <div className="attribute-cards">
             {renderGroupedAttributeObjects()}
           </div>
-        </div>
+        </main>
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>

@@ -10,10 +10,6 @@ function App() {
 
   const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
 
-  /**
-   * Connects to Trimble Extensions API.
-   * @returns {Promise} Connection promise to the Trimble Extensions API.
-   */
   async function dotConnect() {
     return await Extensions.connect(
       window.parent,
@@ -32,9 +28,6 @@ function App() {
     );
   }
 
-  /**
-   * Fetches attribute data from Trimble and sets the state with the data.
-   */
   async function getAttributeDataFromTrimble() {
     console.log("GET ATTRIBUTE DATA");
     await dotConnect().then(async (WorkspaceAPI) => {
@@ -99,12 +92,6 @@ function App() {
     });
   }
 
-  /**
-   * Handles the change event for group checkboxes.
-   * Selects or deselects objects based on the checkbox state.
-   * @param {string} value - The value of the group.
-   * @param {boolean} isChecked - Checkbox checked state.
-   */
   const handleGroupCheckboxChange = async (value, isChecked) => {
     const api = await dotConnect();
     setSelectedGroups((prevSelectedGroups) => {
@@ -125,11 +112,6 @@ function App() {
     }
   };
 
-  /**
-   * Selects objects in the Trimble viewer.
-   * @param {object} api - The Trimble Extensions API instance.
-   * @param {array} objects - The objects to be selected.
-   */
   const selectObjects = async (api, objects) => {
     const modelEntities = objects.map(obj => ({
       modelId: obj.modelId,
@@ -143,11 +125,6 @@ function App() {
     console.log(`Objects selected.`);
   };
 
-  /**
-   * Deselects objects in the Trimble viewer.
-   * @param {object} api - The Trimble Extensions API instance.
-   * @param {array} objects - The objects to be deselected.
-   */
   const deselectObjects = async (api, objects) => {
     const modelEntities = objects.map(obj => ({
       modelId: obj.modelId,
@@ -161,9 +138,6 @@ function App() {
     console.log(`Objects deselected.`);
   };
 
-  /**
-   * Creates a view in the Trimble viewer based on selected objects.
-   */
   const createView = async () => {
     const api = await dotConnect();
     const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
@@ -179,7 +153,7 @@ function App() {
     }));
 
     const viewInfo = {
-      name: selectedData[0].value, // Use the value of the selected attribute as the view name
+      name: selectedData[0].value,
       description: `Beskrivelse\nAntall: ${selectedData.length}\nDiameter: ${selectedData[0].dimensions["Diameter"]}\nDIM A: ${selectedData[0].dimensions["DIM A"]}\nDIM B: ${selectedData[0].dimensions["DIM B"]}\nDIM C: ${selectedData[0].dimensions["DIM C"]}\nDIM R: ${selectedData[0].dimensions["DIM R"]}`,
       objects: modelEntities
     };
@@ -191,9 +165,6 @@ function App() {
     console.log(`View set as active.`);
   };
 
-  /**
-   * Fits the Trimble viewer to the selected objects.
-   */
   const fitToView = async () => {
     const api = await dotConnect();
     const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
@@ -212,11 +183,6 @@ function App() {
     console.log(`View fitted to selected objects.`);
   };
 
-  /**
-   * Groups attribute data by their values.
-   * @param {array} data - The attribute data to be grouped.
-   * @returns {array} - The grouped attribute data.
-   */
   const groupAttributeData = (data = attributeData) => {
     const groupedData = data.reduce((acc, obj) => {
       const { value } = obj;
@@ -231,10 +197,6 @@ function App() {
     return Object.values(groupedData);
   };
 
-  /**
-   * Renders the grouped attribute objects with checkboxes.
-   * @returns {JSX.Element} - The rendered grouped attribute objects.
-   */
   const renderGroupedAttributeObjects = () => {
     const groupedData = groupAttributeData();
     if (groupedData.length === 0) return <p>No data available.</p>;
@@ -313,7 +275,7 @@ function App() {
       <footer>
         <img src="path-to-logo.png" alt="Logo" className="footer-logo"/>
         <p>Utviklet av Yasin Rafiq</p>
-        <p>Version Beta 1.0</p>
+        <p>Version 1.0</p>
       </footer>
     </div>
     </>

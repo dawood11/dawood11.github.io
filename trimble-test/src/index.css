@@ -72,6 +72,7 @@ nav {
   display: flex;
   gap: 1em; /* Adjusted gap */
   justify-content: flex-end; /* Align nav items to the right */
+  align-items: center; /* Center align icons vertically */
   flex-grow: 1; /* Allow nav to grow */
 }
 
@@ -150,7 +151,7 @@ button:focus-visible {
 
 .input-section {
   display: flex;
-  flex-direction: column; /* Adjusted to column for narrow width */
+  flex-direction: row; /* Adjusted to row for horizontal alignment */
   gap: 10px;
   margin-bottom: 10px; /* Adjusted margin-bottom */
   width: 100%; /* Ensure full width */
@@ -166,15 +167,16 @@ button:focus-visible {
 
 .buttons {
   display: flex;
-  flex-direction: column; /* Adjusted to column for narrow width */
+  flex-direction: row; /* Adjusted to row for horizontal alignment */
   gap: 10px;
   margin-bottom: 10px; /* Adjusted margin-bottom */
   width: 100%; /* Ensure full width */
+  justify-content: center; /* Center align buttons */
 }
 
 .attribute-cards {
   display: flex;
-  flex-direction: column; /* Adjusted to column for narrow width */
+  flex-direction: row; /* Adjusted to row for horizontal alignment */
   gap: 10px;
   flex-wrap: wrap;
   width: 100%; /* Ensure full width */

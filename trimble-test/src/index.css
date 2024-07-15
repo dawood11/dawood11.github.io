@@ -147,8 +147,10 @@ button:focus-visible {
 .content {
   flex: 1;
   width: 100%;
+  max-width: 1200px; /* Optional: limit content width */
   background-color: #ffffff; /* Set content background to white */
-  padding: 0 10px;
+  padding: 20px; /* Add padding around content */
+  box-sizing: border-box;
   overflow-y: auto; /* Enable vertical scroll within the content area */
 }
 
@@ -158,14 +160,25 @@ button:focus-visible {
   gap: 10px;
   margin-bottom: 10px; /* Adjusted margin-bottom */
   width: 100%; /* Ensure full width */
+  box-sizing: border-box; /* Ensure padding and border are included in width */
+  padding: 10px;
+  background-color: #ffffff; /* Set input section background to white */
+  border-radius: 8px;
+  border: 1px solid #d3d3d3; /* Add border for visual separation */
 }
 
-.input-section input {
+.input-field {
   padding: 0.5em;
   border-radius: 4px;
-  border: 1px solid #646cff;
+  border: 1px solid #d3d3d3; /* Light grey border */
   width: 100%; /* Ensure full width */
   box-sizing: border-box; /* Ensure padding and border are included in width */
+  background-color: #ffffff; /* Set input background to white */
+  color: #000000; /* Set input text color to black */
+}
+
+.input-field::placeholder {
+  color: #a9a9a9; /* Set placeholder text color to grey */
 }
 
 .buttons {
@@ -182,27 +195,19 @@ button:focus-visible {
   flex-direction: column;
   gap: 10px;
   width: 100%; /* Ensure full width */
+  padding: 10px; /* Add padding around attribute cards */
+  box-sizing: border-box; /* Ensure padding is included in width */
 }
 
 .attribute-card {
   background-color: #DCE0E6;
   padding: 10px;
   border-radius: 8px;
-  text-align: center;
+  text-align: left; /* Align text to the left for better readability */
   color: #000000;
   width: 100%; /* Ensure full width */
   box-sizing: border-box; /* Ensure padding and border are included in width */
-}
-
-.attribute-card h2 {
-  margin: 0;
-  padding: 0;
-  font-size: 1.2em; /* Adjusted font size */
-}
-
-.attribute-card p {
-  margin: 0.3em 0; /* Adjusted margin */
-  font-size: 0.8em; /* Adjusted font size */
+  border: 1px solid #d3d3d3; /* Light grey border */
 }
 
 footer {

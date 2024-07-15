@@ -256,12 +256,14 @@ function App() {
               placeholder="Example: AndfjordSalmon"
               value={psetName}
               onChange={(e) => setPsetName(e.target.value)}
+              className="input-field"
             />
             <input
               type="text"
               placeholder="Example: A22 MMI"
               value={attribute}
               onChange={(e) => setAttribute(e.target.value)}
+              className="input-field"
             />
           </div>
           <div className="buttons">

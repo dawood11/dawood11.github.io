@@ -70,9 +70,13 @@ header .flow {
 nav {
   display: flex;
   gap: 1em; /* Adjusted gap */
-  font-size: 0.7em; /* Reduced font size by 15% */
   justify-content: flex-end; /* Align nav items to the right */
   flex-grow: 1; /* Allow nav to grow */
+}
+
+.nav-icon {
+  width: 5%;
+  height: auto;
 }
 
 h1 {

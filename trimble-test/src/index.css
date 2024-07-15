@@ -5,8 +5,8 @@
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: #000000;
+  background-color: #ffffff;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -15,11 +15,11 @@
 
 a {
   font-weight: 500;
-  color: #ffffff;
+  color: #003D6A;
   text-decoration: inherit;
 }
 a:hover {
-  color: #d3d3d3;
+  color: #535bf2;
 }
 
 body {
@@ -49,10 +49,12 @@ header .logo {
 
 header .pos {
   font-weight: 700;
+  font-size: 1.6em; /* Adjusted font size */
 }
 
 header .flow {
   font-weight: 300;
+  font-size: 1.2em; /* Adjusted font size */
 }
 
 nav {
@@ -60,8 +62,13 @@ nav {
   gap: 1em;
 }
 
+nav a {
+  font-size: 0.8em; /* Adjusted font size */
+  color: #ffffff;
+}
+
 h1 {
-  font-size: 3.2em;
+  font-size: 1.6em; /* Reduced to 50% */
   line-height: 1.1;
 }
 
@@ -76,6 +83,7 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
   margin-top: 20px; /* Added margin-top for spacing */
+  color: #ffffff;
 }
 button:hover {
   border-color: #646cff;
@@ -105,6 +113,7 @@ button:focus-visible {
   align-items: center;
   height: 100vh;
   justify-content: flex-start;
+  background-color: #ffffff; /* Set container background to white */
 }
 
 .content {
@@ -113,6 +122,7 @@ button:focus-visible {
   align-items: center;
   margin-top: 20px;
   width: 100%;
+  background-color: #ffffff; /* Set content background to white */
 }
 
 .input-section {
@@ -164,11 +174,12 @@ footer {
   text-align: center;
   margin-top: auto;
   padding: 1em;
-  background-color: #1a1a1a;
+  background-color: #ffffff; /* Set footer background to white */
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  color: #000000; /* Set footer text color to black */
 }
 
 footer img {
@@ -179,5 +190,5 @@ footer img {
 footer p {
   margin: 5px 0 0 0;
   font-size: 0.8em;
-  color: #ffffff;
+  color: #000000; /* Set footer text color to black */
 }

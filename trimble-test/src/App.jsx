@@ -92,7 +92,8 @@ function App() {
     console.log("Attribute Objects: ", attributeObjects);
   }, [dotConnect, psetName, attribute]);
 
-  const handleGroupClick = useCallback((value) => {
+  const handleGroupClick = useCallback(async (value) => {
+    const api = await dotConnect();
     setSelectedGroups((prevSelectedGroups) => {
       const updatedGroups = { ...prevSelectedGroups };
       if (updatedGroups[value]) {
@@ -102,7 +103,40 @@ function App() {
       }
       return updatedGroups;
     });
-  }, []);
+
+    const selectedData = attributeData.filter(obj => obj.value === value);
+    if (selectedGroups[value]) {
+      await deselectObjects(api, selectedData);
+    } else {
+      await selectObjects(api, selectedData);
+    }
+  }, [attributeData, dotConnect, selectedGroups]);
+
+  const selectObjects = async (api, objects) => {
+    const modelEntities = objects.map(obj => ({
+      modelId: obj.modelId,
+      objectRuntimeIds: [obj.id]
+    }));
+
+    const objectSelector = {
+      modelObjectIds: modelEntities
+    };
+    await api.viewer.setSelection(objectSelector, "add");
+    console.log(`Objects selected.`);
+  };
+
+  const deselectObjects = async (api, objects) => {
+    const modelEntities = objects.map(obj => ({
+      modelId: obj.modelId,
+      objectRuntimeIds: [obj.id]
+    }));
+
+    const objectSelector = {
+      modelObjectIds: modelEntities
+    };
+    await api.viewer.setSelection(objectSelector, "remove");
+    console.log(`Objects deselected.`);
+  };
 
   const createView = useCallback(async () => {
     const api = await dotConnect();

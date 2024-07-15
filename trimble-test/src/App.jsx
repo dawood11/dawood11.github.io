@@ -273,9 +273,9 @@ function App() {
           </div>
         </div>
         <footer>
-          <img src="path-to-logo.png" alt="Logo" className="footer-logo"/>
+          <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Version 1.0</p>
+          <p>Version Beta 1.0</p>
         </footer>
       </div>
     </>

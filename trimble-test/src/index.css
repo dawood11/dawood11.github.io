@@ -48,7 +48,6 @@ header {
   align-items: center;
   width: 100%;
   padding: 0 10px;
-  max-width: 1200px;
 }
 
 header .logo {
@@ -76,18 +75,6 @@ nav {
   font-size: 0.8em; /* Adjusted font size */
   flex-grow: 1; /* Allow nav to grow */
   justify-content: flex-end; /* Align nav items to the right */
-}
-
-.header-content nav {
-  flex-grow: 1;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.header-content h1 {
-  flex-grow: 1;
-  display: flex;
-  align-items: center;
 }
 
 h1 {
@@ -151,7 +138,6 @@ button:focus-visible {
   width: 100%;
   background-color: #ffffff; /* Set content background to white */
   flex-grow: 1; /* Allow content to grow and fill space */
-  max-width: 1200px;
   padding: 0 10px;
 }
 

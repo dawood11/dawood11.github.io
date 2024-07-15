@@ -201,13 +201,18 @@ button:focus-visible {
 
 .attribute-card {
   background-color: #DCE0E6;
-  padding: 10px;
+  padding: 20px;
   border-radius: 8px;
-  text-align: left; /* Align text to the left for better readability */
+  text-align: center; /* Center the text */
   color: #000000;
   width: 100%; /* Ensure full width */
   box-sizing: border-box; /* Ensure padding and border are included in width */
   border: 1px solid #d3d3d3; /* Light grey border */
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.attribute-card.selected {
+  background-color: #a9a9a9; /* Change background color when selected */
 }
 
 footer {

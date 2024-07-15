@@ -92,51 +92,17 @@ function App() {
     console.log("Attribute Objects: ", attributeObjects);
   }, [dotConnect, psetName, attribute]);
 
-  const handleGroupCheckboxChange = useCallback(async (value, isChecked) => {
-    const api = await dotConnect();
+  const handleGroupClick = useCallback((value) => {
     setSelectedGroups((prevSelectedGroups) => {
       const updatedGroups = { ...prevSelectedGroups };
-      if (isChecked) {
-        updatedGroups[value] = true;
-      } else {
+      if (updatedGroups[value]) {
         delete updatedGroups[value];
+      } else {
+        updatedGroups[value] = true;
       }
       return updatedGroups;
     });
-
-    const selectedData = attributeData.filter(obj => obj.value === value);
-    if (isChecked) {
-      await selectObjects(api, selectedData);
-    } else {
-      await deselectObjects(api, selectedData);
-    }
-  }, [attributeData, dotConnect]);
-
-  const selectObjects = async (api, objects) => {
-    const modelEntities = objects.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id]
-    }));
-
-    const objectSelector = {
-      modelObjectIds: modelEntities
-    };
-    await api.viewer.setSelection(objectSelector, "add");
-    console.log(`Objects selected.`);
-  };
-
-  const deselectObjects = async (api, objects) => {
-    const modelEntities = objects.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id]
-    }));
-
-    const objectSelector = {
-      modelObjectIds: modelEntities
-    };
-    await api.viewer.setSelection(objectSelector, "remove");
-    console.log(`Objects deselected.`);
-  };
+  }, []);
 
   const createView = useCallback(async () => {
     const api = await dotConnect();
@@ -199,31 +165,22 @@ function App() {
 
   const renderGroupedAttributeObjects = useCallback(() => {
     const groupedData = groupAttributeData();
-    if (groupedData.length === 0) return <p>No data available.</p>;
 
     return (
       <div className="attribute-cards">
         {groupedData.map(group => (
-          <div key={group.value} className="attribute-card">
-            <input
-              type="checkbox"
-              checked={selectedGroups[group.value] === true}
-              onChange={(e) => handleGroupCheckboxChange(group.value, e.target.checked)}
-            />
-            <label>
-              <strong>{group.value}</strong><br />
-              Antall: {group.antall} <br />
-              Diameter: {group.dimensions["Diameter"]} <br />
-              DIM A: {group.dimensions["DIM A"]} <br />
-              DIM B: {group.dimensions["DIM B"]} <br />
-              DIM C: {group.dimensions["DIM C"]} <br />
-              DIM R: {group.dimensions["DIM R"]}
-            </label>
+          <div 
+            key={group.value} 
+            className={`attribute-card ${selectedGroups[group.value] ? 'selected' : ''}`}
+            onClick={() => handleGroupClick(group.value)}
+          >
+            <strong>{group.value}</strong><br />
+            Antall: {group.antall}
           </div>
         ))}
       </div>
     );
-  }, [groupAttributeData, selectedGroups, handleGroupCheckboxChange]);
+  }, [groupAttributeData, selectedGroups, handleGroupClick]);
 
   return (
     <>

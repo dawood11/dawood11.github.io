@@ -276,10 +276,10 @@ function App() {
             </h1>
           </div>
           <nav>
-            <a href="#">
+            <a href="#" onClick={getAttributeDataFromTrimble}>
               <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
             </a>
-            <a href="#">
+            <a href="#" onClick={createView}>
               <img src="https://dawood11.github.io/trimble-test/src/assets/camera.png" alt="Lag visning" className="nav-icon" />
             </a>
             <a href="#">
@@ -304,18 +304,16 @@ function App() {
           />
         </div>
         <div className="buttons">
-          <button onClick={getAttributeDataFromTrimble}>Generate</button>
           <button onClick={fitToView}>Fit to View</button>
-          <button onClick={createView}>Create View</button>
         </div>
         <div className="attribute-cards">
           {renderGroupedAttributeObjects()}
         </div>
       </div>
       <footer>
-        <img src="path-to-logo.png" alt="Logo" />
+        <img src="path-to-logo.png" alt="Logo" className="footer-logo"/>
         <p>Utviklet av Yasin Rafiq</p>
-        <p>Version 1.0</p>
+        <p>Version Beta 1.0</p>
       </footer>
     </div>
     </>

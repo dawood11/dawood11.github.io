@@ -299,5 +299,3 @@ function App() {
 }
 
 export default App;
-
-// Denne koden fungerer med select/deselct + legg inn egenskapsverdi som viser i gruppe med antall som har samme verdi.

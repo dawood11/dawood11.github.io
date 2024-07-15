@@ -202,9 +202,9 @@ function App() {
     if (groupedData.length === 0) return <p>No data available.</p>;
 
     return (
-      <div>
+      <div className="attribute-cards">
         {groupedData.map(group => (
-          <div key={group.value}>
+          <div key={group.value} className="attribute-card">
             <input
               type="checkbox"
               checked={selectedGroups[group.value] === true}
@@ -267,9 +267,7 @@ function App() {
           <div className="buttons">
             <button onClick={fitToView}>Fit to View</button>
           </div>
-          <div className="attribute-cards">
-            {renderGroupedAttributeObjects()}
-          </div>
+          {renderGroupedAttributeObjects()}
         </main>
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>

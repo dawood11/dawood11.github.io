@@ -179,9 +179,8 @@ button:focus-visible {
 
 .attribute-cards {
   display: flex;
-  flex-direction: row; /* Adjusted to row for horizontal alignment */
+  flex-direction: column;
   gap: 10px;
-  flex-wrap: wrap;
   width: 100%; /* Ensure full width */
 }
 

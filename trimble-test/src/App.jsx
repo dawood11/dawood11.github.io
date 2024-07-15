@@ -286,13 +286,13 @@ function App() {
         <div className="input-section">
           <input
             type="text"
-            placeholder="Legg inn PSET"
+            placeholder="Example: AndfjordSalmon"
             value={psetName}
             onChange={(e) => setPsetName(e.target.value)}
           />
           <input
             type="text"
-            placeholder="Legg inn attributt"
+            placeholder="Example: A22 MMI"
             value={attribute}
             onChange={(e) => setAttribute(e.target.value)}
           />

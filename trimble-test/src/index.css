@@ -31,6 +31,7 @@ body {
   min-height: 100vh;
   background-color: #ffffff;
   overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-y: auto; /* Prevent vertical scroll unless necessary */
 }
 
 .header {
@@ -147,6 +148,7 @@ button:focus-visible {
   background-color: #ffffff; /* Set content background to white */
   flex-grow: 1; /* Allow content to grow and fill space */
   padding: 0 10px;
+  overflow: hidden; /* Prevent scroll within the content area */
 }
 
 .input-section {
@@ -209,8 +211,8 @@ footer {
   background-color: #ffffff; /* Set footer background to white */
   width: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center; /* Center align footer content */
   color: #000000; /* Set footer text color to black */
   position: fixed; /* Fix the footer */
   bottom: 0; /* Align to bottom */

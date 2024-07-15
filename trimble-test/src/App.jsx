@@ -228,56 +228,56 @@ function App() {
 
   return (
     <>
-     <div className="container">
-      <header className="header">
-        <div className="header-content">
-          <div className="logo">
-            <h1>
-              <span className="pos">POS.</span>
-              <span className="flow">Flow</span>
-            </h1>
+      <div className="container">
+        <header className="header">
+          <div className="header-content">
+            <div className="logo">
+              <h1>
+                <span className="pos">POS.</span>
+                <span className="flow">Flow</span>
+              </h1>
+            </div>
+            <nav>
+              <a href="#" onClick={getAttributeDataFromTrimble}>
+                <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
+              </a>
+              <a href="#" onClick={createView}>
+                <img src="https://dawood11.github.io/trimble-test/src/assets/camera.png" alt="Lag visning" className="nav-icon" />
+              </a>
+              <a href="#">
+                <img src="https://dawood11.github.io/trimble-test/src/assets/download.png" alt="Generer" className="nav-icon" />
+              </a>
+            </nav>
           </div>
-          <nav>
-            <a href="#" onClick={getAttributeDataFromTrimble}>
-              <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
-            </a>
-            <a href="#" onClick={createView}>
-              <img src="https://dawood11.github.io/trimble-test/src/assets/camera.png" alt="Lag visning" className="nav-icon" />
-            </a>
-            <a href="#">
-              <img src="https://dawood11.github.io/trimble-test/src/assets/download.png" alt="Generer" className="nav-icon" />
-            </a>
-          </nav>
+        </header>
+        <div className="content">
+          <div className="input-section">
+            <input
+              type="text"
+              placeholder="Example: AndfjordSalmon"
+              value={psetName}
+              onChange={(e) => setPsetName(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Example: A22 MMI"
+              value={attribute}
+              onChange={(e) => setAttribute(e.target.value)}
+            />
+          </div>
+          <div className="buttons">
+            <button onClick={fitToView}>Fit to View</button>
+          </div>
+          <div className="attribute-cards">
+            {renderGroupedAttributeObjects()}
+          </div>
         </div>
-      </header>
-      <div className="content">
-        <div className="input-section">
-          <input
-            type="text"
-            placeholder="Example: AndfjordSalmon"
-            value={psetName}
-            onChange={(e) => setPsetName(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Example: A22 MMI"
-            value={attribute}
-            onChange={(e) => setAttribute(e.target.value)}
-          />
-        </div>
-        <div className="buttons">
-          <button onClick={fitToView}>Fit to View</button>
-        </div>
-        <div className="attribute-cards">
-          {renderGroupedAttributeObjects()}
-        </div>
+        <footer>
+          <img src="path-to-logo.png" alt="Logo" className="footer-logo"/>
+          <p>Utviklet av Yasin Rafiq</p>
+          <p>Version 1.0</p>
+        </footer>
       </div>
-      <footer>
-        <img src="path-to-logo.png" alt="Logo" className="footer-logo"/>
-        <p>Utviklet av Yasin Rafiq</p>
-        <p>Version 1.0</p>
-      </footer>
-    </div>
     </>
   );
 }

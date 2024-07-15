@@ -180,6 +180,7 @@ function App() {
 
     const viewInfo = {
       name: selectedData[0].value, // Use the value of the selected attribute as the view name
+      description: `Antall: ${selectedData.length}, Diameter: ${selectedData[0].dimensions["Diameter"]}, DIM A: ${selectedData[0].dimensions["DIM A"]}, DIM B: ${selectedData[0].dimensions["DIM B"]}, DIM C: ${selectedData[0].dimensions["DIM C"]}, DIM R: ${selectedData[0].dimensions["DIM R"]}`,
       objects: modelEntities
     };
 
@@ -220,9 +221,9 @@ function App() {
     const groupedData = data.reduce((acc, obj) => {
       const { value } = obj;
       if (!acc[value]) {
-        acc[value] = { value, count: 0, models: [], dimensions: obj.dimensions };
+        acc[value] = { value, antall: 0, models: [], dimensions: obj.dimensions };
       }
-      acc[value].count += 1;
+      acc[value].antall += 1;
       acc[value].models.push(obj);
       return acc;
     }, {});
@@ -249,7 +250,7 @@ function App() {
             />
             <label>
               {attribute}: {group.value} <br />
-              Count: {group.count} <br />
+              Antall: {group.antall} <br />
               Diameter: {group.dimensions["Diameter"]} <br />
               DIM A: {group.dimensions["DIM A"]} <br />
               DIM B: {group.dimensions["DIM B"]} <br />

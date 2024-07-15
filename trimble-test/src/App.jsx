@@ -180,7 +180,7 @@ function App() {
 
     const viewInfo = {
       name: selectedData[0].value, // Use the value of the selected attribute as the view name
-      description: `Antall: ${selectedData.length}, Diameter: ${selectedData[0].dimensions["Diameter"]}, DIM A: ${selectedData[0].dimensions["DIM A"]}, DIM B: ${selectedData[0].dimensions["DIM B"]}, DIM C: ${selectedData[0].dimensions["DIM C"]}, DIM R: ${selectedData[0].dimensions["DIM R"]}`,
+      description: `Beskrivelse\nAntall: ${selectedData.length}\nDiameter: ${selectedData[0].dimensions["Diameter"]}\nDIM A: ${selectedData[0].dimensions["DIM A"]}\nDIM B: ${selectedData[0].dimensions["DIM B"]}\nDIM C: ${selectedData[0].dimensions["DIM C"]}\nDIM R: ${selectedData[0].dimensions["DIM R"]}`,
       objects: modelEntities
     };
 
@@ -249,6 +249,7 @@ function App() {
               onChange={(e) => handleGroupCheckboxChange(group.value, e.target.checked)}
             />
             <label>
+              <strong>Beskrivelse</strong><br />
               {attribute}: {group.value} <br />
               Antall: {group.antall} <br />
               Diameter: {group.dimensions["Diameter"]} <br />
@@ -267,7 +268,7 @@ function App() {
     <>
       <div className="container">
         <header>
-          <h1>Tatta 37</h1>
+          <h1>Tatta 39</h1>
         </header>
         <div className="content">
           <div>

@@ -266,36 +266,51 @@ function App() {
 
   return (
     <>
-      <div className="container">
-        <header>
-          <h1>Tatta 39</h1>
-        </header>
-        <div className="content">
-          <div>
-            <label>
-              PSET NAME:
-              <input
-                type="text"
-                value={psetName}
-                onChange={(e) => setPsetName(e.target.value)}
-              />
-            </label>
-            <br />
-            <label>
-              ATTRIBUTE:
-              <input
-                type="text"
-                value={attribute}
-                onChange={(e) => setAttribute(e.target.value)}
-              />
-            </label>
-          </div>
+     <div className="container">
+      <header>
+        <div className="logo">
+          <h1>POS.Flow</h1>
+        </div>
+        <nav>
+          <a href="#">START</a>
+          <a href="#">LAG VISNING</a>
+          <a href="#">GENERER</a>
+        </nav>
+      </header>
+      <div className="content">
+        <div className="input-section">
+          <label>
+            <input
+              type="text"
+              placeholder="Legg inn PSET"
+              value={psetName}
+              onChange={(e) => setPsetName(e.target.value)}
+            />
+          </label>
+          <label>
+            <input
+              type="text"
+              placeholder="Legg inn attributt"
+              value={attribute}
+              onChange={(e) => setAttribute(e.target.value)}
+            />
+          </label>
+        </div>
+        <div className="buttons">
           <button onClick={getAttributeDataFromTrimble}>Generate</button>
-          {renderGroupedAttributeObjects()}
           <button onClick={fitToView}>Fit to View</button>
           <button onClick={createView}>Create View</button>
         </div>
+        <div className="attribute-cards">
+          {renderGroupedAttributeObjects()}
+        </div>
       </div>
+      <footer>
+        <img src="path-to-logo.png" alt="Logo" />
+        <p>Utviklet av Yasin Rafiq</p>
+        <p>Version 1.0</p>
+      </footer>
+    </div>
     </>
   );
 }

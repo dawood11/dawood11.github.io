@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap'); /* Importing the Roboto font */
+
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Roboto', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light dark;
@@ -31,9 +33,23 @@ body {
 
 header {
   width: 100%;
-  text-align: center; /* Centering the header text */
+  text-align: center;
   padding: 1em;
   background-color: #1a1a1a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header .logo {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+nav {
+  display: flex;
+  gap: 1em;
 }
 
 h1 {
@@ -88,4 +104,68 @@ button:focus-visible {
   flex-direction: column;
   align-items: center;
   margin-top: 20px;
+  width: 100%;
+}
+
+.input-section {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.input-section input {
+  padding: 0.5em;
+  border-radius: 4px;
+  border: 1px solid #646cff;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.attribute-cards {
+  display: flex;
+  gap: 20px;
+}
+
+.attribute-card {
+  background-color: #e0e0e0;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.attribute-card h2 {
+  margin: 0;
+  padding: 0;
+  font-size: 1.5em;
+}
+
+.attribute-card p {
+  margin: 0.5em 0;
+  font-size: 0.9em;
+}
+
+footer {
+  text-align: center;
+  margin-top: auto;
+  padding: 1em;
+  background-color: #1a1a1a;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+footer img {
+  width: 50px;
+  height: auto;
+}
+
+footer p {
+  margin: 5px 0 0 0;
+  font-size: 0.8em;
+  color: #ffffff;
 }

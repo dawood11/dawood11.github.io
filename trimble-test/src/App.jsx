@@ -269,7 +269,10 @@ function App() {
      <div className="container">
       <header>
         <div className="logo">
-          <h1>POS.Flow</h1>
+          <h1>
+            <span className="pos">POS.</span>
+            <span className="flow">Flow</span>
+          </h1>
         </div>
         <nav>
           <a href="#">START</a>
@@ -279,22 +282,18 @@ function App() {
       </header>
       <div className="content">
         <div className="input-section">
-          <label>
-            <input
-              type="text"
-              placeholder="Legg inn PSET"
-              value={psetName}
-              onChange={(e) => setPsetName(e.target.value)}
-            />
-          </label>
-          <label>
-            <input
-              type="text"
-              placeholder="Legg inn attributt"
-              value={attribute}
-              onChange={(e) => setAttribute(e.target.value)}
-            />
-          </label>
+          <input
+            type="text"
+            placeholder="Legg inn PSET"
+            value={psetName}
+            onChange={(e) => setPsetName(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Legg inn attributt"
+            value={attribute}
+            onChange={(e) => setAttribute(e.target.value)}
+          />
         </div>
         <div className="buttons">
           <button onClick={getAttributeDataFromTrimble}>Generate</button>

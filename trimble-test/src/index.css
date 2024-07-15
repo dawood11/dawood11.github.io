@@ -33,56 +33,62 @@ body {
 
 header {
   width: 100%;
-  text-align: center;
-  padding: 1em;
   background-color: #003D6A;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5em 0;
+}
+
+.header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
+  max-width: 340px;
 }
 
 header .logo {
-  font-size: 1.5em;
+  font-size: 0.75em; /* Further reduced font size */
   font-weight: 700;
   color: #ffffff;
+  flex-shrink: 0;
 }
 
 header .pos {
   font-weight: 700;
-  font-size: 1.6em; /* Adjusted font size */
+  font-size: 1.2em; /* Adjusted font size */
 }
 
 header .flow {
   font-weight: 300;
-  font-size: 1.2em; /* Adjusted font size */
+  font-size: 1em; /* Adjusted font size */
 }
 
 nav {
   display: flex;
-  gap: 1em;
-}
-
-nav a {
-  font-size: 0.8em; /* Adjusted font size */
-  color: #ffffff;
+  gap: 0.5em; /* Adjusted gap */
+  font-size: 0.7em; /* Adjusted font size */
+  flex-grow: 1; /* Allow nav to grow */
+  justify-content: flex-end; /* Align nav items to the right */
 }
 
 h1 {
-  font-size: 1.6em; /* Reduced to 50% */
+  font-size: 1.2em; /* Adjusted font size */
   line-height: 1.1;
 }
 
 button {
   border-radius: 8px;
   border: 1px solid transparent;
-  padding: 0.4em 1em;
-  font-size: 0.8em;
+  padding: 0.3em 0.8em; /* Adjusted padding */
+  font-size: 0.7em; /* Adjusted font size */
   font-weight: 500;
   font-family: inherit;
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
-  margin-top: 20px; /* Added margin-top for spacing */
+  margin-top: 10px; /* Adjusted margin-top */
   color: #ffffff;
 }
 button:hover {
@@ -114,39 +120,49 @@ button:focus-visible {
   height: 100vh;
   justify-content: flex-start;
   background-color: #ffffff; /* Set container background to white */
+  max-width: 340px; /* Set max-width to 340px */
 }
 
 .content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 20px;
+  margin-top: 10px; /* Adjusted margin-top */
   width: 100%;
   background-color: #ffffff; /* Set content background to white */
+  flex-grow: 1; /* Allow content to grow and fill space */
 }
 
 .input-section {
   display: flex;
+  flex-direction: column; /* Adjusted to column for narrow width */
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 10px; /* Adjusted margin-bottom */
+  width: 100%; /* Ensure full width */
 }
 
 .input-section input {
   padding: 0.5em;
   border-radius: 4px;
   border: 1px solid #646cff;
+  width: 100%; /* Ensure full width */
+  box-sizing: border-box; /* Ensure padding and border are included in width */
 }
 
 .buttons {
   display: flex;
+  flex-direction: column; /* Adjusted to column for narrow width */
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 10px; /* Adjusted margin-bottom */
+  width: 100%; /* Ensure full width */
 }
 
 .attribute-cards {
   display: flex;
-  gap: 20px;
+  flex-direction: column; /* Adjusted to column for narrow width */
+  gap: 10px;
   flex-wrap: wrap;
+  width: 100%; /* Ensure full width */
 }
 
 .attribute-card {
@@ -155,40 +171,44 @@ button:focus-visible {
   border-radius: 8px;
   text-align: center;
   color: #000000;
-  width: calc(50% - 20px); /* Two columns */
-  box-sizing: border-box;
+  width: 100%; /* Ensure full width */
+  box-sizing: border-box; /* Ensure padding and border are included in width */
 }
 
 .attribute-card h2 {
   margin: 0;
   padding: 0;
-  font-size: 1.5em;
+  font-size: 1.2em; /* Adjusted font size */
 }
 
 .attribute-card p {
-  margin: 0.5em 0;
-  font-size: 0.9em;
+  margin: 0.3em 0; /* Adjusted margin */
+  font-size: 0.8em; /* Adjusted font size */
 }
 
 footer {
   text-align: center;
-  margin-top: auto;
   padding: 1em;
   background-color: #ffffff; /* Set footer background to white */
   width: 100%;
+  max-width: 340px; /* Set max-width to 340px */
   display: flex;
   flex-direction: column;
   align-items: center;
   color: #000000; /* Set footer text color to black */
+  position: fixed; /* Fix the footer */
+  bottom: 0; /* Align to bottom */
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 footer img {
-  width: 50px;
+  width: 30px; /* Adjusted width */
   height: auto;
 }
 
 footer p {
   margin: 5px 0 0 0;
-  font-size: 0.8em;
+  font-size: 0.7em; /* Adjusted font size */
   color: #000000; /* Set footer text color to black */
 }

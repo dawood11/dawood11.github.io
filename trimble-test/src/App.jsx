@@ -268,17 +268,19 @@ function App() {
     <>
      <div className="container">
       <header>
-        <div className="logo">
-          <h1>
-            <span className="pos">POS.</span>
-            <span className="flow">Flow</span>
-          </h1>
+        <div className="header-content">
+          <div className="logo">
+            <h1>
+              <span className="pos">POS.</span>
+              <span className="flow">Flow</span>
+            </h1>
+          </div>
+          <nav>
+            <a href="#">START</a>
+            <a href="#">LAG VISNING</a>
+            <a href="#">GENERER</a>
+          </nav>
         </div>
-        <nav>
-          <a href="#">START</a>
-          <a href="#">LAG VISNING</a>
-          <a href="#">GENERER</a>
-        </nav>
       </header>
       <div className="content">
         <div className="input-section">

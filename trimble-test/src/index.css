@@ -27,11 +27,15 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 320px;
+  width: auto;
   min-height: 100vh;
   background-color: #ffffff;
   overflow-x: hidden; /* Prevent horizontal scroll */
-  overflow-y: hidden; /* Prevent vertical scroll */
+}
+
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .header {
@@ -137,7 +141,7 @@ button:focus-visible {
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  width: 100%;
+  width: auto;
   justify-content: flex-start;
   background-color: #ffffff; /* Set container background to white */
   padding-top: 60px; /* Space for fixed header */
@@ -145,6 +149,11 @@ button:focus-visible {
   box-sizing: border-box;
   overflow-x: hidden; /* Prevent horizontal scroll */
   overflow-y: auto; /* Enable vertical scroll */
+}
+
+.container::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .content {
@@ -155,6 +164,11 @@ button:focus-visible {
   padding: 20px; /* Add padding around content */
   box-sizing: border-box;
   overflow-y: auto; /* Enable vertical scroll within the content area */
+}
+
+.content::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .input-section {
@@ -202,6 +216,11 @@ button:focus-visible {
   box-sizing: border-box; /* Ensure padding is included in width */
 }
 
+.attribute-cards::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
 .attribute-card {
   background-color: #DCE0E6;
   padding: 20px;
@@ -233,8 +252,13 @@ footer {
   z-index: 1000;
 }
 
+footer::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
 footer .footer-logo {
-  width: 30px; /* Adjusted width */
+  width: 45px; /* Adjusted width */
   height: auto;
 }
 

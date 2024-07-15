@@ -31,6 +31,7 @@ body {
   min-height: 100vh;
   background-color: #ffffff;
   overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-y: hidden; /* Prevent vertical scroll */
 }
 
 .header {
@@ -142,6 +143,8 @@ button:focus-visible {
   padding-top: 60px; /* Space for fixed header */
   padding-bottom: 60px; /* Space for fixed footer */
   box-sizing: border-box;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-y: auto; /* Enable vertical scroll */
 }
 
 .content {
@@ -231,7 +234,7 @@ footer {
 }
 
 footer .footer-logo {
-  width: 40px; /* Adjusted width */
+  width: 30px; /* Adjusted width */
   height: auto;
 }
 

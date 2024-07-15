@@ -1,5 +1,5 @@
 import * as Extensions from "trimble-connect-workspace-api";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import './index.css'; // Import the CSS file
 
 function App() {
@@ -10,15 +10,13 @@ function App() {
 
   const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
 
-  async function dotConnect() {
+  const dotConnect = useCallback(async () => {
     return await Extensions.connect(
       window.parent,
       (event, args) => {
         switch (event) {
           case "extension.command":
-            break;
           case "extension.accessToken":
-            break;
           case "extension.userSettingsChanged":
             break;
           default:
@@ -26,25 +24,27 @@ function App() {
       },
       30000
     );
-  }
+  }, []);
 
-  async function getAttributeDataFromTrimble() {
+  const getAttributeDataFromTrimble = useCallback(async () => {
     console.log("GET ATTRIBUTE DATA");
-    await dotConnect().then(async (WorkspaceAPI) => {
-      const api = await WorkspaceAPI;
-      console.log("api: ", api);
+    const api = await dotConnect();
+    console.log("api: ", api);
 
-      const viewerObjects = await api.viewer.getObjects();
-      console.log("viewerObjects: ", viewerObjects);
+    const viewerObjects = await api.viewer.getObjects();
+    console.log("viewerObjects: ", viewerObjects);
 
-      const attributeObjects = [];
+    const attributeObjects = [];
+    const batchSize = 1000;
 
-      for (const modelObjectsSet of viewerObjects) {
-        const modelId = modelObjectsSet["modelId"];
-        let modelObjectIdsList = modelObjectsSet["objects"].map((obj) => obj.id);
-        console.log("Fetching properties for model ID:", modelId);
+    for (const modelObjectsSet of viewerObjects) {
+      const modelId = modelObjectsSet["modelId"];
+      let modelObjectIdsList = modelObjectsSet["objects"].map((obj) => obj.id);
+      console.log("Fetching properties for model ID:", modelId);
 
-        const properties = await api.viewer.getObjectProperties(modelId, modelObjectIdsList);
+      for (let i = 0; i < modelObjectIdsList.length; i += batchSize) {
+        const batch = modelObjectIdsList.slice(i, i + batchSize);
+        const properties = await api.viewer.getObjectProperties(modelId, batch);
         console.log("Fetched properties:", properties);
 
         properties.forEach((propertySet) => {
@@ -86,13 +86,13 @@ function App() {
           }
         });
       }
+    }
 
-      setAttributeData(attributeObjects);
-      console.log("Attribute Objects: ", attributeObjects);
-    });
-  }
+    setAttributeData(attributeObjects);
+    console.log("Attribute Objects: ", attributeObjects);
+  }, [dotConnect, psetName, attribute, dimensionAttributes]);
 
-  const handleGroupCheckboxChange = async (value, isChecked) => {
+  const handleGroupCheckboxChange = useCallback(async (value, isChecked) => {
     const api = await dotConnect();
     setSelectedGroups((prevSelectedGroups) => {
       const updatedGroups = { ...prevSelectedGroups };
@@ -110,7 +110,7 @@ function App() {
     } else {
       await deselectObjects(api, selectedData);
     }
-  };
+  }, [attributeData, dotConnect]);
 
   const selectObjects = async (api, objects) => {
     const modelEntities = objects.map(obj => ({
@@ -138,7 +138,7 @@ function App() {
     console.log(`Objects deselected.`);
   };
 
-  const createView = async () => {
+  const createView = useCallback(async () => {
     const api = await dotConnect();
     const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
 
@@ -163,9 +163,9 @@ function App() {
 
     await api.view.setView(viewSpec.id);
     console.log(`View set as active.`);
-  };
+  }, [attributeData, selectedGroups, dotConnect]);
 
-  const fitToView = async () => {
+  const fitToView = useCallback(async () => {
     const api = await dotConnect();
     const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
 
@@ -181,9 +181,9 @@ function App() {
 
     await api.viewer.fitToView({ modelObjectIds: modelEntities });
     console.log(`View fitted to selected objects.`);
-  };
+  }, [attributeData, selectedGroups, dotConnect]);
 
-  const groupAttributeData = (data = attributeData) => {
+  const groupAttributeData = useCallback((data = attributeData) => {
     const groupedData = data.reduce((acc, obj) => {
       const { value } = obj;
       if (!acc[value]) {
@@ -195,9 +195,9 @@ function App() {
     }, {});
 
     return Object.values(groupedData);
-  };
+  }, [attributeData]);
 
-  const renderGroupedAttributeObjects = () => {
+  const renderGroupedAttributeObjects = useCallback(() => {
     const groupedData = groupAttributeData();
     if (groupedData.length === 0) return <p>No data available.</p>;
 
@@ -224,7 +224,7 @@ function App() {
         ))}
       </div>
     );
-  };
+  }, [groupAttributeData, selectedGroups, handleGroupCheckboxChange, attribute]);
 
   return (
     <>

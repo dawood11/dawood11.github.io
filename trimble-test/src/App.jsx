@@ -267,7 +267,7 @@ function App() {
   return (
     <>
      <div className="container">
-      <header>
+      <header className="header">
         <div className="header-content">
           <div className="logo">
             <h1>

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap'); /* Importing the Roboto font */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
 
 :root {
   font-family: 'Roboto', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -33,13 +33,13 @@ body {
   overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
-header {
+.header {
   width: 100%;
   background-color: #003D6A;
   display: flex;
   justify-content: space-between; /* Distribute space between logo and nav */
   align-items: center;
-  padding: 0.5em 10px; /* Added padding to ensure no gaps */
+  padding: 0.5em 1em; /* Adjust padding as needed */
   box-sizing: border-box; /* Ensure padding is included in width */
 }
 
@@ -51,20 +51,20 @@ header {
 }
 
 header .logo {
-  font-size: 1em; /* Adjusted font size */
-  font-weight: 700;
-  color: #ffffff;
-  flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 header .pos {
   font-weight: 700;
   font-size: 1.2em; /* Adjusted font size */
+  color: #ffffff;
 }
 
 header .flow {
   font-weight: 300;
   font-size: 1em; /* Adjusted font size */
+  color: #ffffff;
 }
 
 nav {
@@ -78,6 +78,7 @@ nav {
 h1 {
   font-size: 1.2em; /* Adjusted font size */
   line-height: 1.1;
+  margin: 0;
 }
 
 button {
@@ -117,7 +118,6 @@ button:focus-visible {
   }
 }
 
-/* Added styles */
 .container {
   display: flex;
   flex-direction: column;

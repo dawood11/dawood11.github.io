@@ -37,17 +37,10 @@ header {
   width: 100%;
   background-color: #003D6A;
   display: flex;
-  justify-content: center;
+  justify-content: space-between; /* Distribute space between logo and nav */
   align-items: center;
-  padding: 0.5em 0;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  padding: 0 10px;
+  padding: 0.5em 10px; /* Added padding to ensure no gaps */
+  box-sizing: border-box; /* Ensure padding is included in width */
 }
 
 header .logo {
@@ -55,8 +48,6 @@ header .logo {
   font-weight: 700;
   color: #ffffff;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
 }
 
 header .pos {
@@ -71,8 +62,8 @@ header .flow {
 
 nav {
   display: flex;
-  gap: 1em; /* Adjusted gap */
-  font-size: 0.8em; /* Adjusted font size */
+  gap: 0.85em; /* Adjusted gap */
+  font-size: 0.7em; /* Reduced font size by 15% */
   flex-grow: 1; /* Allow nav to grow */
   justify-content: flex-end; /* Align nav items to the right */
 }

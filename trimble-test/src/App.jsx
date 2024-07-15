@@ -4,6 +4,8 @@ import './index.css'; // Import the CSS file
 
 function App() {
   const [attributeData, setAttributeData] = useState([]);
+  const [psetName, setPsetName] = useState("Example: AndfjordSalmon");
+  const [attribute, setAttribute] = useState("Example: A22 MMI");
   const [selectedGroups, setSelectedGroups] = useState({});
 
   const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
@@ -57,23 +59,25 @@ function App() {
             };
 
             propertySet.properties.forEach((prop) => {
-              prop.properties.forEach((subProp) => {
-                if (subProp.name === "Pos.nr") {
-                  primaryAttribute = { 
-                    modelId, 
-                    id: propertySet.id, 
-                    class: propertySet.class, 
-                    name: subProp.name,
-                    value: subProp.value 
-                  };
-                }
-
-                dimensionAttributes.forEach(dimAttr => {
-                  if (subProp.name.includes(dimAttr)) {
-                    dimensions[dimAttr] = subProp.value;
+              if (prop.name === psetName.replace("Example: ", "")) {
+                prop.properties.forEach((subProp) => {
+                  if (subProp.name === attribute.replace("Example: ", "")) {
+                    primaryAttribute = { 
+                      modelId, 
+                      id: propertySet.id, 
+                      class: propertySet.class, 
+                      name: subProp.name,
+                      value: subProp.value 
+                    };
                   }
+
+                  dimensionAttributes.forEach(dimAttr => {
+                    if (subProp.name.includes(dimAttr)) {
+                      dimensions[dimAttr] = subProp.value;
+                    }
+                  });
                 });
-              });
+              }
             });
 
             if (primaryAttribute) {
@@ -208,7 +212,7 @@ function App() {
             />
             <label>
               <strong>Beskrivelse</strong><br />
-              Pos.nr: {group.value} <br />
+              {attribute}: {group.value} <br />
               Antall: {group.antall} <br />
               Diameter: {group.dimensions["Diameter"]} <br />
               DIM A: {group.dimensions["DIM A"]} <br />
@@ -247,6 +251,20 @@ function App() {
           </div>
         </header>
         <div className="content">
+          <div className="input-section">
+            <input
+              type="text"
+              placeholder="Example: AndfjordSalmon"
+              value={psetName}
+              onChange={(e) => setPsetName(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Example: A22 MMI"
+              value={attribute}
+              onChange={(e) => setAttribute(e.target.value)}
+            />
+          </div>
           <div className="buttons">
             <button onClick={fitToView}>Fit to View</button>
           </div>

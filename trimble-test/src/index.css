@@ -30,6 +30,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background-color: #ffffff;
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 header {
@@ -55,6 +56,8 @@ header .logo {
   font-weight: 700;
   color: #ffffff;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 header .pos {

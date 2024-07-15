@@ -1,5 +1,5 @@
 import * as Extensions from "trimble-connect-workspace-api";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import './index.css'; // Import the CSS file
 
 function App() {
@@ -8,12 +8,10 @@ function App() {
   const [attribute, setAttribute] = useState("Example: A22 MMI");
   const [selectedGroups, setSelectedGroups] = useState({});
 
-  const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
-
   const dotConnect = useCallback(async () => {
     return await Extensions.connect(
       window.parent,
-      (event, args) => {
+      (event) => {
         switch (event) {
           case "extension.command":
           case "extension.accessToken":
@@ -27,6 +25,8 @@ function App() {
   }, []);
 
   const getAttributeDataFromTrimble = useCallback(async () => {
+    const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
+
     console.log("GET ATTRIBUTE DATA");
     const api = await dotConnect();
     console.log("api: ", api);
@@ -90,7 +90,7 @@ function App() {
 
     setAttributeData(attributeObjects);
     console.log("Attribute Objects: ", attributeObjects);
-  }, [dotConnect, psetName, attribute, dimensionAttributes]);
+  }, [dotConnect, psetName, attribute]);
 
   const handleGroupCheckboxChange = useCallback(async (value, isChecked) => {
     const api = await dotConnect();

@@ -276,9 +276,15 @@ function App() {
             </h1>
           </div>
           <nav>
-            <a href="#">START</a>
-            <a href="#">LAG VISNING</a>
-            <a href="#">GENERER</a>
+            <a href="#">
+              <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
+            </a>
+            <a href="#">
+              <img src="https://dawood11.github.io/trimble-test/src/assets/camera.png" alt="Lag visning" className="nav-icon" />
+            </a>
+            <a href="#">
+              <img src="https://dawood11.github.io/trimble-test/src/assets/download.png" alt="Generer" className="nav-icon" />
+            </a>
           </nav>
         </div>
       </header>

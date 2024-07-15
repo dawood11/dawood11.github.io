@@ -1,42 +1,222 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+:root {
+  font-family: 'Roboto', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  color: #000000;
+  background-color: #ffffff;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #ffffff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #d3d3d3;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #ffffff;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+.header {
+  width: 100%;
+  background-color: #003D6A;
+  display: flex;
+  justify-content: space-between; /* Distribute space between logo and nav */
+  align-items: center;
+  padding: 0.5em 1em; /* Adjust padding as needed */
+  box-sizing: border-box; /* Ensure padding is included in width */
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+header .logo {
+  display: flex;
+  align-items: center;
+}
+
+header .pos {
+  font-weight: 700;
+  font-size: 1.2em; /* Adjusted font size */
+  color: #ffffff;
+}
+
+header .flow {
+  font-weight: 300;
+  font-size: 1em; /* Adjusted font size */
+  color: #ffffff;
+}
+
+nav {
+  display: flex;
+  gap: 1em; /* Adjusted gap */
+  justify-content: flex-end; /* Align nav items to the right */
+  flex-grow: 1; /* Allow nav to grow */
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+}
+
+h1 {
+  font-size: 1.2em; /* Adjusted font size */
+  line-height: 1.1;
+  margin: 0;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.4em 1em; /* Adjusted padding */
+  font-size: 0.8em; /* Adjusted font size */
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #ffffff; /* Set button background to white */
+  color: #000000; /* Set button text color to black */
+  cursor: pointer;
+  transition: background-color 0.25s, border-color 0.25s;
+  margin-top: 10px; /* Adjusted margin-top */
+}
+button:hover {
+  background-color: #d3d3d3; /* Set hover background color to light grey */
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #ffffff; /* Ensure button background is white in light mode */
+  }
+  button:hover {
+    background-color: #d3d3d3; /* Ensure hover background color is light grey in light mode */
+  }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  justify-content: flex-start;
+  background-color: #ffffff; /* Set container background to white */
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px; /* Adjusted margin-top */
+  width: 100%;
+  background-color: #ffffff; /* Set content background to white */
+  flex-grow: 1; /* Allow content to grow and fill space */
+  padding: 0 10px;
+}
+
+.input-section {
+  display: flex;
+  flex-direction: column; /* Adjusted to column for narrow width */
+  gap: 10px;
+  margin-bottom: 10px; /* Adjusted margin-bottom */
+  width: 100%; /* Ensure full width */
+}
+
+.input-section input {
+  padding: 0.5em;
+  border-radius: 4px;
+  border: 1px solid #646cff;
+  width: 100%; /* Ensure full width */
+  box-sizing: border-box; /* Ensure padding and border are included in width */
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column; /* Adjusted to column for narrow width */
+  gap: 10px;
+  margin-bottom: 10px; /* Adjusted margin-bottom */
+  width: 100%; /* Ensure full width */
+}
+
+.attribute-cards {
+  display: flex;
+  flex-direction: column; /* Adjusted to column for narrow width */
+  gap: 10px;
+  flex-wrap: wrap;
+  width: 100%; /* Ensure full width */
+}
+
+.attribute-card {
+  background-color: #DCE0E6;
+  padding: 10px;
+  border-radius: 8px;
   text-align: center;
+  color: #000000;
+  width: 100%; /* Ensure full width */
+  box-sizing: border-box; /* Ensure padding and border are included in width */
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.attribute-card h2 {
+  margin: 0;
+  padding: 0;
+  font-size: 1.2em; /* Adjusted font size */
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.attribute-card p {
+  margin: 0.3em 0; /* Adjusted margin */
+  font-size: 0.8em; /* Adjusted font size */
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+footer {
+  text-align: center;
+  padding: 1em;
+  background-color: #ffffff; /* Set footer background to white */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #000000; /* Set footer text color to black */
+  position: fixed; /* Fix the footer */
+  bottom: 0; /* Align to bottom */
+  left: 0; /* Align to left */
 }
 
-.card {
-  padding: 2em;
+footer img {
+  width: 30px; /* Adjusted width */
+  height: auto;
 }
 
-.read-the-docs {
-  color: #888;
+footer p {
+  margin: 5px 0 0 0;
+  font-size: 0.7em; /* Adjusted font size */
+  color: #000000; /* Set footer text color to black */
 }

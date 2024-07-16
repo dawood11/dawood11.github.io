@@ -8,10 +8,17 @@ function App() {
   const [attribute, setAttribute] = useState("Example: A22 MMI");
   const [selectedGroups, setSelectedGroups] = useState({});
 
+  const generateRandomColor = () => {
+    const r = Math.floor(Math.random() * 256);
+    const g = Math.floor(Math.random() * 256);
+    const b = Math.floor(Math.random() * 256);
+    return { r, g, b };
+  };
+
   const colors = useMemo(() => ({
-    group1: { r: 255, g: 0, b: 0 },
-    group2: { r: 0, g: 255, b: 0 },
-    group3: { r: 0, g: 0, b: 255 },
+    group1: generateRandomColor(),
+    group2: generateRandomColor(),
+    group3: generateRandomColor(),
     // Add more colors as needed
   }), []);
 
@@ -37,6 +44,31 @@ function App() {
       30000
     );
   }, []);
+
+  const colorizeObjects = useCallback(async (api, objects, color) => {
+    const modelEntities = objects.map(obj => ({
+      modelId: obj.modelId,
+      objectRuntimeIds: [obj.id],
+      color
+    }));
+
+    await api.viewer.setObjectColors(modelEntities);
+    console.log(`Objects colorized.`);
+  }, []);
+
+  const groupAttributeData = useCallback((data = attributeData) => {
+    const groupedData = data.reduce((acc, obj) => {
+      const { value } = obj;
+      if (!acc[value]) {
+        acc[value] = { value, antall: 0, models: [], dimensions: obj.dimensions };
+      }
+      acc[value].antall += 1;
+      acc[value].models.push(obj);
+      return acc;
+    }, {});
+
+    return Object.values(groupedData);
+  }, [attributeData]);
 
   const getAttributeDataFromTrimble = useCallback(async () => {
     const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
@@ -104,7 +136,14 @@ function App() {
 
     setAttributeData(attributeObjects);
     console.log("Attribute Objects: ", attributeObjects);
-  }, [dotConnect, psetName, attribute]);
+
+    // Colorize objects based on group
+    const groupedData = groupAttributeData(attributeObjects);
+    groupedData.forEach(group => {
+      const color = generateRandomColor();
+      colorizeObjects(api, group.models, color);
+    });
+  }, [dotConnect, psetName, attribute, groupAttributeData, colorizeObjects]);
 
   const selectObjects = useCallback(async (api, objects) => {
     const modelEntities = objects.map(obj => ({
@@ -130,17 +169,6 @@ function App() {
     };
     await api.viewer.setSelection(objectSelector, "remove");
     console.log(`Objects deselected.`);
-  }, []);
-
-  const colorizeObjects = useCallback(async (api, objects, color) => {
-    const modelEntities = objects.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id],
-      color
-    }));
-
-    await api.viewer.setObjectColors(modelEntities);
-    console.log(`Objects colorized.`);
   }, []);
 
   const resetObjectColors = useCallback(async (api, objects) => {
@@ -221,20 +249,6 @@ function App() {
     await api.viewer.fitToView({ modelObjectIds: modelEntities });
     console.log(`View fitted to selected objects.`);
   }, [attributeData, selectedGroups, dotConnect]);
-
-  const groupAttributeData = useCallback((data = attributeData) => {
-    const groupedData = data.reduce((acc, obj) => {
-      const { value } = obj;
-      if (!acc[value]) {
-        acc[value] = { value, antall: 0, models: [], dimensions: obj.dimensions };
-      }
-      acc[value].antall += 1;
-      acc[value].models.push(obj);
-      return acc;
-    }, {});
-
-    return Object.values(groupedData);
-  }, [attributeData]);
 
   const renderGroupedAttributeObjects = useCallback(() => {
     const groupedData = groupAttributeData();

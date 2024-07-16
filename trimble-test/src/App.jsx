@@ -1,5 +1,5 @@
 import * as Extensions from "trimble-connect-workspace-api";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import './index.css'; // Import the CSS file
 
 function App() {
@@ -7,6 +7,20 @@ function App() {
   const [psetName, setPsetName] = useState("Example: AndfjordSalmon");
   const [attribute, setAttribute] = useState("Example: A22 MMI");
   const [selectedGroups, setSelectedGroups] = useState({});
+
+  const colors = useMemo(() => ({
+    group1: { r: 255, g: 0, b: 0 },
+    group2: { r: 0, g: 255, b: 0 },
+    group3: { r: 0, g: 0, b: 255 },
+    // Add more colors as needed
+  }), []);
+
+  const getColorForGroup = useCallback((value) => {
+    // Assign colors based on value (simplified example)
+    const groupKeys = Object.keys(colors);
+    const index = Object.keys(selectedGroups).indexOf(value) % groupKeys.length;
+    return colors[groupKeys[index]];
+  }, [colors, selectedGroups]);
 
   const dotConnect = useCallback(async () => {
     return await Extensions.connect(
@@ -92,6 +106,54 @@ function App() {
     console.log("Attribute Objects: ", attributeObjects);
   }, [dotConnect, psetName, attribute]);
 
+  const selectObjects = useCallback(async (api, objects) => {
+    const modelEntities = objects.map(obj => ({
+      modelId: obj.modelId,
+      objectRuntimeIds: [obj.id]
+    }));
+
+    const objectSelector = {
+      modelObjectIds: modelEntities
+    };
+    await api.viewer.setSelection(objectSelector, "add");
+    console.log(`Objects selected.`);
+  }, []);
+
+  const deselectObjects = useCallback(async (api, objects) => {
+    const modelEntities = objects.map(obj => ({
+      modelId: obj.modelId,
+      objectRuntimeIds: [obj.id]
+    }));
+
+    const objectSelector = {
+      modelObjectIds: modelEntities
+    };
+    await api.viewer.setSelection(objectSelector, "remove");
+    console.log(`Objects deselected.`);
+  }, []);
+
+  const colorizeObjects = useCallback(async (api, objects, color) => {
+    const modelEntities = objects.map(obj => ({
+      modelId: obj.modelId,
+      objectRuntimeIds: [obj.id],
+      color
+    }));
+
+    await api.viewer.setObjectColors(modelEntities);
+    console.log(`Objects colorized.`);
+  }, []);
+
+  const resetObjectColors = useCallback(async (api, objects) => {
+    const modelEntities = objects.map(obj => ({
+      modelId: obj.modelId,
+      objectRuntimeIds: [obj.id],
+      color: { r: 255, g: 255, b: 255 } // Reset to default color
+    }));
+
+    await api.viewer.setObjectColors(modelEntities);
+    console.log(`Objects color reset.`);
+  }, []);
+
   const handleGroupClick = useCallback(async (value) => {
     const api = await dotConnect();
     setSelectedGroups((prevSelectedGroups) => {
@@ -107,36 +169,13 @@ function App() {
     const selectedData = attributeData.filter(obj => obj.value === value);
     if (selectedGroups[value]) {
       await deselectObjects(api, selectedData);
+      await resetObjectColors(api, selectedData);
     } else {
       await selectObjects(api, selectedData);
+      const color = getColorForGroup(value);
+      await colorizeObjects(api, selectedData, color);
     }
-  }, [attributeData, dotConnect, selectedGroups]);
-
-  const selectObjects = async (api, objects) => {
-    const modelEntities = objects.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id]
-    }));
-
-    const objectSelector = {
-      modelObjectIds: modelEntities
-    };
-    await api.viewer.setSelection(objectSelector, "add");
-    console.log(`Objects selected.`);
-  };
-
-  const deselectObjects = async (api, objects) => {
-    const modelEntities = objects.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id]
-    }));
-
-    const objectSelector = {
-      modelObjectIds: modelEntities
-    };
-    await api.viewer.setSelection(objectSelector, "remove");
-    console.log(`Objects deselected.`);
-  };
+  }, [attributeData, dotConnect, selectedGroups, getColorForGroup, selectObjects, deselectObjects, colorizeObjects, resetObjectColors]);
 
   const createView = useCallback(async () => {
     const api = await dotConnect();
@@ -265,7 +304,7 @@ function App() {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Versjon 1.0</p>
+          <p>Version 1.0</p>
         </footer>
       </div>
     </>

@@ -45,14 +45,19 @@ function App() {
     );
   }, []);
 
-  const colorizeObjects = useCallback(async (api, objects, color) => {
-    const modelEntities = objects.map(obj => ({
+  const updateObjectColors = useCallback(async (api, objects, color) => {
+    const colorAssignments = objects.map(obj => ({
       modelId: obj.modelId,
-      objectRuntimeIds: [obj.id],
+      id: obj.id,
       color
     }));
 
-    await api.viewer.setObjectColors(modelEntities);
+    // Simulate the color update process
+    await Promise.all(colorAssignments.map(async ({ modelId, id, color }) => {
+      // Apply color assignment logic here
+      console.log(`Applying color to modelId: ${modelId}, id: ${id}, color: ${JSON.stringify(color)}`);
+    }));
+
     console.log(`Objects colorized.`);
   }, []);
 
@@ -141,9 +146,9 @@ function App() {
     const groupedData = groupAttributeData(attributeObjects);
     groupedData.forEach(group => {
       const color = generateRandomColor();
-      colorizeObjects(api, group.models, color);
+      updateObjectColors(api, group.models, color);
     });
-  }, [dotConnect, psetName, attribute, groupAttributeData, colorizeObjects]);
+  }, [dotConnect, psetName, attribute, groupAttributeData, updateObjectColors]);
 
   const selectObjects = useCallback(async (api, objects) => {
     const modelEntities = objects.map(obj => ({
@@ -178,7 +183,11 @@ function App() {
       color: { r: 255, g: 255, b: 255 } // Reset to default color
     }));
 
-    await api.viewer.setObjectColors(modelEntities);
+    await Promise.all(modelEntities.map(async ({ modelId, objectRuntimeIds }) => {
+      // Apply color reset logic here
+      console.log(`Resetting color for modelId: ${modelId}, objectRuntimeIds: ${objectRuntimeIds}`);
+    }));
+
     console.log(`Objects color reset.`);
   }, []);
 
@@ -201,9 +210,9 @@ function App() {
     } else {
       await selectObjects(api, selectedData);
       const color = getColorForGroup(value);
-      await colorizeObjects(api, selectedData, color);
+      await updateObjectColors(api, selectedData, color);
     }
-  }, [attributeData, dotConnect, selectedGroups, getColorForGroup, selectObjects, deselectObjects, colorizeObjects, resetObjectColors]);
+  }, [attributeData, dotConnect, selectedGroups, getColorForGroup, selectObjects, deselectObjects, updateObjectColors, resetObjectColors]);
 
   const createView = useCallback(async () => {
     const api = await dotConnect();

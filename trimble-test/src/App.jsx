@@ -8,6 +8,7 @@ function App() {
   const [attribute, setAttribute] = useState("Example: A22 MMI");
   const [selectedGroups, setSelectedGroups] = useState({});
   const [api, setApi] = useState(null);
+  const [objectColors, setObjectColors] = useState({});
 
   useEffect(() => {
     const initializeApi = async () => {
@@ -45,19 +46,14 @@ function App() {
     return colors[groupKeys[index]];
   }, [colors, selectedGroups]);
 
-  const colorizeObjects = useCallback(async (objects, color) => {
-    if (!api) return;
-
-    const modelEntities = objects.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id]
-    }));
-
-    const colorString = `rgba(${color.r}, ${color.g}, ${color.b}, 1)`;
-    const promises = modelEntities.map(entity => api.viewer.setObjectProperties(entity.modelId, entity.objectRuntimeIds, { color: colorString }));
-    await Promise.all(promises);
+  const colorizeObjects = useCallback((objects, color) => {
+    const newObjectColors = { ...objectColors };
+    objects.forEach(obj => {
+      newObjectColors[obj.id] = color;
+    });
+    setObjectColors(newObjectColors);
     console.log(`Objects colorized.`);
-  }, [api]);
+  }, [objectColors]);
 
   const groupAttributeData = useCallback((data = attributeData) => {
     const groupedData = data.reduce((acc, obj) => {
@@ -177,13 +173,14 @@ function App() {
     console.log(`Objects deselected.`);
   }, [api]);
 
-  const resetObjectColors = useCallback(async (objects) => {
-    if (!api) return;
-
-    const promises = objects.map(obj => api.viewer.setObjectProperties(obj.modelId, [obj.id], { color: `rgba(255, 255, 255, 1)` }));
-    await Promise.all(promises);
+  const resetObjectColors = useCallback((objects) => {
+    const newObjectColors = { ...objectColors };
+    objects.forEach(obj => {
+      delete newObjectColors[obj.id];
+    });
+    setObjectColors(newObjectColors);
     console.log(`Objects color reset.`);
-  }, [api]);
+  }, [objectColors]);
 
   const handleGroupClick = useCallback(async (value) => {
     if (!api) return;
@@ -201,11 +198,11 @@ function App() {
     const selectedData = attributeData.filter(obj => obj.value === value);
     if (selectedGroups[value]) {
       await deselectObjects(selectedData);
-      await resetObjectColors(selectedData);
+      resetObjectColors(selectedData);
     } else {
       await selectObjects(selectedData);
       const color = getColorForGroup(value);
-      await colorizeObjects(selectedData, color);
+      colorizeObjects(selectedData, color);
     }
   }, [api, attributeData, selectedGroups, getColorForGroup, selectObjects, deselectObjects, colorizeObjects, resetObjectColors]);
 

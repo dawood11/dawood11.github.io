@@ -203,7 +203,7 @@ function App() {
     const groupedData = groupAttributeData();
     const worksheetData = groupedData.map(group => ({
       "POS.NR": group.value,
-      "Antall (count)": group.antall,
+      "Antall": group.antall,
       Diameter: group.dimensions.Diameter,
       "DIM A": group.dimensions["DIM A"],
       "DIM B": group.dimensions["DIM B"],

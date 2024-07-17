@@ -1,5 +1,5 @@
 import * as Extensions from "trimble-connect-workspace-api";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import './index.css'; // Import the CSS file
 
 function App() {
@@ -8,7 +8,7 @@ function App() {
   const [attribute, setAttribute] = useState("Example: A22 MMI");
   const [selectedGroups, setSelectedGroups] = useState({});
 
-  const dotConnect = async () => {
+  const dotConnect = useCallback(async () => {
     return await Extensions.connect(
       window.parent,
       (event) => {
@@ -22,10 +22,11 @@ function App() {
       },
       30000
     );
-  };
+  }, []);
 
-  const getAttributeDataFromTrimble = async () => {
+  const getAttributeDataFromTrimble = useCallback(async () => {
     const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
+
     console.log("GET ATTRIBUTE DATA");
     const api = await dotConnect();
     console.log("api: ", api);
@@ -35,10 +36,14 @@ function App() {
 
     const attributeObjects = [];
     const batchSize = 1000;
-    const maxConcurrentBatches = 5;
 
-    const processBatch = async (modelId, batch) => {
-      try {
+    for (const modelObjectsSet of viewerObjects) {
+      const modelId = modelObjectsSet["modelId"];
+      let modelObjectIdsList = modelObjectsSet["objects"].map((obj) => obj.id);
+      console.log("Fetching properties for model ID:", modelId);
+
+      for (let i = 0; i < modelObjectIdsList.length; i += batchSize) {
+        const batch = modelObjectIdsList.slice(i, i + batchSize);
         const properties = await api.viewer.getObjectProperties(modelId, batch);
         console.log("Fetched properties:", properties);
 
@@ -80,32 +85,14 @@ function App() {
             }
           }
         });
-      } catch (error) {
-        console.error("Error processing batch:", error);
-      }
-    };
-
-    for (const modelObjectsSet of viewerObjects) {
-      const modelId = modelObjectsSet["modelId"];
-      let modelObjectIdsList = modelObjectsSet["objects"].map((obj) => obj.id);
-      console.log("Fetching properties for model ID:", modelId);
-
-      for (let i = 0; i < modelObjectIdsList.length; i += batchSize) {
-        const concurrentBatches = [];
-
-        for (let j = 0; j < maxConcurrentBatches && i + j * batchSize < modelObjectIdsList.length; j++) {
-          concurrentBatches.push(processBatch(modelId, modelObjectIdsList.slice(i + j * batchSize, i + (j + 1) * batchSize)));
-        }
-
-        await Promise.all(concurrentBatches);
       }
     }
 
     setAttributeData(attributeObjects);
     console.log("Attribute Objects: ", attributeObjects);
-  };
+  }, [dotConnect, psetName, attribute]);
 
-  const handleGroupClick = async (value) => {
+  const handleGroupClick = useCallback(async (value) => {
     const api = await dotConnect();
     setSelectedGroups((prevSelectedGroups) => {
       const updatedGroups = { ...prevSelectedGroups };
@@ -123,7 +110,7 @@ function App() {
     } else {
       await selectObjects(api, selectedData);
     }
-  };
+  }, [attributeData, dotConnect, selectedGroups]);
 
   const selectObjects = async (api, objects) => {
     const modelEntities = objects.map(obj => ({
@@ -151,7 +138,7 @@ function App() {
     console.log(`Objects deselected.`);
   };
 
-  const createView = async () => {
+  const createView = useCallback(async () => {
     const api = await dotConnect();
     const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
 
@@ -176,9 +163,9 @@ function App() {
 
     await api.view.setView(viewSpec.id);
     console.log(`View set as active.`);
-  };
+  }, [attributeData, selectedGroups, dotConnect]);
 
-  const fitToView = async () => {
+  const fitToView = useCallback(async () => {
     const api = await dotConnect();
     const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
 
@@ -194,9 +181,9 @@ function App() {
 
     await api.viewer.fitToView({ modelObjectIds: modelEntities });
     console.log(`View fitted to selected objects.`);
-  };
+  }, [attributeData, selectedGroups, dotConnect]);
 
-  const groupAttributeData = (data = attributeData) => {
+  const groupAttributeData = useCallback((data = attributeData) => {
     const groupedData = data.reduce((acc, obj) => {
       const { value } = obj;
       if (!acc[value]) {
@@ -208,9 +195,9 @@ function App() {
     }, {});
 
     return Object.values(groupedData);
-  };
+  }, [attributeData]);
 
-  const renderGroupedAttributeObjects = () => {
+  const renderGroupedAttributeObjects = useCallback(() => {
     const groupedData = groupAttributeData();
 
     return (
@@ -227,7 +214,7 @@ function App() {
         ))}
       </div>
     );
-  };
+  }, [groupAttributeData, selectedGroups, handleGroupClick]);
 
   return (
     <>
@@ -278,7 +265,7 @@ function App() {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Versjon 1.0</p>
+          <p>Beta 1.0</p>
         </footer>
       </div>
     </>

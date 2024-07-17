@@ -45,7 +45,13 @@ function App() {
   }, []);
 
   const colorizeObjects = useCallback(async (api, objects, color) => {
-    const promises = objects.map(obj => api.viewer.setObjectProperties(obj.modelId, [obj.id], { color: `rgba(${color.r}, ${color.g}, ${color.b}, 1)` }));
+    const modelEntities = objects.map(obj => ({
+      modelId: obj.modelId,
+      objectRuntimeIds: [obj.id]
+    }));
+
+    const colorString = `rgba(${color.r}, ${color.g}, ${color.b}, 1)`;
+    const promises = modelEntities.map(entity => api.viewer.setObjectProperties(entity.modelId, entity.objectRuntimeIds, { color: colorString }));
     await Promise.all(promises);
     console.log(`Objects colorized.`);
   }, []);

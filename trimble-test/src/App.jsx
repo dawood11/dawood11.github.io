@@ -53,11 +53,11 @@ function App() {
           if (propertySet.properties) {
             let primaryAttribute = null;
             let dimensions = {
-              Diameter: "Inneholder ikke",
-              "DIM A": "Inneholder ikke",
-              "DIM B": "Inneholder ikke",
-              "DIM C": "Inneholder ikke",
-              "DIM R": "Inneholder ikke"
+              Diameter: "--",
+              "DIM A": "--",
+              "DIM B": "--",
+              "DIM C": "--",
+              "DIM R": "--"
             };
 
             propertySet.properties.forEach((prop) => {
@@ -290,7 +290,7 @@ function App() {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Versjon 1.0</p>
+          <p>Beta 1.0</p>
         </footer>
       </div>
     </>

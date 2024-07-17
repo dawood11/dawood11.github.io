@@ -1,6 +1,8 @@
 import * as Extensions from "trimble-connect-workspace-api";
 import { useState, useCallback } from "react";
 import './index.css'; // Import the CSS file
+import * as XLSX from 'xlsx'; // Import the xlsx library
+import { saveAs } from 'file-saver'; // Import the file-saver library
 
 function App() {
   const [attributeData, setAttributeData] = useState([]);
@@ -197,6 +199,29 @@ function App() {
     return Object.values(groupedData);
   }, [attributeData]);
 
+  const exportToExcel = () => {
+    const groupedData = groupAttributeData();
+    const worksheetData = groupedData.map(group => ({
+      "POS.NR": group.value,
+      "Antall (count)": group.antall,
+      Diameter: group.dimensions.Diameter,
+      "DIM A": group.dimensions["DIM A"],
+      "DIM B": group.dimensions["DIM B"],
+      "DIM C": group.dimensions["DIM C"],
+      "DIM R": group.dimensions["DIM R"],
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Attribute Data");
+
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+    saveAs(blob, "AttributeData.xlsx");
+    console.log("Exported data to Excel");
+  };
+
   const renderGroupedAttributeObjects = useCallback(() => {
     const groupedData = groupAttributeData();
 
@@ -234,7 +259,7 @@ function App() {
               <a href="#" onClick={createView}>
                 <img src="https://dawood11.github.io/trimble-test/src/assets/camera.png" alt="Lag visning" className="nav-icon" />
               </a>
-              <a href="#">
+              <a href="#" onClick={exportToExcel}>
                 <img src="https://dawood11.github.io/trimble-test/src/assets/download.png" alt="Generer" className="nav-icon" />
               </a>
             </nav>
@@ -265,7 +290,7 @@ function App() {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Beta 1.0</p>
+          <p>Versjon 1.0</p>
         </footer>
       </div>
     </>

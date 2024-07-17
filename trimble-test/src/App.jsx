@@ -45,19 +45,14 @@ function App() {
     );
   }, []);
 
-  const updateObjectColors = useCallback(async (api, objects, color) => {
-    const colorAssignments = objects.map(obj => ({
+  const colorizeObjects = useCallback(async (api, objects, color) => {
+    const modelEntities = objects.map(obj => ({
       modelId: obj.modelId,
-      id: obj.id,
-      color
+      objectRuntimeIds: [obj.id],
+      color: `rgba(${color.r}, ${color.g}, ${color.b}, 1)`
     }));
 
-    // Simulate the color update process
-    await Promise.all(colorAssignments.map(async ({ modelId, id, color }) => {
-      // Apply color assignment logic here
-      console.log(`Applying color to modelId: ${modelId}, id: ${id}, color: ${JSON.stringify(color)}`);
-    }));
-
+    await api.viewer.setObjectProperties(modelEntities);
     console.log(`Objects colorized.`);
   }, []);
 
@@ -146,9 +141,9 @@ function App() {
     const groupedData = groupAttributeData(attributeObjects);
     groupedData.forEach(group => {
       const color = generateRandomColor();
-      updateObjectColors(api, group.models, color);
+      colorizeObjects(api, group.models, color);
     });
-  }, [dotConnect, psetName, attribute, groupAttributeData, updateObjectColors]);
+  }, [dotConnect, psetName, attribute, groupAttributeData, colorizeObjects]);
 
   const selectObjects = useCallback(async (api, objects) => {
     const modelEntities = objects.map(obj => ({
@@ -210,9 +205,9 @@ function App() {
     } else {
       await selectObjects(api, selectedData);
       const color = getColorForGroup(value);
-      await updateObjectColors(api, selectedData, color);
+      await colorizeObjects(api, selectedData, color);
     }
-  }, [attributeData, dotConnect, selectedGroups, getColorForGroup, selectObjects, deselectObjects, updateObjectColors, resetObjectColors]);
+  }, [attributeData, dotConnect, selectedGroups, getColorForGroup, selectObjects, deselectObjects, colorizeObjects, resetObjectColors]);
 
   const createView = useCallback(async () => {
     const api = await dotConnect();

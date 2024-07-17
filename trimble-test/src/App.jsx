@@ -1,5 +1,5 @@
 import * as Extensions from "trimble-connect-workspace-api";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import './index.css'; // Import the CSS file
 
 function App() {
@@ -7,6 +7,23 @@ function App() {
   const [psetName, setPsetName] = useState("Example: AndfjordSalmon");
   const [attribute, setAttribute] = useState("Example: A22 MMI");
   const [selectedGroups, setSelectedGroups] = useState({});
+  const [api, setApi] = useState(null);
+
+  useEffect(() => {
+    const initializeApi = async () => {
+      const connectedApi = await Extensions.connect(window.parent, (event) => {
+        switch (event) {
+          case "extension.command":
+          case "extension.accessToken":
+          case "extension.userSettingsChanged":
+            break;
+          default:
+        }
+      }, 30000);
+      setApi(connectedApi);
+    };
+    initializeApi();
+  }, []);
 
   const generateRandomColor = () => {
     const r = Math.floor(Math.random() * 256);
@@ -28,23 +45,9 @@ function App() {
     return colors[groupKeys[index]];
   }, [colors, selectedGroups]);
 
-  const dotConnect = useCallback(async () => {
-    return await Extensions.connect(
-      window.parent,
-      (event) => {
-        switch (event) {
-          case "extension.command":
-          case "extension.accessToken":
-          case "extension.userSettingsChanged":
-            break;
-          default:
-        }
-      },
-      30000
-    );
-  }, []);
+  const colorizeObjects = useCallback(async (objects, color) => {
+    if (!api) return;
 
-  const colorizeObjects = useCallback(async (api, objects, color) => {
     const modelEntities = objects.map(obj => ({
       modelId: obj.modelId,
       objectRuntimeIds: [obj.id]
@@ -54,7 +57,7 @@ function App() {
     const promises = modelEntities.map(entity => api.viewer.setObjectProperties(entity.modelId, entity.objectRuntimeIds, { color: colorString }));
     await Promise.all(promises);
     console.log(`Objects colorized.`);
-  }, []);
+  }, [api]);
 
   const groupAttributeData = useCallback((data = attributeData) => {
     const groupedData = data.reduce((acc, obj) => {
@@ -71,12 +74,11 @@ function App() {
   }, [attributeData]);
 
   const getAttributeDataFromTrimble = useCallback(async () => {
+    if (!api) return;
+
     const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
 
     console.log("GET ATTRIBUTE DATA");
-    const api = await dotConnect();
-    console.log("api: ", api);
-
     const viewerObjects = await api.viewer.getObjects();
     console.log("viewerObjects: ", viewerObjects);
 
@@ -141,11 +143,13 @@ function App() {
     const groupedData = groupAttributeData(attributeObjects);
     groupedData.forEach(group => {
       const color = generateRandomColor();
-      colorizeObjects(api, group.models, color);
+      colorizeObjects(group.models, color);
     });
-  }, [dotConnect, psetName, attribute, groupAttributeData, colorizeObjects]);
+  }, [api, psetName, attribute, groupAttributeData, colorizeObjects]);
 
-  const selectObjects = useCallback(async (api, objects) => {
+  const selectObjects = useCallback(async (objects) => {
+    if (!api) return;
+
     const modelEntities = objects.map(obj => ({
       modelId: obj.modelId,
       objectRuntimeIds: [obj.id]
@@ -156,9 +160,11 @@ function App() {
     };
     await api.viewer.setSelection(objectSelector, "add");
     console.log(`Objects selected.`);
-  }, []);
+  }, [api]);
 
-  const deselectObjects = useCallback(async (api, objects) => {
+  const deselectObjects = useCallback(async (objects) => {
+    if (!api) return;
+
     const modelEntities = objects.map(obj => ({
       modelId: obj.modelId,
       objectRuntimeIds: [obj.id]
@@ -169,16 +175,19 @@ function App() {
     };
     await api.viewer.setSelection(objectSelector, "remove");
     console.log(`Objects deselected.`);
-  }, []);
+  }, [api]);
 
-  const resetObjectColors = useCallback(async (api, objects) => {
+  const resetObjectColors = useCallback(async (objects) => {
+    if (!api) return;
+
     const promises = objects.map(obj => api.viewer.setObjectProperties(obj.modelId, [obj.id], { color: `rgba(255, 255, 255, 1)` }));
     await Promise.all(promises);
     console.log(`Objects color reset.`);
-  }, []);
+  }, [api]);
 
   const handleGroupClick = useCallback(async (value) => {
-    const api = await dotConnect();
+    if (!api) return;
+
     setSelectedGroups((prevSelectedGroups) => {
       const updatedGroups = { ...prevSelectedGroups };
       if (updatedGroups[value]) {
@@ -191,17 +200,18 @@ function App() {
 
     const selectedData = attributeData.filter(obj => obj.value === value);
     if (selectedGroups[value]) {
-      await deselectObjects(api, selectedData);
-      await resetObjectColors(api, selectedData);
+      await deselectObjects(selectedData);
+      await resetObjectColors(selectedData);
     } else {
-      await selectObjects(api, selectedData);
+      await selectObjects(selectedData);
       const color = getColorForGroup(value);
-      await colorizeObjects(api, selectedData, color);
+      await colorizeObjects(selectedData, color);
     }
-  }, [attributeData, dotConnect, selectedGroups, getColorForGroup, selectObjects, deselectObjects, colorizeObjects, resetObjectColors]);
+  }, [api, attributeData, selectedGroups, getColorForGroup, selectObjects, deselectObjects, colorizeObjects, resetObjectColors]);
 
   const createView = useCallback(async () => {
-    const api = await dotConnect();
+    if (!api) return;
+
     const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
 
     if (selectedData.length === 0) {
@@ -225,10 +235,11 @@ function App() {
 
     await api.view.setView(viewSpec.id);
     console.log(`View set as active.`);
-  }, [attributeData, selectedGroups, dotConnect]);
+  }, [api, attributeData, selectedGroups]);
 
   const fitToView = useCallback(async () => {
-    const api = await dotConnect();
+    if (!api) return;
+
     const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
 
     if (selectedData.length === 0) {
@@ -243,7 +254,7 @@ function App() {
 
     await api.viewer.fitToView({ modelObjectIds: modelEntities });
     console.log(`View fitted to selected objects.`);
-  }, [attributeData, selectedGroups, dotConnect]);
+  }, [api, attributeData, selectedGroups]);
 
   const renderGroupedAttributeObjects = useCallback(() => {
     const groupedData = groupAttributeData();

@@ -1,5 +1,5 @@
 import * as Extensions from "trimble-connect-workspace-api";
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState } from "react";
 import './index.css'; // Import the CSS file
 
 function App() {
@@ -7,12 +7,11 @@ function App() {
   const [psetName, setPsetName] = useState("Example: AndfjordSalmon");
   const [attribute, setAttribute] = useState("Example: A22 MMI");
   const [selectedGroups, setSelectedGroups] = useState({});
-  const [api, setApi] = useState(null);
-  const [objectColors, setObjectColors] = useState({});
 
-  useEffect(() => {
-    const initializeApi = async () => {
-      const connectedApi = await Extensions.connect(window.parent, (event) => {
+  const dotConnect = async () => {
+    return await Extensions.connect(
+      window.parent,
+      (event) => {
         switch (event) {
           case "extension.command":
           case "extension.accessToken":
@@ -20,74 +19,26 @@ function App() {
             break;
           default:
         }
-      }, 30000);
-      setApi(connectedApi);
-    };
-    initializeApi();
-  }, []);
-
-  const generateRandomColor = () => {
-    const r = Math.floor(Math.random() * 256);
-    const g = Math.floor(Math.random() * 256);
-    const b = Math.floor(Math.random() * 256);
-    return { r, g, b };
+      },
+      30000
+    );
   };
 
-  const colors = useMemo(() => ({
-    group1: generateRandomColor(),
-    group2: generateRandomColor(),
-    group3: generateRandomColor(),
-    // Add more colors as needed
-  }), []);
-
-  const getColorForGroup = useCallback((value) => {
-    const groupKeys = Object.keys(colors);
-    const index = Object.keys(selectedGroups).indexOf(value) % groupKeys.length;
-    return colors[groupKeys[index]];
-  }, [colors, selectedGroups]);
-
-  const colorizeObjects = useCallback((objects, color) => {
-    const newObjectColors = { ...objectColors };
-    objects.forEach(obj => {
-      newObjectColors[obj.id] = color;
-    });
-    setObjectColors(newObjectColors);
-    console.log(`Objects colorized.`);
-  }, [objectColors]);
-
-  const groupAttributeData = useCallback((data = attributeData) => {
-    const groupedData = data.reduce((acc, obj) => {
-      const { value } = obj;
-      if (!acc[value]) {
-        acc[value] = { value, antall: 0, models: [], dimensions: obj.dimensions };
-      }
-      acc[value].antall += 1;
-      acc[value].models.push(obj);
-      return acc;
-    }, {});
-
-    return Object.values(groupedData);
-  }, [attributeData]);
-
-  const getAttributeDataFromTrimble = useCallback(async () => {
-    if (!api) return;
-
+  const getAttributeDataFromTrimble = async () => {
     const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
-
     console.log("GET ATTRIBUTE DATA");
+    const api = await dotConnect();
+    console.log("api: ", api);
+
     const viewerObjects = await api.viewer.getObjects();
     console.log("viewerObjects: ", viewerObjects);
 
     const attributeObjects = [];
     const batchSize = 1000;
+    const maxConcurrentBatches = 5;
 
-    for (const modelObjectsSet of viewerObjects) {
-      const modelId = modelObjectsSet["modelId"];
-      let modelObjectIdsList = modelObjectsSet["objects"].map((obj) => obj.id);
-      console.log("Fetching properties for model ID:", modelId);
-
-      for (let i = 0; i < modelObjectIdsList.length; i += batchSize) {
-        const batch = modelObjectIdsList.slice(i, i + batchSize);
+    const processBatch = async (modelId, batch) => {
+      try {
         const properties = await api.viewer.getObjectProperties(modelId, batch);
         console.log("Fetched properties:", properties);
 
@@ -129,62 +80,33 @@ function App() {
             }
           }
         });
+      } catch (error) {
+        console.error("Error processing batch:", error);
+      }
+    };
+
+    for (const modelObjectsSet of viewerObjects) {
+      const modelId = modelObjectsSet["modelId"];
+      let modelObjectIdsList = modelObjectsSet["objects"].map((obj) => obj.id);
+      console.log("Fetching properties for model ID:", modelId);
+
+      for (let i = 0; i < modelObjectIdsList.length; i += batchSize) {
+        const concurrentBatches = [];
+
+        for (let j = 0; j < maxConcurrentBatches && i + j * batchSize < modelObjectIdsList.length; j++) {
+          concurrentBatches.push(processBatch(modelId, modelObjectIdsList.slice(i + j * batchSize, i + (j + 1) * batchSize)));
+        }
+
+        await Promise.all(concurrentBatches);
       }
     }
 
     setAttributeData(attributeObjects);
     console.log("Attribute Objects: ", attributeObjects);
+  };
 
-    // Colorize objects based on group
-    const groupedData = groupAttributeData(attributeObjects);
-    groupedData.forEach(group => {
-      const color = generateRandomColor();
-      colorizeObjects(group.models, color);
-    });
-  }, [api, psetName, attribute, groupAttributeData, colorizeObjects]);
-
-  const selectObjects = useCallback(async (objects) => {
-    if (!api) return;
-
-    const modelEntities = objects.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id]
-    }));
-
-    const objectSelector = {
-      modelObjectIds: modelEntities
-    };
-    await api.viewer.setSelection(objectSelector, "add");
-    console.log(`Objects selected.`);
-  }, [api]);
-
-  const deselectObjects = useCallback(async (objects) => {
-    if (!api) return;
-
-    const modelEntities = objects.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id]
-    }));
-
-    const objectSelector = {
-      modelObjectIds: modelEntities
-    };
-    await api.viewer.setSelection(objectSelector, "remove");
-    console.log(`Objects deselected.`);
-  }, [api]);
-
-  const resetObjectColors = useCallback((objects) => {
-    const newObjectColors = { ...objectColors };
-    objects.forEach(obj => {
-      delete newObjectColors[obj.id];
-    });
-    setObjectColors(newObjectColors);
-    console.log(`Objects color reset.`);
-  }, [objectColors]);
-
-  const handleGroupClick = useCallback(async (value) => {
-    if (!api) return;
-
+  const handleGroupClick = async (value) => {
+    const api = await dotConnect();
     setSelectedGroups((prevSelectedGroups) => {
       const updatedGroups = { ...prevSelectedGroups };
       if (updatedGroups[value]) {
@@ -197,18 +119,40 @@ function App() {
 
     const selectedData = attributeData.filter(obj => obj.value === value);
     if (selectedGroups[value]) {
-      await deselectObjects(selectedData);
-      resetObjectColors(selectedData);
+      await deselectObjects(api, selectedData);
     } else {
-      await selectObjects(selectedData);
-      const color = getColorForGroup(value);
-      colorizeObjects(selectedData, color);
+      await selectObjects(api, selectedData);
     }
-  }, [api, attributeData, selectedGroups, getColorForGroup, selectObjects, deselectObjects, colorizeObjects, resetObjectColors]);
+  };
 
-  const createView = useCallback(async () => {
-    if (!api) return;
+  const selectObjects = async (api, objects) => {
+    const modelEntities = objects.map(obj => ({
+      modelId: obj.modelId,
+      objectRuntimeIds: [obj.id]
+    }));
 
+    const objectSelector = {
+      modelObjectIds: modelEntities
+    };
+    await api.viewer.setSelection(objectSelector, "add");
+    console.log(`Objects selected.`);
+  };
+
+  const deselectObjects = async (api, objects) => {
+    const modelEntities = objects.map(obj => ({
+      modelId: obj.modelId,
+      objectRuntimeIds: [obj.id]
+    }));
+
+    const objectSelector = {
+      modelObjectIds: modelEntities
+    };
+    await api.viewer.setSelection(objectSelector, "remove");
+    console.log(`Objects deselected.`);
+  };
+
+  const createView = async () => {
+    const api = await dotConnect();
     const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
 
     if (selectedData.length === 0) {
@@ -232,11 +176,10 @@ function App() {
 
     await api.view.setView(viewSpec.id);
     console.log(`View set as active.`);
-  }, [api, attributeData, selectedGroups]);
+  };
 
-  const fitToView = useCallback(async () => {
-    if (!api) return;
-
+  const fitToView = async () => {
+    const api = await dotConnect();
     const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
 
     if (selectedData.length === 0) {
@@ -251,9 +194,23 @@ function App() {
 
     await api.viewer.fitToView({ modelObjectIds: modelEntities });
     console.log(`View fitted to selected objects.`);
-  }, [api, attributeData, selectedGroups]);
+  };
 
-  const renderGroupedAttributeObjects = useCallback(() => {
+  const groupAttributeData = (data = attributeData) => {
+    const groupedData = data.reduce((acc, obj) => {
+      const { value } = obj;
+      if (!acc[value]) {
+        acc[value] = { value, antall: 0, models: [], dimensions: obj.dimensions };
+      }
+      acc[value].antall += 1;
+      acc[value].models.push(obj);
+      return acc;
+    }, {});
+
+    return Object.values(groupedData);
+  };
+
+  const renderGroupedAttributeObjects = () => {
     const groupedData = groupAttributeData();
 
     return (
@@ -270,7 +227,7 @@ function App() {
         ))}
       </div>
     );
-  }, [groupAttributeData, selectedGroups, handleGroupClick]);
+  };
 
   return (
     <>
@@ -321,7 +278,7 @@ function App() {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Version 1.0</p>
+          <p>Versjon 1.0</p>
         </footer>
       </div>
     </>

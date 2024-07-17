@@ -45,13 +45,7 @@ function App() {
   }, []);
 
   const colorizeObjects = useCallback(async (api, objects, color) => {
-    const modelEntities = objects.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id],
-      color: `rgba(${color.r}, ${color.g}, ${color.b}, 1)`
-    }));
-
-    const promises = modelEntities.map(entity => api.viewer.setObjectProperties(entity.modelId, entity.objectRuntimeIds, { color: entity.color }));
+    const promises = objects.map(obj => api.viewer.setObjectProperties(obj.modelId, [obj.id], { color: `rgba(${color.r}, ${color.g}, ${color.b}, 1)` }));
     await Promise.all(promises);
     console.log(`Objects colorized.`);
   }, []);
@@ -172,13 +166,7 @@ function App() {
   }, []);
 
   const resetObjectColors = useCallback(async (api, objects) => {
-    const modelEntities = objects.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id],
-      color: { r: 255, g: 255, b: 255, a: 1 } // Reset to default color
-    }));
-
-    const promises = modelEntities.map(entity => api.viewer.setObjectProperties(entity.modelId, entity.objectRuntimeIds, { color: entity.color }));
+    const promises = objects.map(obj => api.viewer.setObjectProperties(obj.modelId, [obj.id], { color: `rgba(255, 255, 255, 1)` }));
     await Promise.all(promises);
     console.log(`Objects color reset.`);
   }, []);

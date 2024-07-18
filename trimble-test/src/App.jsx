@@ -235,7 +235,7 @@ function App() {
 
     // Set column widths
     worksheet.columns = [
-      { width: 15 }, // A
+      { width: 10 }, // A
       { width: 15 }, // B
       { width: 15 }, // C
       { width: 15 }, // D
@@ -263,12 +263,7 @@ function App() {
         worksheet.mergeCells(`A${rowStart}:A${rowStart + 1}`);
         worksheet.mergeCells(`B${rowStart}:C${rowStart}`);
         worksheet.mergeCells(`B${rowStart + 1}:C${rowStart + 1}`);
-        worksheet.mergeCells(`D${rowStart}:E${rowStart}`);
-        worksheet.mergeCells(`D${rowStart + 1}:E${rowStart + 1}`);
-        worksheet.mergeCells(`F${rowStart}:F${rowStart + 1}`);
-        worksheet.mergeCells(`G${rowStart}:G${rowStart + 1}`);
-        worksheet.mergeCells(`H${rowStart}:H${rowStart + 1}`);
-        worksheet.mergeCells(`I${rowStart}:I${rowStart + 2}`);
+        worksheet.mergeCells(`H${rowStart}:I${rowStart + 1}`);
 
         // Set values and styles
         worksheet.getCell(`A${rowStart}`).value = group.value;
@@ -279,45 +274,43 @@ function App() {
         worksheet.getCell(`B${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
         worksheet.getCell(`B${rowStart}`).font = { bold: true };
 
-        worksheet.getCell(`D${rowStart}`).value = group.dimensions["DIM A"];
+        worksheet.getCell(`D${rowStart}`).value = group.dimensions.Diameter;
         worksheet.getCell(`D${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
 
-        worksheet.getCell(`F${rowStart}`).value = group.dimensions["DIM C"];
+        worksheet.getCell(`E${rowStart}`).value = 'DIM A';
+        worksheet.getCell(`E${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell(`E${rowStart}`).font = { bold: true };
+
+        worksheet.getCell(`F${rowStart}`).value = group.dimensions["DIM A"];
         worksheet.getCell(`F${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
 
-        worksheet.getCell(`H${rowStart}`).value = 'DIM C';
+        worksheet.getCell(`G${rowStart}`).value = 'DIM C';
+        worksheet.getCell(`G${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell(`G${rowStart}`).font = { bold: true };
+
+        worksheet.getCell(`H${rowStart}`).value = group.dimensions["DIM C"];
         worksheet.getCell(`H${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
 
         worksheet.getCell(`B${rowStart + 1}`).value = 'ANTALL';
         worksheet.getCell(`B${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
         worksheet.getCell(`B${rowStart + 1}`).font = { bold: true };
 
-        worksheet.getCell(`D${rowStart + 1}`).value = group.dimensions["DIM B"];
+        worksheet.getCell(`D${rowStart + 1}`).value = group.antall;
         worksheet.getCell(`D${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
 
-        worksheet.getCell(`F${rowStart + 1}`).value = group.dimensions["DIM D"];
+        worksheet.getCell(`E${rowStart + 1}`).value = 'DIM B';
+        worksheet.getCell(`E${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell(`E${rowStart + 1}`).font = { bold: true };
+
+        worksheet.getCell(`F${rowStart + 1}`).value = group.dimensions["DIM B"];
         worksheet.getCell(`F${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
 
-        worksheet.getCell(`H${rowStart + 1}`).value = 'DIM D';
-        worksheet.getCell(`H${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
-
-        worksheet.getCell(`G${rowStart}`).value = group.dimensions.Diameter;
-        worksheet.getCell(`G${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
-
-        worksheet.getCell(`H${rowStart}`).value = group.dimensions["DIM A"];
-        worksheet.getCell(`H${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
-
-        worksheet.getCell(`I${rowStart}`).value = group.dimensions["DIM C"];
-        worksheet.getCell(`I${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
-
-        worksheet.getCell(`G${rowStart + 1}`).value = group.dimensions["DIM B"];
+        worksheet.getCell(`G${rowStart + 1}`).value = 'DIM D';
         worksheet.getCell(`G${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell(`G${rowStart + 1}`).font = { bold: true };
 
         worksheet.getCell(`H${rowStart + 1}`).value = group.dimensions["DIM D"];
         worksheet.getCell(`H${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
-
-        worksheet.getCell(`I${rowStart + 1}`).value = group.dimensions["DIM R"];
-        worksheet.getCell(`I${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
 
         // Add QR code
         if (qrCodeDataUrl) {

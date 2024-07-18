@@ -317,7 +317,7 @@ function App() {
             extension: 'png',
           });
           worksheet.addImage(imageId, {
-            tl: { col: 8.5, row: rowStart + 0.35 }, // Adjusted to place the QR code in column I
+            tl: { col: 8.5 + 0.5, row: rowStart - 1 + 0.35 }, // Move half a cell to the right (0.5 cells) and one cell up (-1 row)
             ext: { width: 90, height: 90 },
           });
         }

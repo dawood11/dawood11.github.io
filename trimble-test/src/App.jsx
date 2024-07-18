@@ -12,6 +12,7 @@ function App() {
   const [selectedGroups, setSelectedGroups] = useState({});
   const [views, setViews] = useState([]);
   const [projectId, setProjectId] = useState(null);
+  const [modelName, setModelName] = useState("Model");
 
   const dotConnect = useCallback(async () => {
     return await Extensions.connect(
@@ -36,6 +37,15 @@ function App() {
     return project.id;
   }, [dotConnect]);
 
+  const getModelName = useCallback(async () => {
+    const api = await dotConnect();
+    const viewer = api.viewer;
+    const models = await viewer.getModels();
+    if (models.length > 0) {
+      setModelName(models[0].name);
+    }
+  }, [dotConnect]);
+
   const getViews = useCallback(async () => {
     const api = await dotConnect();
     const viewApi = api.view;
@@ -49,6 +59,7 @@ function App() {
     console.log("GET ATTRIBUTE DATA");
     const api = await dotConnect();
     await getProjectId();
+    await getModelName();
     await getViews();
 
     const viewerObjects = await api.viewer.getObjects();
@@ -110,7 +121,7 @@ function App() {
 
     setAttributeData(attributeObjects);
     console.log("Attribute Objects: ", attributeObjects);
-  }, [dotConnect, psetName, attribute, getProjectId, getViews]);
+  }, [dotConnect, psetName, attribute, getProjectId, getModelName, getViews]);
 
   const handleGroupClick = useCallback(async (value) => {
     const api = await dotConnect();
@@ -286,7 +297,8 @@ function App() {
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/octet-stream' });
 
-    saveAs(blob, "AttributeData.xlsx");
+    const filename = `${modelName}_Bøyeliste.xlsx`;
+    saveAs(blob, filename);
     console.log("Exported data to Excel");
   };
 
@@ -358,7 +370,7 @@ function App() {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Beta 1.4</p>
+          <p>Beta 1.5</p>
         </footer>
       </div>
     </>

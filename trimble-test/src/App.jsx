@@ -317,7 +317,7 @@ function App() {
             extension: 'png',
           });
           worksheet.addImage(imageId, {
-            tl: { col: 8.5 + 0.3, row: rowStart + 1 - 0.5 }, // Move 30 px to the right and 30 px up
+            tl: { col: 8.5 + 1.5, row: rowStart + 1 - 3.5 }, // Move 150 px to the right (1.5 cells) and 70 px up (3.5 cells)
             ext: { width: 90, height: 90 },
           });
         }

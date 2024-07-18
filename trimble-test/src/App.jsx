@@ -4,6 +4,7 @@ import './index.css'; // Import the CSS file
 import * as XLSX from 'xlsx'; // Import the xlsx library
 import { saveAs } from 'file-saver'; // Import the file-saver library
 import QRCode from 'qrcode'; // Import the qrcode library
+import ExcelJS from 'exceljs'; // Import the exceljs library
 
 function App() {
   const [attributeData, setAttributeData] = useState([]);
@@ -219,7 +220,22 @@ function App() {
 
   const exportToExcel = async () => {
     const groupedData = groupAttributeData();
-    const worksheetData = await Promise.all(groupedData.map(async group => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Attribute Data');
+
+    worksheet.columns = [
+      { header: 'POS.NR', key: 'posNr', width: 10 },
+      { header: 'Antall', key: 'antall', width: 10 },
+      { header: 'Diameter', key: 'diameter', width: 10 },
+      { header: 'DIM A', key: 'dimA', width: 10 },
+      { header: 'DIM B', key: 'dimB', width: 10 },
+      { header: 'DIM C', key: 'dimC', width: 10 },
+      { header: 'DIM R', key: 'dimR', width: 10 },
+      { header: 'View URL', key: 'viewUrl', width: 30 },
+      { header: 'QR Code', key: 'qrCode', width: 30 },
+    ];
+
+    await Promise.all(groupedData.map(async (group) => {
       const view = views.find(v => v.name === group.value);
       const viewId = view ? view.id : null;
       const projId = projectId || null;
@@ -230,51 +246,34 @@ function App() {
         qrCodeDataUrl = await QRCode.toDataURL(viewUrl);
       }
 
-      return {
-        "POS.NR": group.value,
-        "Antall": group.antall,
-        Diameter: group.dimensions.Diameter,
-        "DIM A": group.dimensions["DIM A"],
-        "DIM B": group.dimensions["DIM B"],
-        "DIM C": group.dimensions["DIM C"],
-        "DIM R": group.dimensions["DIM R"],
-        "View URL": viewUrl,
-        "QR Code": qrCodeDataUrl
-      };
+      worksheet.addRow({
+        posNr: group.value,
+        antall: group.antall,
+        diameter: group.dimensions.Diameter,
+        dimA: group.dimensions["DIM A"],
+        dimB: group.dimensions["DIM B"],
+        dimC: group.dimensions["DIM C"],
+        dimR: group.dimensions["DIM R"],
+        viewUrl: viewUrl,
+        qrCode: qrCodeDataUrl,
+      });
     }));
 
-    const worksheet = XLSX.utils.json_to_sheet(worksheetData.map(({ "POS.NR": posNr, "Antall": antall, Diameter, "DIM A": dimA, "DIM B": dimB, "DIM C": dimC, "DIM R": dimR, "View URL": viewUrl }) => ({
-      "POS.NR": posNr,
-      "Antall": antall,
-      Diameter,
-      "DIM A": dimA,
-      "DIM B": dimB,
-      "DIM C": dimC,
-      "DIM R": dimR,
-      "View URL": viewUrl
-    })));
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Attribute Data");
-
-    worksheetData.forEach((row, index) => {
-      if (row["QR Code"]) {
-        const imageCell = `H${index + 2}`;
-        const imageId = XLSX.utils.book_append_image(workbook, {
-          image: row["QR Code"],
-          type: 'dataURL',
-          ext: '.png',
-        });
-
-        worksheet[imageCell] = {
-          t: 'z',
-          l: { Target: imageId }
-        };
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber > 1) {
+        const qrCodeDataUrl = row.getCell('qrCode').value;
+        if (qrCodeDataUrl) {
+          const imageId = workbook.addImage({
+            base64: qrCodeDataUrl,
+            extension: 'png',
+          });
+          worksheet.addImage(imageId, `I${rowNumber}:I${rowNumber}`);
+        }
       }
     });
 
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/octet-stream' });
 
     saveAs(blob, "AttributeData.xlsx");
     console.log("Exported data to Excel");
@@ -348,7 +347,7 @@ function App() {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Beta 1.2</p>
+          <p>Beta 1.3</p>
         </footer>
       </div>
     </>

@@ -9,6 +9,8 @@ function App() {
   const [psetName, setPsetName] = useState("Example: AndfjordSalmon");
   const [attribute, setAttribute] = useState("Example: A22 MMI");
   const [selectedGroups, setSelectedGroups] = useState({});
+  const [views, setViews] = useState([]);
+  const [projectId, setProjectId] = useState(null);
 
   const dotConnect = useCallback(async () => {
     return await Extensions.connect(
@@ -26,12 +28,27 @@ function App() {
     );
   }, []);
 
+  const getProjectId = useCallback(async () => {
+    const api = await dotConnect();
+    const project = await api.project.getProject();
+    setProjectId(project.id);
+    return project.id;
+  }, [dotConnect]);
+
+  const getViews = useCallback(async () => {
+    const api = await dotConnect();
+    const viewApi = api.view;
+    const allViews = await viewApi.getViews();
+    setViews(allViews);
+  }, [dotConnect]);
+
   const getAttributeDataFromTrimble = useCallback(async () => {
     const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
 
     console.log("GET ATTRIBUTE DATA");
     const api = await dotConnect();
-    console.log("api: ", api);
+    await getProjectId();
+    await getViews();
 
     const viewerObjects = await api.viewer.getObjects();
     console.log("viewerObjects: ", viewerObjects);
@@ -92,7 +109,7 @@ function App() {
 
     setAttributeData(attributeObjects);
     console.log("Attribute Objects: ", attributeObjects);
-  }, [dotConnect, psetName, attribute]);
+  }, [dotConnect, psetName, attribute, getProjectId, getViews]);
 
   const handleGroupClick = useCallback(async (value) => {
     const api = await dotConnect();
@@ -201,15 +218,22 @@ function App() {
 
   const exportToExcel = () => {
     const groupedData = groupAttributeData();
-    const worksheetData = groupedData.map(group => ({
-      "POS.NR": group.value,
-      "Antall": group.antall,
-      Diameter: group.dimensions.Diameter,
-      "DIM A": group.dimensions["DIM A"],
-      "DIM B": group.dimensions["DIM B"],
-      "DIM C": group.dimensions["DIM C"],
-      "DIM R": group.dimensions["DIM R"],
-    }));
+    const worksheetData = groupedData.map(group => {
+      const view = views.find(v => v.name === group.value);
+      const viewId = view ? view.id : "--";
+      const projId = projectId || "--";
+
+      return {
+        "POS.NR": group.value,
+        "Antall": group.antall,
+        Diameter: group.dimensions.Diameter,
+        "DIM A": group.dimensions["DIM A"],
+        "DIM B": group.dimensions["DIM B"],
+        "DIM C": group.dimensions["DIM C"],
+        "DIM R": group.dimensions["DIM R"],
+        "View URL": projId && viewId ? `https://web.connect.trimble.com/projects/${projId}/viewer/3d?viewId=${viewId}&region=europe` : "--"
+      };
+    });
 
     const worksheet = XLSX.utils.json_to_sheet(worksheetData);
     const workbook = XLSX.utils.book_new();
@@ -290,7 +314,7 @@ function App() {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Beta 1.0</p>
+          <p>Beta 1.1</p>
         </footer>
       </div>
     </>

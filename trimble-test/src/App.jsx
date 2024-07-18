@@ -235,7 +235,7 @@ function App() {
 
     // Set column widths
     worksheet.columns = [
-      { width: 10 }, // A
+      { width: 20 }, // A
       { width: 15 }, // B
       { width: 15 }, // C
       { width: 15 }, // D
@@ -260,10 +260,10 @@ function App() {
         }
 
         // Merge cells for the design
-        worksheet.mergeCells(`A${rowStart}:A${rowStart + 1}`);
+        worksheet.mergeCells(`A${rowStart}:A${rowStart + 2}`);
         worksheet.mergeCells(`B${rowStart}:C${rowStart}`);
         worksheet.mergeCells(`B${rowStart + 1}:C${rowStart + 1}`);
-        worksheet.mergeCells(`H${rowStart}:I${rowStart + 1}`);
+        worksheet.mergeCells(`I${rowStart}:J${rowStart + 2}`);
 
         // Set values and styles
         worksheet.getCell(`A${rowStart}`).value = group.value;
@@ -325,7 +325,7 @@ function App() {
         }
 
         // Add border to the cells to mimic card style
-        for (let r = rowStart; r <= rowStart + 1; r++) {
+        for (let r = rowStart; r <= rowStart + 2; r++) {
           for (let c = 1; c <= 9; c++) {
             worksheet.getCell(r, c).border = {
               top: { style: 'thin' },

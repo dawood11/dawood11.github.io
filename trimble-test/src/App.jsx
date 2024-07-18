@@ -248,7 +248,7 @@ function App() {
     ];
 
     await Promise.all(groupedData.map(async (group, index) => {
-        const rowStart = index * 5 + 2; // Adjusted for merging 5 rows
+        const rowStart = index * 10 + 2; // Adjusted for 4 rows spacing between cards
         const view = views.find(v => v.name === group.value);
         const viewId = view ? view.id : null;
         const projId = projectId || null;

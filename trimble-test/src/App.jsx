@@ -317,15 +317,15 @@ function App() {
             extension: 'png',
           });
           worksheet.addImage(imageId, {
-            tl: { col: 8.5 - 0.85, row: rowStart + 1 + 0.35 }, // Move 17 px to the left (0.85 cells) and 7 px down (0.35 cells)
+            tl: { col: 8.5, row: rowStart + 0.35 }, // Adjusted to place the QR code in column I
             ext: { width: 90, height: 90 },
           });
         }
 
         // Add border to the cells to mimic card style
         for (let r = rowStart; r <= rowStart + 4; r++) {
-          for (let c = 1; c <= 9; c++) {
-            if (r === rowStart || r === rowStart + 4 || c === 1 || c === 9) {
+          for (let c = 1; c <= 10; c++) { // Adjusted to cover column I and J
+            if (r === rowStart || r === rowStart + 4 || c === 1 || c === 10) { // Adjusted to cover column I and J
               worksheet.getCell(r, c).border = {
                 top: { style: 'medium' },
                 left: { style: 'medium' },

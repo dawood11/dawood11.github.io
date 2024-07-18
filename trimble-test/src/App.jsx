@@ -248,7 +248,7 @@ function App() {
     ];
 
     await Promise.all(groupedData.map(async (group, index) => {
-        const rowStart = index * 6 + 2; // Adjusted for merging 3 more rows
+        const rowStart = index * 5 + 2; // Adjusted for merging 5 rows
         const view = views.find(v => v.name === group.value);
         const viewId = view ? view.id : null;
         const projId = projectId || null;
@@ -260,10 +260,8 @@ function App() {
         }
 
         // Merge cells for the design
-        worksheet.mergeCells(`A${rowStart}:A${rowStart + 3}`);
-        worksheet.mergeCells(`B${rowStart}:C${rowStart}`);
-        worksheet.mergeCells(`B${rowStart + 1}:C${rowStart + 1}`);
-        worksheet.mergeCells(`I${rowStart}:J${rowStart + 3}`);
+        worksheet.mergeCells(`A${rowStart}:A${rowStart + 4}`);
+        worksheet.mergeCells(`I${rowStart}:J${rowStart + 4}`);
 
         // Set values and styles
         worksheet.getCell(`A${rowStart}`).value = group.value;
@@ -274,43 +272,43 @@ function App() {
         worksheet.getCell(`B${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
         worksheet.getCell(`B${rowStart}`).font = { bold: true };
 
-        worksheet.getCell(`D${rowStart}`).value = group.dimensions.Diameter;
+        worksheet.getCell(`C${rowStart}`).value = group.dimensions.Diameter;
+        worksheet.getCell(`C${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+        worksheet.getCell(`D${rowStart}`).value = 'DIM A';
         worksheet.getCell(`D${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell(`D${rowStart}`).font = { bold: true };
 
-        worksheet.getCell(`E${rowStart}`).value = 'DIM A';
+        worksheet.getCell(`E${rowStart}`).value = group.dimensions["DIM A"];
         worksheet.getCell(`E${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
-        worksheet.getCell(`E${rowStart}`).font = { bold: true };
 
-        worksheet.getCell(`F${rowStart}`).value = group.dimensions["DIM A"];
+        worksheet.getCell(`F${rowStart}`).value = 'DIM C';
         worksheet.getCell(`F${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell(`F${rowStart}`).font = { bold: true };
 
-        worksheet.getCell(`G${rowStart}`).value = 'DIM C';
+        worksheet.getCell(`G${rowStart}`).value = group.dimensions["DIM C"];
         worksheet.getCell(`G${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
-        worksheet.getCell(`G${rowStart}`).font = { bold: true };
-
-        worksheet.getCell(`H${rowStart}`).value = group.dimensions["DIM C"];
-        worksheet.getCell(`H${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
 
         worksheet.getCell(`B${rowStart + 1}`).value = 'ANTALL';
         worksheet.getCell(`B${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
         worksheet.getCell(`B${rowStart + 1}`).font = { bold: true };
 
-        worksheet.getCell(`D${rowStart + 1}`).value = group.antall;
+        worksheet.getCell(`C${rowStart + 1}`).value = group.antall;
+        worksheet.getCell(`C${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+        worksheet.getCell(`D${rowStart + 1}`).value = 'DIM B';
         worksheet.getCell(`D${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell(`D${rowStart + 1}`).font = { bold: true };
 
-        worksheet.getCell(`E${rowStart + 1}`).value = 'DIM B';
+        worksheet.getCell(`E${rowStart + 1}`).value = group.dimensions["DIM B"];
         worksheet.getCell(`E${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
-        worksheet.getCell(`E${rowStart + 1}`).font = { bold: true };
 
-        worksheet.getCell(`F${rowStart + 1}`).value = group.dimensions["DIM B"];
+        worksheet.getCell(`F${rowStart + 1}`).value = 'DIM D';
         worksheet.getCell(`F${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell(`F${rowStart + 1}`).font = { bold: true };
 
-        worksheet.getCell(`G${rowStart + 1}`).value = 'DIM D';
+        worksheet.getCell(`G${rowStart + 1}`).value = group.dimensions["DIM D"];
         worksheet.getCell(`G${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
-        worksheet.getCell(`G${rowStart + 1}`).font = { bold: true };
-
-        worksheet.getCell(`H${rowStart + 1}`).value = group.dimensions["DIM D"];
-        worksheet.getCell(`H${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
 
         // Add QR code
         if (qrCodeDataUrl) {
@@ -319,20 +317,29 @@ function App() {
             extension: 'png',
           });
           worksheet.addImage(imageId, {
-            tl: { col: 8, row: rowStart - 1 },
+            tl: { col: 8.5, row: rowStart + 1 }, // Centering the QR code
             ext: { width: 90, height: 90 },
           });
         }
 
         // Add border to the cells to mimic card style
-        for (let r = rowStart; r <= rowStart + 3; r++) {
+        for (let r = rowStart; r <= rowStart + 4; r++) {
           for (let c = 1; c <= 9; c++) {
-            worksheet.getCell(r, c).border = {
-              top: { style: 'medium' },
-              left: { style: 'medium' },
-              bottom: { style: 'medium' },
-              right: { style: 'medium' },
-            };
+            if (r === rowStart || r === rowStart + 4 || c === 1 || c === 9) {
+              worksheet.getCell(r, c).border = {
+                top: { style: 'medium' },
+                left: { style: 'medium' },
+                bottom: { style: 'medium' },
+                right: { style: 'medium' },
+              };
+            } else {
+              worksheet.getCell(r, c).border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' },
+              };
+            }
           }
         }
     }));

@@ -317,7 +317,7 @@ function App() {
             extension: 'png',
           });
           worksheet.addImage(imageId, {
-            tl: { col: 8.5, row: rowStart + 1 }, // Centering the QR code
+            tl: { col: 8.5 + 0.3, row: rowStart + 1 - 0.5 }, // Move 30 px to the right and 30 px up
             ext: { width: 90, height: 90 },
           });
         }

@@ -248,7 +248,7 @@ function App() {
     ];
 
     await Promise.all(groupedData.map(async (group, index) => {
-        const rowStart = index * 5 + 2;
+        const rowStart = index * 6 + 2; // Adjusted for merging 3 more rows
         const view = views.find(v => v.name === group.value);
         const viewId = view ? view.id : null;
         const projId = projectId || null;
@@ -260,10 +260,10 @@ function App() {
         }
 
         // Merge cells for the design
-        worksheet.mergeCells(`A${rowStart}:A${rowStart + 2}`);
+        worksheet.mergeCells(`A${rowStart}:A${rowStart + 3}`);
         worksheet.mergeCells(`B${rowStart}:C${rowStart}`);
         worksheet.mergeCells(`B${rowStart + 1}:C${rowStart + 1}`);
-        worksheet.mergeCells(`I${rowStart}:J${rowStart + 2}`);
+        worksheet.mergeCells(`I${rowStart}:J${rowStart + 3}`);
 
         // Set values and styles
         worksheet.getCell(`A${rowStart}`).value = group.value;
@@ -325,13 +325,13 @@ function App() {
         }
 
         // Add border to the cells to mimic card style
-        for (let r = rowStart; r <= rowStart + 2; r++) {
+        for (let r = rowStart; r <= rowStart + 3; r++) {
           for (let c = 1; c <= 9; c++) {
             worksheet.getCell(r, c).border = {
-              top: { style: 'thin' },
-              left: { style: 'thin' },
-              bottom: { style: 'thin' },
-              right: { style: 'thin' },
+              top: { style: 'medium' },
+              left: { style: 'medium' },
+              bottom: { style: 'medium' },
+              right: { style: 'medium' },
             };
           }
         }

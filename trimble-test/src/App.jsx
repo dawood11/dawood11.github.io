@@ -310,6 +310,11 @@ function App() {
         worksheet.getCell(`G${rowStart + 1}`).value = group.dimensions["DIM D"];
         worksheet.getCell(`G${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
 
+        // Add reference text in the merged cell
+        const qrCell = worksheet.getCell(`I${rowStart}`);
+        qrCell.value = "QR Code here";
+        qrCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        
         // Add QR code
         if (qrCodeDataUrl) {
           const imageId = workbook.addImage({
@@ -317,7 +322,7 @@ function App() {
             extension: 'png',
           });
           worksheet.addImage(imageId, {
-            tl: { col: 8.5 - 0.85, row: rowStart + 1 + 0.35 }, // Move 17 px to the left (0.85 cells) and 7 px down (0.35 cells)
+            tl: { col: 8.5 - 0.85, row: rowStart + 0.35 }, // Adjusted to move the QR code
             ext: { width: 90, height: 90 },
           });
         }

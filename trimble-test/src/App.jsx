@@ -1,7 +1,6 @@
 import * as Extensions from "trimble-connect-workspace-api";
 import { useState, useCallback } from "react";
 import './index.css'; // Import the CSS file
-import * as XLSX from 'xlsx'; // Import the xlsx library
 import { saveAs } from 'file-saver'; // Import the file-saver library
 import QRCode from 'qrcode'; // Import the qrcode library
 import ExcelJS from 'exceljs'; // Import the exceljs library
@@ -224,7 +223,7 @@ function App() {
     const worksheet = workbook.addWorksheet('Attribute Data');
 
     worksheet.columns = [
-      { header: 'POS.NR', key: 'posNr', width: 10 },
+      { header: 'POS.NR', key: 'posNr', width: 15 },
       { header: 'Antall', key: 'antall', width: 10 },
       { header: 'Diameter', key: 'diameter', width: 10 },
       { header: 'DIM A', key: 'dimA', width: 10 },
@@ -232,8 +231,14 @@ function App() {
       { header: 'DIM C', key: 'dimC', width: 10 },
       { header: 'DIM R', key: 'dimR', width: 10 },
       { header: 'View URL', key: 'viewUrl', width: 30 },
-      { header: 'QR Code', key: 'qrCode', width: 30 },
+      { header: 'QR Code', key: 'qrCode', width: 15 },
     ];
+
+    // Style headers
+    worksheet.getRow(1).eachCell((cell) => {
+      cell.font = { bold: true };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    });
 
     await Promise.all(groupedData.map(async (group) => {
       const view = views.find(v => v.name === group.value);
@@ -246,7 +251,7 @@ function App() {
         qrCodeDataUrl = await QRCode.toDataURL(viewUrl);
       }
 
-      worksheet.addRow({
+      const row = worksheet.addRow({
         posNr: group.value,
         antall: group.antall,
         diameter: group.dimensions.Diameter,
@@ -257,20 +262,26 @@ function App() {
         viewUrl: viewUrl,
         qrCode: qrCodeDataUrl,
       });
-    }));
 
-    worksheet.eachRow((row, rowNumber) => {
-      if (rowNumber > 1) {
-        const qrCodeDataUrl = row.getCell('qrCode').value;
-        if (qrCodeDataUrl) {
-          const imageId = workbook.addImage({
-            base64: qrCodeDataUrl,
-            extension: 'png',
-          });
-          worksheet.addImage(imageId, `I${rowNumber}:I${rowNumber}`);
-        }
+      // Center align all cells
+      row.eachCell((cell) => {
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      });
+
+      // Set row height
+      row.height = 100;
+
+      if (qrCodeDataUrl) {
+        const imageId = workbook.addImage({
+          base64: qrCodeDataUrl.replace(/^data:image\/png;base64,/, ""),
+          extension: 'png',
+        });
+        worksheet.addImage(imageId, {
+          tl: { col: 8, row: row.number - 1 },
+          ext: { width: 90, height: 90 },
+        });
       }
-    });
+    }));
 
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/octet-stream' });
@@ -347,7 +358,7 @@ function App() {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Beta 1.3</p>
+          <p>Beta 1.4</p>
         </footer>
       </div>
     </>

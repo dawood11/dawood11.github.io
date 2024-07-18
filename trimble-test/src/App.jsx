@@ -253,10 +253,10 @@ function App() {
         const viewId = view ? view.id : null;
         const projId = projectId || null;
         const viewUrl = projId && viewId ? `https://web.connect.trimble.com/projects/${projId}/viewer/3d?viewId=${viewId}&region=europe` : null;
-        let qrCodeDataUrl = null;
+        let qrCodeUrl = null;
 
         if (viewUrl) {
-          qrCodeDataUrl = await QRCode.toDataURL(viewUrl);
+          qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(viewUrl)}&size=90x90`;
         }
 
         // Merge cells for the design
@@ -310,21 +310,14 @@ function App() {
         worksheet.getCell(`G${rowStart + 1}`).value = group.dimensions["DIM D"];
         worksheet.getCell(`G${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
 
-        // Add reference text in the merged cell
-        const qrCell = worksheet.getCell(`I${rowStart}`);
-        qrCell.value = "QR Code here";
-        qrCell.alignment = { vertical: 'middle', horizontal: 'center' };
-        
-        // Add QR code
-        if (qrCodeDataUrl) {
-          const imageId = workbook.addImage({
-            base64: qrCodeDataUrl.replace(/^data:image\/png;base64,/, ""),
-            extension: 'png',
-          });
-          worksheet.addImage(imageId, {
-            tl: { col: 8.5 - 0.85, row: rowStart + 0.35 }, // Adjusted to move the QR code
-            ext: { width: 90, height: 90 },
-          });
+        // Use the IMAGE function to insert the QR code
+        if (qrCodeUrl) {
+          worksheet.getCell(`I${rowStart}`).value = {
+            formula: `=IMAGE("${qrCodeUrl}", "QR Code", 4, 90, 90)`
+          };
+          worksheet.getCell(`I${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
+        } else {
+          worksheet.getCell(`I${rowStart}`).value = "";
         }
 
         // Add border to the cells to mimic card style

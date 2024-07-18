@@ -3,6 +3,7 @@ import { useState, useCallback } from "react";
 import './index.css'; // Import the CSS file
 import * as XLSX from 'xlsx'; // Import the xlsx library
 import { saveAs } from 'file-saver'; // Import the file-saver library
+import QRCode from 'qrcode'; // Import the qrcode library
 
 function App() {
   const [attributeData, setAttributeData] = useState([]);
@@ -216,12 +217,18 @@ function App() {
     return Object.values(groupedData);
   }, [attributeData]);
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     const groupedData = groupAttributeData();
-    const worksheetData = groupedData.map(group => {
+    const worksheetData = await Promise.all(groupedData.map(async group => {
       const view = views.find(v => v.name === group.value);
-      const viewId = view ? view.id : "--";
-      const projId = projectId || "--";
+      const viewId = view ? view.id : null;
+      const projId = projectId || null;
+      const viewUrl = projId && viewId ? `https://web.connect.trimble.com/projects/${projId}/viewer/3d?viewId=${viewId}&region=europe` : null;
+      let qrCodeDataUrl = null;
+
+      if (viewUrl) {
+        qrCodeDataUrl = await QRCode.toDataURL(viewUrl);
+      }
 
       return {
         "POS.NR": group.value,
@@ -231,13 +238,40 @@ function App() {
         "DIM B": group.dimensions["DIM B"],
         "DIM C": group.dimensions["DIM C"],
         "DIM R": group.dimensions["DIM R"],
-        "View URL": projId && viewId ? `https://web.connect.trimble.com/projects/${projId}/viewer/3d?viewId=${viewId}&region=europe` : "--"
+        "View URL": viewUrl,
+        "QR Code": qrCodeDataUrl
       };
-    });
+    }));
 
-    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData.map(({ "POS.NR": posNr, "Antall": antall, Diameter, "DIM A": dimA, "DIM B": dimB, "DIM C": dimC, "DIM R": dimR, "View URL": viewUrl }) => ({
+      "POS.NR": posNr,
+      "Antall": antall,
+      Diameter,
+      "DIM A": dimA,
+      "DIM B": dimB,
+      "DIM C": dimC,
+      "DIM R": dimR,
+      "View URL": viewUrl
+    })));
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Attribute Data");
+
+    worksheetData.forEach((row, index) => {
+      if (row["QR Code"]) {
+        const imageCell = `H${index + 2}`;
+        const imageId = XLSX.utils.book_append_image(workbook, {
+          image: row["QR Code"],
+          type: 'dataURL',
+          ext: '.png',
+        });
+
+        worksheet[imageCell] = {
+          t: 'z',
+          l: { Target: imageId }
+        };
+      }
+    });
 
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
     const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
@@ -314,7 +348,7 @@ function App() {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Beta 1.1</p>
+          <p>Beta 1.2</p>
         </footer>
       </div>
     </>

@@ -233,64 +233,115 @@ function App() {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Attribute Data');
 
+    // Set column widths
     worksheet.columns = [
-      { header: 'POS.NR', key: 'posNr', width: 15 },
-      { header: 'Antall', key: 'antall', width: 10 },
-      { header: 'Diameter', key: 'diameter', width: 10 },
-      { header: 'DIM A', key: 'dimA', width: 10 },
-      { header: 'DIM B', key: 'dimB', width: 10 },
-      { header: 'DIM C', key: 'dimC', width: 10 },
-      { header: 'DIM R', key: 'dimR', width: 10 },
-      { header: 'View URL', key: 'viewUrl', width: 30 },
-      { header: 'QR Code', key: 'qrCode', width: 15 },
+      { width: 15 }, // A
+      { width: 15 }, // B
+      { width: 15 }, // C
+      { width: 15 }, // D
+      { width: 15 }, // E
+      { width: 15 }, // F
+      { width: 15 }, // G
+      { width: 15 }, // H
+      { width: 15 }, // I
+      { width: 15 }, // J
     ];
 
-    // Style headers
-    worksheet.getRow(1).eachCell((cell) => {
-      cell.font = { bold: true };
-      cell.alignment = { vertical: 'middle', horizontal: 'center' };
-    });
+    await Promise.all(groupedData.map(async (group, index) => {
+        const rowStart = index * 5 + 2;
+        const view = views.find(v => v.name === group.value);
+        const viewId = view ? view.id : null;
+        const projId = projectId || null;
+        const viewUrl = projId && viewId ? `https://web.connect.trimble.com/projects/${projId}/viewer/3d?viewId=${viewId}&region=europe` : null;
+        let qrCodeDataUrl = null;
 
-    await Promise.all(groupedData.map(async (group) => {
-      const view = views.find(v => v.name === group.value);
-      const viewId = view ? view.id : null;
-      const projId = projectId || null;
-      const viewUrl = projId && viewId ? `https://web.connect.trimble.com/projects/${projId}/viewer/3d?viewId=${viewId}&region=europe` : null;
-      let qrCodeDataUrl = null;
+        if (viewUrl) {
+          qrCodeDataUrl = await QRCode.toDataURL(viewUrl);
+        }
 
-      if (viewUrl) {
-        qrCodeDataUrl = await QRCode.toDataURL(viewUrl);
-      }
+        // Merge cells for the design
+        worksheet.mergeCells(`A${rowStart}:A${rowStart + 1}`);
+        worksheet.mergeCells(`B${rowStart}:C${rowStart}`);
+        worksheet.mergeCells(`B${rowStart + 1}:C${rowStart + 1}`);
+        worksheet.mergeCells(`D${rowStart}:E${rowStart}`);
+        worksheet.mergeCells(`D${rowStart + 1}:E${rowStart + 1}`);
+        worksheet.mergeCells(`F${rowStart}:F${rowStart + 1}`);
+        worksheet.mergeCells(`G${rowStart}:G${rowStart + 1}`);
+        worksheet.mergeCells(`H${rowStart}:H${rowStart + 1}`);
+        worksheet.mergeCells(`I${rowStart}:I${rowStart + 2}`);
 
-      const row = worksheet.addRow({
-        posNr: group.value,
-        antall: group.antall,
-        diameter: group.dimensions.Diameter,
-        dimA: group.dimensions["DIM A"],
-        dimB: group.dimensions["DIM B"],
-        dimC: group.dimensions["DIM C"],
-        dimR: group.dimensions["DIM R"],
-        viewUrl: viewUrl,
-      });
+        // Set values and styles
+        worksheet.getCell(`A${rowStart}`).value = group.value;
+        worksheet.getCell(`A${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell(`A${rowStart}`).font = { size: 14, bold: true };
 
-      // Center align all cells
-      row.eachCell((cell) => {
-        cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      });
+        worksheet.getCell(`B${rowStart}`).value = 'DIAMETER';
+        worksheet.getCell(`B${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell(`B${rowStart}`).font = { bold: true };
 
-      // Set row height
-      row.height = 100;
+        worksheet.getCell(`D${rowStart}`).value = group.dimensions["DIM A"];
+        worksheet.getCell(`D${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
 
-      if (qrCodeDataUrl) {
-        const imageId = workbook.addImage({
-          base64: qrCodeDataUrl.replace(/^data:image\/png;base64,/, ""),
-          extension: 'png',
-        });
-        worksheet.addImage(imageId, {
-          tl: { col: 8, row: row.number - 1 },
-          ext: { width: 90, height: 90 },
-        });
-      }
+        worksheet.getCell(`F${rowStart}`).value = group.dimensions["DIM C"];
+        worksheet.getCell(`F${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+        worksheet.getCell(`H${rowStart}`).value = 'DIM C';
+        worksheet.getCell(`H${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+        worksheet.getCell(`B${rowStart + 1}`).value = 'ANTALL';
+        worksheet.getCell(`B${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell(`B${rowStart + 1}`).font = { bold: true };
+
+        worksheet.getCell(`D${rowStart + 1}`).value = group.dimensions["DIM B"];
+        worksheet.getCell(`D${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+        worksheet.getCell(`F${rowStart + 1}`).value = group.dimensions["DIM D"];
+        worksheet.getCell(`F${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+        worksheet.getCell(`H${rowStart + 1}`).value = 'DIM D';
+        worksheet.getCell(`H${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+        worksheet.getCell(`G${rowStart}`).value = group.dimensions.Diameter;
+        worksheet.getCell(`G${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+        worksheet.getCell(`H${rowStart}`).value = group.dimensions["DIM A"];
+        worksheet.getCell(`H${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+        worksheet.getCell(`I${rowStart}`).value = group.dimensions["DIM C"];
+        worksheet.getCell(`I${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+        worksheet.getCell(`G${rowStart + 1}`).value = group.dimensions["DIM B"];
+        worksheet.getCell(`G${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+        worksheet.getCell(`H${rowStart + 1}`).value = group.dimensions["DIM D"];
+        worksheet.getCell(`H${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+        worksheet.getCell(`I${rowStart + 1}`).value = group.dimensions["DIM R"];
+        worksheet.getCell(`I${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+        // Add QR code
+        if (qrCodeDataUrl) {
+          const imageId = workbook.addImage({
+            base64: qrCodeDataUrl.replace(/^data:image\/png;base64,/, ""),
+            extension: 'png',
+          });
+          worksheet.addImage(imageId, {
+            tl: { col: 8, row: rowStart - 1 },
+            ext: { width: 90, height: 90 },
+          });
+        }
+
+        // Add border to the cells to mimic card style
+        for (let r = rowStart; r <= rowStart + 1; r++) {
+          for (let c = 1; c <= 9; c++) {
+            worksheet.getCell(r, c).border = {
+              top: { style: 'thin' },
+              left: { style: 'thin' },
+              bottom: { style: 'thin' },
+              right: { style: 'thin' },
+            };
+          }
+        }
     }));
 
     const buffer = await workbook.xlsx.writeBuffer();

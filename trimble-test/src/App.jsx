@@ -354,19 +354,45 @@ function App() {
 
   const renderGroupedAttributeObjects = () => {
     const groupedData = groupAttributeData();
+    const selectedData = groupedData.filter(group => selectedGroups[group.value]);
+    const nonSelectedData = groupedData.filter(group => !selectedGroups[group.value]);
 
     return (
       <div className="attribute-cards">
-        {groupedData.map(group => (
+        <h2>Selected Attributes</h2>
+        {selectedData.map(group => (
           <div 
             key={group.value} 
-            className={`attribute-card ${selectedGroups[group.value] ? 'selected' : ''}`}
+            className={`attribute-card selected`}
             onClick={() => handleGroupClick(group.value)}
           >
             <strong>{group.value}</strong><br />
             Antall: {group.antall}
           </div>
         ))}
+        <hr />
+        <h2>Available Attributes</h2>
+        {nonSelectedData.map(group => (
+          <div 
+            key={group.value} 
+            className={`attribute-card`}
+            onClick={() => handleGroupClick(group.value)}
+          >
+            <strong>{group.value}</strong><br />
+            Antall: {group.antall}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderTotalSelected = () => {
+    const groupedData = groupAttributeData();
+    const totalSelected = groupedData.filter(group => selectedGroups[group.value]).length;
+
+    return (
+      <div className="total-selected">
+        <strong>Total Selected: {totalSelected}</strong>
       </div>
     );
   };
@@ -412,6 +438,7 @@ function App() {
               className="input-field"
             />
           </div>
+          {renderTotalSelected()}
           <div className="buttons">
             <button onClick={fitToView}>Fokuser</button>
           </div>

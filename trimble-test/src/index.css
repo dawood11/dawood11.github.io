@@ -173,7 +173,7 @@ button:focus-visible {
 
 .separator {
   border: none;
-  border-top: 1px solid #d3d3d3;
+  border-top: 2px solid #d3d3d3;
   margin: 10px 0;
 }
 

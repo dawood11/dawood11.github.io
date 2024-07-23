@@ -359,7 +359,6 @@ function App() {
 
     return (
       <div className="attribute-cards">
-        {selectedData.length > 0 && <hr className="separator" />}
         {selectedData.map(group => (
           <div 
             key={group.value} 
@@ -370,6 +369,7 @@ function App() {
             Antall: {group.antall}
           </div>
         ))}
+        {selectedData.length > 0 && <hr className="separator" />}
         {nonSelectedData.map(group => (
           <div 
             key={group.value} 

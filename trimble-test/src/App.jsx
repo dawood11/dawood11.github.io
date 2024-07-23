@@ -413,7 +413,7 @@ function App() {
             />
           </div>
           <div className="buttons">
-            <button onClick={fitToView}>Fit to View</button>
+            <button onClick={fitToView}>Fokuser</button>
           </div>
           {renderGroupedAttributeObjects()}
         </main>

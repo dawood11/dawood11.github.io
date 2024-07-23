@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import * as Extensions from 'trimble-connect-workspace-api';
-import './index.css'; // Import the CSS file
-import { saveAs } from 'file-saver'; // Import the file-saver library
-import QRCode from 'qrcode'; // Import the qrcode library
-import ExcelJS from 'exceljs'; // Import the exceljs library
+import './index.css';
+import { saveAs } from 'file-saver';
+import QRCode from 'qrcode';
+import ExcelJS from 'exceljs';
 
 function App() {
   const [attributeData, setAttributeData] = useState([]);
@@ -16,117 +16,140 @@ function App() {
   const [modelName, setModelName] = useState('Model');
 
   useEffect(() => {
+    console.log('App component mounted');
     setPsetName(localStorage.getItem('psetName') || 'Example: AndfjordSalmon');
     setAttribute(localStorage.getItem('attribute') || 'Example: A22 MMI');
   }, []);
 
   const dotConnect = async () => {
-    return await Extensions.connect(
-      window.parent,
-      (event) => {
-        switch (event) {
-          case 'extension.command':
-          case 'extension.accessToken':
-          case 'extension.userSettingsChanged':
-            break;
-          default:
-        }
-      },
-      30000
-    );
+    try {
+      return await Extensions.connect(
+        window.parent,
+        (event) => {
+          switch (event) {
+            case 'extension.command':
+            case 'extension.accessToken':
+            case 'extension.userSettingsChanged':
+              break;
+            default:
+          }
+        },
+        30000
+      );
+    } catch (error) {
+      console.error('Error connecting to Trimble Connect API:', error);
+      alert('Failed to connect to Trimble Connect API. Please check your permissions and try again.');
+    }
   };
 
   const getProjectId = async () => {
-    const api = await dotConnect();
-    const project = await api.project.getProject();
-    setProjectId(project.id);
-    return project.id;
+    try {
+      const api = await dotConnect();
+      const project = await api.project.getProject();
+      setProjectId(project.id);
+      return project.id;
+    } catch (error) {
+      console.error('Error fetching project ID:', error);
+    }
   };
 
   const getModelName = async () => {
-    const api = await dotConnect();
-    const viewer = api.viewer;
-    const models = await viewer.getModels();
-    if (models.length > 0) {
-      setModelName(models[0].name);
+    try {
+      const api = await dotConnect();
+      const viewer = api.viewer;
+      const models = await viewer.getModels();
+      if (models.length > 0) {
+        setModelName(models[0].name);
+      }
+    } catch (error) {
+      console.error('Error fetching model name:', error);
     }
   };
 
   const getViews = async () => {
-    const api = await dotConnect();
-    const viewApi = api.view;
-    const allViews = await viewApi.getViews();
-    setViews(allViews);
+    try {
+      const api = await dotConnect();
+      const viewApi = api.view;
+      const allViews = await viewApi.getViews();
+      setViews(allViews);
+    } catch (error) {
+      console.error('Error fetching views:', error);
+    }
   };
 
   const getAttributeDataFromTrimble = async () => {
     const dimensionAttributes = ['Diameter', 'DIM A', 'DIM B', 'DIM C', 'DIM R'];
 
     console.log('GET ATTRIBUTE DATA');
-    const api = await dotConnect();
-    await getProjectId();
-    await getModelName();
-    await getViews();
+    try {
+      const api = await dotConnect();
+      await getProjectId();
+      await getModelName();
+      await getViews();
 
-    const viewerObjects = await api.viewer.getObjects();
-    console.log('viewerObjects: ', viewerObjects);
+      const viewerObjects = await api.viewer.getObjects();
+      console.log('viewerObjects: ', viewerObjects);
 
-    const attributeObjects = [];
-    const batchSize = 1000;
+      const attributeObjects = [];
+      const batchSize = 1000;
 
-    for (const modelObjectsSet of viewerObjects) {
-      const modelId = modelObjectsSet['modelId'];
-      let modelObjectIdsList = modelObjectsSet['objects'].map((obj) => obj.id);
-      console.log('Fetching properties for model ID:', modelId);
+      for (const modelObjectsSet of viewerObjects) {
+        const modelId = modelObjectsSet['modelId'];
+        let modelObjectIdsList = modelObjectsSet['objects'].map((obj) => obj.id);
+        console.log('Fetching properties for model ID:', modelId);
 
-      for (let i = 0; i < modelObjectIdsList.length; i += batchSize) {
-        const batch = modelObjectIdsList.slice(i, i + batchSize);
-        const properties = await api.viewer.getObjectProperties(modelId, batch);
-        console.log('Fetched properties:', properties);
+        for (let i = 0; i < modelObjectIdsList.length; i += batchSize) {
+          const batch = modelObjectIdsList.slice(i, i + batchSize);
+          const properties = await api.viewer.getObjectProperties(modelId, batch);
+          console.log('Fetched properties:', properties);
 
-        properties.forEach((propertySet) => {
-          if (propertySet.properties) {
-            let primaryAttribute = null;
-            let dimensions = {
-              Diameter: '--',
-              'DIM A': '--',
-              'DIM B': '--',
-              'DIM C': '--',
-              'DIM R': '--',
-            };
+          properties.forEach((propertySet) => {
+            if (propertySet.properties) {
+              let primaryAttribute = null;
+              let dimensions = {
+                Diameter: '--',
+                'DIM A': '--',
+                'DIM B': '--',
+                'DIM C': '--',
+                'DIM R': '--',
+              };
 
-            propertySet.properties.forEach((prop) => {
-              if (prop.name === psetName.replace('Example: ', '')) {
-                prop.properties.forEach((subProp) => {
-                  if (subProp.name === attribute.replace('Example: ', '')) {
-                    primaryAttribute = {
-                      modelId,
-                      id: propertySet.id,
-                      class: propertySet.class,
-                      name: subProp.name,
-                      value: subProp.value,
-                    };
-                  }
-
-                  dimensionAttributes.forEach((dimAttr) => {
-                    if (subProp.name.includes(dimAttr)) {
-                      dimensions[dimAttr] = subProp.value;
+              propertySet.properties.forEach((prop) => {
+                if (prop.name === psetName.replace('Example: ', '')) {
+                  prop.properties.forEach((subProp) => {
+                    if (subProp.name === attribute.replace('Example: ', '')) {
+                      primaryAttribute = {
+                        modelId,
+                        id: propertySet.id,
+                        class: propertySet.class,
+                        name: subProp.name,
+                        value: subProp.value,
+                      };
                     }
+
+                    dimensionAttributes.forEach((dimAttr) => {
+                      if (subProp.name.includes(dimAttr)) {
+                        dimensions[dimAttr] = subProp.value;
+                      }
+                    });
                   });
-                });
+                }
+              });
+
+              if (primaryAttribute) {
+                attributeObjects.push({ ...primaryAttribute, dimensions });
               }
-            });
-
-            if (primaryAttribute) {
-              attributeObjects.push({ ...primaryAttribute, dimensions });
             }
-          }
-        });
+          });
+        }
       }
-    }
 
-    setAttributeData(attributeObjects);
-    console.log('Attribute Objects: ', attributeObjects);
+      setAttributeData(attributeObjects);
+      console.log('Attribute Objects: ', attributeObjects);
+    } catch (error) {
+      console.error('Error fetching attribute data:', error);
+      alert('Failed to fetch attribute data. Please try again.');
+    }
   };
 
   const handleGroupClick = async (value) => {
@@ -241,21 +264,21 @@ function App() {
 
     // Set column widths
     worksheet.columns = [
-      { width: 20 }, // A
-      { width: 15 }, // B
-      { width: 15 }, // C
-      { width: 15 }, // D
-      { width: 15 }, // E
-      { width: 15 }, // F
-      { width: 15 }, // G
-      { width: 15 }, // H
-      { width: 15 }, // I
-      { width: 15 }, // J
+      { width: 20 },
+      { width: 15 },
+      { width: 15 },
+      { width: 15 },
+      { width: 15 },
+      { width: 15 },
+      { width: 15 },
+      { width: 15 },
+      { width: 15 },
+      { width: 15 },
     ];
 
     await Promise.all(
       groupedData.map(async (group, index) => {
-        const rowStart = index * 10 + 2; // Adjusted for 4 rows spacing between cards
+        const rowStart = index * 10 + 2;
         const view = views.find((v) => v.name === group.value);
         const viewId = view ? view.id : null;
         const projId = projectId || null;
@@ -324,7 +347,7 @@ function App() {
             extension: 'png',
           });
           worksheet.addImage(imageId, {
-            tl: { col: 8.5 + 0.5, row: rowStart - 1 + 0.35 }, // Move half a cell to the right (0.5 cells) and one cell up (-1 row)
+            tl: { col: 8.5 + 0.5, row: rowStart - 1 + 0.35 },
             ext: { width: 90, height: 90 },
           });
         }
@@ -332,9 +355,7 @@ function App() {
         // Add border to the cells to mimic card style
         for (let r = rowStart; r <= rowStart + 4; r++) {
           for (let c = 1; c <= 10; c++) {
-            // Adjusted to cover column I and J
             if (r === rowStart || r === rowStart + 4 || c === 1 || c === 10) {
-              // Adjusted to cover column I and J
               worksheet.getCell(r, c).border = {
                 top: { style: 'medium' },
                 left: { style: 'medium' },

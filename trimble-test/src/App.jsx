@@ -355,14 +355,25 @@ function App() {
   const renderGroupedAttributeObjects = () => {
     const groupedData = groupAttributeData();
     const selectedData = groupedData.filter(group => selectedGroups[group.value]);
+    const nonSelectedData = groupedData.filter(group => !selectedGroups[group.value]);
 
     return (
       <div className="attribute-cards">
-        {selectedData.length > 0 && <hr />}
-        {groupedData.sort((a, b) => selectedGroups[b.value] - selectedGroups[a.value]).map(group => (
+        {selectedData.length > 0 && <hr className="separator" />}
+        {selectedData.map(group => (
           <div 
             key={group.value} 
-            className={`attribute-card ${selectedGroups[group.value] ? 'selected' : ''}`}
+            className={`attribute-card selected`}
+            onClick={() => handleGroupClick(group.value)}
+          >
+            <strong>{group.value}</strong><br />
+            Antall: {group.antall}
+          </div>
+        ))}
+        {nonSelectedData.map(group => (
+          <div 
+            key={group.value} 
+            className={`attribute-card`}
             onClick={() => handleGroupClick(group.value)}
           >
             <strong>{group.value}</strong><br />

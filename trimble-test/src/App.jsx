@@ -1,5 +1,5 @@
 import * as Extensions from "trimble-connect-workspace-api";
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import './index.css'; // Import the CSS file
 import { saveAs } from 'file-saver'; // Import the file-saver library
 import QRCode from 'qrcode'; // Import the qrcode library
@@ -14,7 +14,7 @@ function App() {
   const [projectId, setProjectId] = useState(null);
   const [modelName, setModelName] = useState("Model");
 
-  const dotConnect = useCallback(async () => {
+  const dotConnect = async () => {
     return await Extensions.connect(
       window.parent,
       (event) => {
@@ -28,32 +28,32 @@ function App() {
       },
       30000
     );
-  }, []);
+  };
 
-  const getProjectId = useCallback(async () => {
+  const getProjectId = async () => {
     const api = await dotConnect();
     const project = await api.project.getProject();
     setProjectId(project.id);
     return project.id;
-  }, [dotConnect]);
+  };
 
-  const getModelName = useCallback(async () => {
+  const getModelName = async () => {
     const api = await dotConnect();
     const viewer = api.viewer;
     const models = await viewer.getModels();
     if (models.length > 0) {
       setModelName(models[0].name);
     }
-  }, [dotConnect]);
+  };
 
-  const getViews = useCallback(async () => {
+  const getViews = async () => {
     const api = await dotConnect();
     const viewApi = api.view;
     const allViews = await viewApi.getViews();
     setViews(allViews);
-  }, [dotConnect]);
+  };
 
-  const getAttributeDataFromTrimble = useCallback(async () => {
+  const getAttributeDataFromTrimble = async () => {
     const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
 
     console.log("GET ATTRIBUTE DATA");
@@ -121,9 +121,9 @@ function App() {
 
     setAttributeData(attributeObjects);
     console.log("Attribute Objects: ", attributeObjects);
-  }, [dotConnect, psetName, attribute, getProjectId, getModelName, getViews]);
+  };
 
-  const handleGroupClick = useCallback(async (value) => {
+  const handleGroupClick = async (value) => {
     const api = await dotConnect();
     setSelectedGroups((prevSelectedGroups) => {
       const updatedGroups = { ...prevSelectedGroups };
@@ -141,7 +141,7 @@ function App() {
     } else {
       await selectObjects(api, selectedData);
     }
-  }, [attributeData, dotConnect, selectedGroups]);
+  };
 
   const selectObjects = async (api, objects) => {
     const modelEntities = objects.map(obj => ({
@@ -169,7 +169,7 @@ function App() {
     console.log(`Objects deselected.`);
   };
 
-  const createView = useCallback(async () => {
+  const createView = async () => {
     const api = await dotConnect();
     const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
 
@@ -194,9 +194,9 @@ function App() {
 
     await api.view.setView(viewSpec.id);
     console.log(`View set as active.`);
-  }, [attributeData, selectedGroups, dotConnect]);
+  };
 
-  const fitToView = useCallback(async () => {
+  const fitToView = async () => {
     const api = await dotConnect();
     const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
 
@@ -212,9 +212,9 @@ function App() {
 
     await api.viewer.fitToView({ modelObjectIds: modelEntities });
     console.log(`View fitted to selected objects.`);
-  }, [attributeData, selectedGroups, dotConnect]);
+  };
 
-  const groupAttributeData = useCallback((data = attributeData) => {
+  const groupAttributeData = (data = attributeData) => {
     const groupedData = data.reduce((acc, obj) => {
       const { value } = obj;
       if (!acc[value]) {
@@ -226,7 +226,7 @@ function App() {
     }, {});
 
     return Object.values(groupedData);
-  }, [attributeData]);
+  };
 
   const exportToExcel = async () => {
     const groupedData = groupAttributeData();
@@ -352,7 +352,7 @@ function App() {
     console.log("Exported data to Excel");
   };
 
-  const renderGroupedAttributeObjects = useCallback(() => {
+  const renderGroupedAttributeObjects = () => {
     const groupedData = groupAttributeData();
 
     return (
@@ -369,7 +369,7 @@ function App() {
         ))}
       </div>
     );
-  }, [groupAttributeData, selectedGroups, handleGroupClick]);
+  };
 
   return (
     <>

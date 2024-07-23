@@ -359,7 +359,7 @@ function App() {
     return (
       <div className="attribute-cards">
         {selectedData.length > 0 && <hr />}
-        {groupedData.map(group => (
+        {groupedData.sort((a, b) => selectedGroups[b.value] - selectedGroups[a.value]).map(group => (
           <div 
             key={group.value} 
             className={`attribute-card ${selectedGroups[group.value] ? 'selected' : ''}`}

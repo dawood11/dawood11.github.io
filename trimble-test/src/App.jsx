@@ -153,15 +153,9 @@ class App extends Component {
   selectObjects = async (api, objects) => {
     const modelEntities = objects.map(obj => ({
       modelId: obj.modelId,
-      objectRuntimeIds: [obj.id]
+      entityIds: [obj.id]
     }));
 
-    const objectSelector = {
-      modelObjectIds: modelEntities
-    };
-    await api.viewer.setSelection(objectSelector, "add");
-    console.log(`Objects selected.`);
-  
     // Show only the selected objects
     await api.viewer.isolateEntities(modelEntities);
     console.log(`Isolated selected objects.`);

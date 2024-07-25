@@ -213,11 +213,6 @@ class App extends Component {
   ghostMode = async () => {
     try {
       const api = await this.dotConnect();
-      if (!api.viewer.presentation || !api.viewer.presentation.ghost) {
-        console.error("Ghost mode is not available in the current API.");
-        return;
-      }
-      
       const selectedData = this.state.attributeData.filter(obj => this.state.selectedGroups[obj.value]);
 
       if (selectedData.length === 0) {
@@ -225,13 +220,29 @@ class App extends Component {
         return;
       }
 
-      const modelEntities = selectedData.map(obj => ({
-        modelId: obj.modelId,
-        objectRuntimeIds: [obj.id]
-      }));
+      const viewerObjects = await api.viewer.getObjects();
+      const selectedIds = selectedData.map(obj => obj.id);
+      const nonSelectedEntities = viewerObjects.reduce((acc, modelObjectsSet) => {
+        const modelId = modelObjectsSet.modelId;
+        const nonSelectedObjects = modelObjectsSet.objects.filter(obj => !selectedIds.includes(obj.id));
+        if (nonSelectedObjects.length > 0) {
+          acc.push({
+            modelId,
+            objectRuntimeIds: nonSelectedObjects.map(obj => obj.id),
+            ghost: true
+          });
+        }
+        return acc;
+      }, []);
 
-      await api.viewer.presentation.ghost(modelEntities);
-      console.log(`Applied ghost mode to selected objects.`);
+      console.log(`Applying ghost mode to non-selected objects: ${JSON.stringify(nonSelectedEntities)}`);
+
+      await api.viewer.isolateEntities(nonSelectedEntities);
+      console.log(`Applied ghost mode to non-selected objects.`);
+  
+      // Fit the view to the selected objects
+      await api.viewer.setCamera("reset");
+      console.log(`View reset to fit selected objects.`);
     } catch (error) {
       console.error("Error applying ghost mode:", error);
     }

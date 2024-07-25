@@ -1,20 +1,25 @@
-import * as Extensions from "trimble-connect-workspace-api";
-import { useState } from "react";
+import { Component } from 'react';
+import * as Extensions from 'trimble-connect-workspace-api';
 import './index.css'; // Import the CSS file
 import { saveAs } from 'file-saver'; // Import the file-saver library
 import QRCode from 'qrcode'; // Import the qrcode library
 import ExcelJS from 'exceljs'; // Import the exceljs library
 
-function App() {
-  const [attributeData, setAttributeData] = useState([]);
-  const [psetName, setPsetName] = useState("Example: AndfjordSalmon");
-  const [attribute, setAttribute] = useState("Example: A22 MMI");
-  const [selectedGroups, setSelectedGroups] = useState({});
-  const [views, setViews] = useState([]);
-  const [projectId, setProjectId] = useState(null);
-  const [modelName, setModelName] = useState("Model");
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      attributeData: [],
+      psetName: "Example: AndfjordSalmon",
+      attribute: "Example: A22 MMI",
+      selectedGroups: {},
+      views: [],
+      projectId: null,
+      modelName: "Model",
+    };
+  }
 
-  const dotConnect = async () => {
+  dotConnect = async () => {
     return await Extensions.connect(
       window.parent,
       (event) => {
@@ -30,37 +35,38 @@ function App() {
     );
   };
 
-  const getProjectId = async () => {
-    const api = await dotConnect();
+  getProjectId = async () => {
+    const api = await this.dotConnect();
     const project = await api.project.getProject();
-    setProjectId(project.id);
+    this.setState({ projectId: project.id });
     return project.id;
   };
 
-  const getModelName = async () => {
-    const api = await dotConnect();
+  getModelName = async () => {
+    const api = await this.dotConnect();
     const viewer = api.viewer;
     const models = await viewer.getModels();
     if (models.length > 0) {
-      setModelName(models[0].name);
+      this.setState({ modelName: models[0].name });
     }
   };
 
-  const getViews = async () => {
-    const api = await dotConnect();
+  getViews = async () => {
+    const api = await this.dotConnect();
     const viewApi = api.view;
     const allViews = await viewApi.getViews();
-    setViews(allViews);
+    this.setState({ views: allViews });
   };
 
-  const getAttributeDataFromTrimble = async () => {
+  getAttributeDataFromTrimble = async () => {
+    const { psetName, attribute } = this.state;
     const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
 
     console.log("GET ATTRIBUTE DATA");
-    const api = await dotConnect();
-    await getProjectId();
-    await getModelName();
-    await getViews();
+    const api = await this.dotConnect();
+    await this.getProjectId();
+    await this.getModelName();
+    await this.getViews();
 
     const viewerObjects = await api.viewer.getObjects();
     console.log("viewerObjects: ", viewerObjects);
@@ -119,31 +125,32 @@ function App() {
       }
     }
 
-    setAttributeData(attributeObjects);
+    this.setState({ attributeData: attributeObjects });
     console.log("Attribute Objects: ", attributeObjects);
   };
 
-  const handleGroupClick = async (value) => {
-    const api = await dotConnect();
-    setSelectedGroups((prevSelectedGroups) => {
-      const updatedGroups = { ...prevSelectedGroups };
+  handleGroupClick = async (value) => {
+    const api = await this.dotConnect();
+    this.setState((prevState) => {
+      const updatedGroups = { ...prevState.selectedGroups };
       if (updatedGroups[value]) {
         delete updatedGroups[value];
       } else {
         updatedGroups[value] = true;
       }
-      return updatedGroups;
+
+      return { selectedGroups: updatedGroups };
     });
 
-    const selectedData = attributeData.filter(obj => obj.value === value);
-    if (selectedGroups[value]) {
-      await deselectObjects(api, selectedData);
+    const selectedData = this.state.attributeData.filter(obj => obj.value === value);
+    if (this.state.selectedGroups[value]) {
+      await this.deselectObjects(api, selectedData);
     } else {
-      await selectObjects(api, selectedData);
+      await this.selectObjects(api, selectedData);
     }
   };
 
-  const selectObjects = async (api, objects) => {
+  selectObjects = async (api, objects) => {
     const modelEntities = objects.map(obj => ({
       modelId: obj.modelId,
       objectRuntimeIds: [obj.id]
@@ -156,7 +163,7 @@ function App() {
     console.log(`Objects selected.`);
   };
 
-  const deselectObjects = async (api, objects) => {
+  deselectObjects = async (api, objects) => {
     const modelEntities = objects.map(obj => ({
       modelId: obj.modelId,
       objectRuntimeIds: [obj.id]
@@ -169,9 +176,9 @@ function App() {
     console.log(`Objects deselected.`);
   };
 
-  const createView = async () => {
-    const api = await dotConnect();
-    const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
+  createView = async () => {
+    const api = await this.dotConnect();
+    const selectedData = this.state.attributeData.filter(obj => this.state.selectedGroups[obj.value]);
 
     if (selectedData.length === 0) {
       console.log("No objects selected to create a view.");
@@ -196,9 +203,9 @@ function App() {
     console.log(`View set as active.`);
   };
 
-  const fitToView = async () => {
-    const api = await dotConnect();
-    const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
+  fitToView = async () => {
+    const api = await this.dotConnect();
+    const selectedData = this.state.attributeData.filter(obj => this.state.selectedGroups[obj.value]);
 
     if (selectedData.length === 0) {
       console.log("No objects selected to fit view.");
@@ -214,7 +221,7 @@ function App() {
     console.log(`View fitted to selected objects.`);
   };
 
-  const groupAttributeData = (data = attributeData) => {
+  groupAttributeData = (data = this.state.attributeData) => {
     const groupedData = data.reduce((acc, obj) => {
       const { value } = obj;
       if (!acc[value]) {
@@ -228,8 +235,8 @@ function App() {
     return Object.values(groupedData);
   };
 
-  const exportToExcel = async () => {
-    const groupedData = groupAttributeData();
+  exportToExcel = async () => {
+    const groupedData = this.groupAttributeData();
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Attribute Data');
 
@@ -249,9 +256,9 @@ function App() {
 
     await Promise.all(groupedData.map(async (group, index) => {
         const rowStart = index * 10 + 2; // Adjusted for 4 rows spacing between cards
-        const view = views.find(v => v.name === group.value);
+        const view = this.state.views.find(v => v.name === group.value);
         const viewId = view ? view.id : null;
-        const projId = projectId || null;
+        const projId = this.state.projectId || null;
         const viewUrl = projId && viewId ? `https://web.connect.trimble.com/projects/${projId}/viewer/3d?viewId=${viewId}&region=europe` : null;
         let qrCodeDataUrl = null;
 
@@ -347,15 +354,15 @@ function App() {
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/octet-stream' });
 
-    const filename = `${modelName}_Bøyeliste.xlsx`;
+    const filename = `${this.state.modelName}_Bøyeliste.xlsx`;
     saveAs(blob, filename);
     console.log("Exported data to Excel");
   };
 
-  const renderGroupedAttributeObjects = () => {
-    const groupedData = groupAttributeData();
-    const selectedData = groupedData.filter(group => selectedGroups[group.value]);
-    const nonSelectedData = groupedData.filter(group => !selectedGroups[group.value]);
+  renderGroupedAttributeObjects = () => {
+    const groupedData = this.groupAttributeData();
+    const selectedData = groupedData.filter(group => this.state.selectedGroups[group.value]);
+    const nonSelectedData = groupedData.filter(group => !this.state.selectedGroups[group.value]);
 
     return (
       <div className="attribute-cards">
@@ -363,7 +370,7 @@ function App() {
           <div 
             key={group.value} 
             className={`attribute-card selected`}
-            onClick={() => handleGroupClick(group.value)}
+            onClick={() => this.handleGroupClick(group.value)}
           >
             <strong>{group.value}</strong><br />
             Antall: {group.antall}
@@ -374,7 +381,7 @@ function App() {
           <div 
             key={group.value} 
             className={`attribute-card`}
-            onClick={() => handleGroupClick(group.value)}
+            onClick={() => this.handleGroupClick(group.value)}
           >
             <strong>{group.value}</strong><br />
             Antall: {group.antall}
@@ -384,60 +391,62 @@ function App() {
     );
   };
 
-  return (
-    <>
-      <div className="container">
-        <header className="header">
-          <div className="header-content">
-            <div className="logo">
-              <h1>
-                <span className="pos">POS.</span>
-                <span className="flow">Flow</span>
-              </h1>
+  render() {
+    return (
+      <>
+        <div className="container">
+          <header className="header">
+            <div className="header-content">
+              <div className="logo">
+                <h1>
+                  <span className="pos">POS.</span>
+                  <span className="flow">Flow</span>
+                </h1>
+              </div>
+              <nav>
+                <a href="#" onClick={this.getAttributeDataFromTrimble}>
+                  <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
+                </a>
+                <a href="#" onClick={this.createView}>
+                  <img src="https://dawood11.github.io/trimble-test/src/assets/camera.png" alt="Lag visning" className="nav-icon" />
+                </a>
+                <a href="#" onClick={this.exportToExcel}>
+                  <img src="https://dawood11.github.io/trimble-test/src/assets/download.png" alt="Generer" className="nav-icon" />
+                </a>
+              </nav>
             </div>
-            <nav>
-              <a href="#" onClick={getAttributeDataFromTrimble}>
-                <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
-              </a>
-              <a href="#" onClick={createView}>
-                <img src="https://dawood11.github.io/trimble-test/src/assets/camera.png" alt="Lag visning" className="nav-icon" />
-              </a>
-              <a href="#" onClick={exportToExcel}>
-                <img src="https://dawood11.github.io/trimble-test/src/assets/download.png" alt="Generer" className="nav-icon" />
-              </a>
-            </nav>
-          </div>
-        </header>
-        <main className="content">
-          <div className="input-section">
-            <input
-              type="text"
-              placeholder="Example: AndfjordSalmon"
-              value={psetName}
-              onChange={(e) => setPsetName(e.target.value)}
-              className="input-field"
-            />
-            <input
-              type="text"
-              placeholder="Example: A22 MMI"
-              value={attribute}
-              onChange={(e) => setAttribute(e.target.value)}
-              className="input-field"
-            />
-          </div>
-          <div className="buttons">
-            <button onClick={fitToView}>Fokuser</button>
-          </div>
-          {renderGroupedAttributeObjects()}
-        </main>
-        <footer>
-          <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
-          <p>Utviklet av Yasin Rafiq</p>
-          <p>Beta 1.0</p>
-        </footer>
-      </div>
-    </>
-  );
+          </header>
+          <main className="content">
+            <div className="input-section">
+              <input
+                type="text"
+                placeholder="Example: AndfjordSalmon"
+                value={this.state.psetName}
+                onChange={(e) => this.setState({ psetName: e.target.value })}
+                className="input-field"
+              />
+              <input
+                type="text"
+                placeholder="Example: A22 MMI"
+                value={this.state.attribute}
+                onChange={(e) => this.setState({ attribute: e.target.value })}
+                className="input-field"
+              />
+            </div>
+            <div className="buttons">
+              <button onClick={this.fitToView}>Fokuser</button>
+            </div>
+            {this.renderGroupedAttributeObjects()}
+          </main>
+          <footer>
+            <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
+            <p>Utviklet av Yasin Rafiq</p>
+            <p>Beta 1.0</p>
+          </footer>
+        </div>
+      </>
+    );
+  }
 }
 
 export default App;

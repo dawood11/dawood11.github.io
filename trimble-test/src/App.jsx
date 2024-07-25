@@ -228,8 +228,7 @@ class App extends Component {
         if (nonSelectedObjects.length > 0) {
           acc.push({
             modelId,
-            objectRuntimeIds: nonSelectedObjects.map(obj => obj.id),
-            ghost: true
+            entityIds: nonSelectedObjects.map(obj => obj.id)
           });
         }
         return acc;
@@ -237,7 +236,7 @@ class App extends Component {
 
       console.log(`Applying ghost mode to non-selected objects: ${JSON.stringify(nonSelectedEntities)}`);
 
-      await api.viewer.isolateEntities(nonSelectedEntities);
+      await api.viewer.presentation.ghost(nonSelectedEntities);
       console.log(`Applied ghost mode to non-selected objects.`);
     } catch (error) {
       console.error("Error applying ghost mode:", error);

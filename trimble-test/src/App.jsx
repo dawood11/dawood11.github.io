@@ -237,7 +237,7 @@ class App extends Component {
       console.log(`Applying ghost mode to non-selected objects: ${JSON.stringify(nonSelectedEntities)}`);
 
       // Apply ghost mode to the non-selected objects
-      await api.viewer.presentation.ghost({ Boolean: true });
+      await api.presentation.ghost({ Boolean: true });
       console.log(`Applied ghost mode to non-selected objects.`);
     } catch (error) {
       console.error("Error applying ghost mode:", error);

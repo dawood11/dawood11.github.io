@@ -140,14 +140,12 @@ class App extends Component {
       }
 
       return { selectedGroups: updatedGroups };
+    }, async () => {
+      const selectedData = this.state.attributeData.filter(obj => this.state.selectedGroups[obj.value]);
+      if (Object.keys(this.state.selectedGroups).length > 0) {
+        await this.selectObjects(api, selectedData);
+      }
     });
-
-    const selectedData = this.state.attributeData.filter(obj => obj.value === value);
-    if (this.state.selectedGroups[value]) {
-      await this.deselectObjects(api, selectedData);
-    } else {
-      await this.selectObjects(api, selectedData);
-    }
   };
 
   selectObjects = async (api, objects) => {
@@ -210,24 +208,6 @@ class App extends Component {
 
     await api.view.setView(viewSpec.id);
     console.log(`View set as active.`);
-  };
-
-  fitToView = async () => {
-    const api = await this.dotConnect();
-    const selectedData = this.state.attributeData.filter(obj => this.state.selectedGroups[obj.value]);
-
-    if (selectedData.length === 0) {
-      console.log("No objects selected to fit view.");
-      return;
-    }
-
-    const modelEntities = selectedData.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id]
-    }));
-
-    await api.viewer.fitToView({ modelObjectIds: modelEntities });
-    console.log(`View fitted to selected objects.`);
   };
 
   groupAttributeData = (data = this.state.attributeData) => {
@@ -443,14 +423,14 @@ class App extends Component {
               />
             </div>
             <div className="buttons">
-              <button onClick={this.fitToView}>Fokuser</button>
+              <button>Skyggemodus</button>
             </div>
             {this.renderGroupedAttributeObjects()}
           </main>
           <footer>
             <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
             <p>Utviklet av Yasin Rafiq</p>
-            <p>Beta 1.1</p>
+            <p>Beta 1.0</p>
           </footer>
         </div>
       </>

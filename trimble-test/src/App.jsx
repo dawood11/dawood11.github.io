@@ -140,14 +140,12 @@ class App extends Component {
       }
 
       return { selectedGroups: updatedGroups };
+    }, async () => {
+      const selectedData = this.state.attributeData.filter(obj => this.state.selectedGroups[obj.value]);
+      if (Object.keys(this.state.selectedGroups).length > 0) {
+        await this.selectObjects(api, selectedData);
+      }
     });
-
-    const selectedData = this.state.attributeData.filter(obj => obj.value === value);
-    if (this.state.selectedGroups[value]) {
-      await this.deselectObjects(api, selectedData);
-    } else {
-      await this.selectObjects(api, selectedData);
-    }
   };
 
   selectObjects = async (api, objects) => {
@@ -450,7 +448,7 @@ class App extends Component {
           <footer>
             <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
             <p>Utviklet av Yasin Rafiq</p>
-            <p>Beta 1.1</p>
+            <p>Beta 1.0</p>
           </footer>
         </div>
       </>

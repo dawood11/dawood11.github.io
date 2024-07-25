@@ -151,10 +151,15 @@ class App extends Component {
   };
 
   selectObjects = async (api, objects) => {
-    const modelEntities = objects.map(obj => ({
-      modelId: obj.modelId,
-      entityIds: [obj.id]
-    }));
+    const modelEntities = objects.reduce((acc, obj) => {
+      const model = acc.find(m => m.modelId === obj.modelId);
+      if (model) {
+        model.entityIds.push(obj.id);
+      } else {
+        acc.push({ modelId: obj.modelId, entityIds: [obj.id] });
+      }
+      return acc;
+    }, []);
 
     console.log(`Selecting objects: ${JSON.stringify(modelEntities)}`);
 

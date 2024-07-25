@@ -161,6 +161,14 @@ class App extends Component {
     };
     await api.viewer.setSelection(objectSelector, "add");
     console.log(`Objects selected.`);
+  
+    // Show only the selected objects
+    await api.viewer.isolateEntities(modelEntities);
+    console.log(`Isolated selected objects.`);
+  
+    // Fit the view to the selected objects
+    await api.viewer.setCamera("reset");
+    console.log(`View reset to fit selected objects.`);
   };
 
   deselectObjects = async (api, objects) => {

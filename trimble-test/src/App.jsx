@@ -211,21 +211,30 @@ class App extends Component {
   };
 
   ghostMode = async () => {
-    const api = await this.dotConnect();
-    const selectedData = this.state.attributeData.filter(obj => this.state.selectedGroups[obj.value]);
+    try {
+      const api = await this.dotConnect();
+      if (!api.viewer.presentation || !api.viewer.presentation.ghost) {
+        console.error("Ghost mode is not available in the current API.");
+        return;
+      }
+      
+      const selectedData = this.state.attributeData.filter(obj => this.state.selectedGroups[obj.value]);
 
-    if (selectedData.length === 0) {
-      console.log("No objects selected for ghost mode.");
-      return;
+      if (selectedData.length === 0) {
+        console.log("No objects selected for ghost mode.");
+        return;
+      }
+
+      const modelEntities = selectedData.map(obj => ({
+        modelId: obj.modelId,
+        objectRuntimeIds: [obj.id]
+      }));
+
+      await api.viewer.presentation.ghost(modelEntities);
+      console.log(`Applied ghost mode to selected objects.`);
+    } catch (error) {
+      console.error("Error applying ghost mode:", error);
     }
-
-    const modelEntities = selectedData.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id]
-    }));
-
-    await api.viewer.presentation.ghost(modelEntities);
-    console.log(`Applied ghost mode to selected objects.`);
   };
 
   groupAttributeData = (data = this.state.attributeData) => {

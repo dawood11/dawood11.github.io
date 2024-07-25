@@ -239,10 +239,6 @@ class App extends Component {
 
       await api.viewer.isolateEntities(nonSelectedEntities);
       console.log(`Applied ghost mode to non-selected objects.`);
-  
-      // Fit the view to the selected objects
-      await api.viewer.setCamera("reset");
-      console.log(`View reset to fit selected objects.`);
     } catch (error) {
       console.error("Error applying ghost mode:", error);
     }

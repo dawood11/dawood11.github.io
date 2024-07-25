@@ -156,6 +156,8 @@ class App extends Component {
       entityIds: [obj.id]
     }));
 
+    console.log(`Selecting objects: ${JSON.stringify(modelEntities)}`);
+
     // Show only the selected objects
     await api.viewer.isolateEntities(modelEntities);
     console.log(`Isolated selected objects.`);

@@ -210,12 +210,12 @@ class App extends Component {
     console.log(`View set as active.`);
   };
 
-  fitToView = async () => {
+  ghostMode = async () => {
     const api = await this.dotConnect();
     const selectedData = this.state.attributeData.filter(obj => this.state.selectedGroups[obj.value]);
 
     if (selectedData.length === 0) {
-      console.log("No objects selected to fit view.");
+      console.log("No objects selected for ghost mode.");
       return;
     }
 
@@ -224,8 +224,8 @@ class App extends Component {
       objectRuntimeIds: [obj.id]
     }));
 
-    await api.viewer.fitToView({ modelObjectIds: modelEntities });
-    console.log(`View fitted to selected objects.`);
+    await api.viewer.presentation.ghost(modelEntities);
+    console.log(`Applied ghost mode to selected objects.`);
   };
 
   groupAttributeData = (data = this.state.attributeData) => {
@@ -441,7 +441,7 @@ class App extends Component {
               />
             </div>
             <div className="buttons">
-              <button onClick={this.fitToView}>Fokuser</button>
+              <button onClick={this.ghostMode}>Skyggemodus</button>
             </div>
             {this.renderGroupedAttributeObjects()}
           </main>

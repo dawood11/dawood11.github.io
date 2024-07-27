@@ -141,7 +141,7 @@ button:focus-visible {
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  width: auto;
+  width: 100%; /* Full width */
   justify-content: flex-start;
   background-color: #ffffff; /* Set container background to white */
   padding-top: 60px; /* Space for fixed header */
@@ -218,7 +218,7 @@ button:focus-visible {
   flex-direction: column;
   gap: 10px;
   width: 100%; /* Ensure full width */
-  padding: 10px; /* Add padding around attribute cards */
+  padding: 0; /* Remove padding around attribute cards */
   box-sizing: border-box; /* Ensure padding is included in width */
 }
 
@@ -238,6 +238,7 @@ button:focus-visible {
   border: 1px solid #d3d3d3; /* Light grey border */
   cursor: pointer;
   transition: background-color 0.3s;
+  margin-bottom: 10px; /* Add margin-bottom for spacing */
 }
 .attribute-card.selected {
   background-color: #a9a9a9; /* Change background color when selected */

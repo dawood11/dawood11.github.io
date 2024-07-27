@@ -155,8 +155,8 @@ button:focus-visible {
 
 .content {
   flex: 1;
-  width: calc(100% - 40px); /* Ensure full width minus 20px margin on each side */
-  max-width: calc(1200px - 40px); /* Ensure max-width minus 20px margin on each side */
+  width: 100%; /* Ensure full width */
+  max-width: 1200px; /* Optional: limit content width */
   background-color: #ffffff; /* Set content background to white */
   padding: 20px; /* Add padding around content */
   box-sizing: border-box;
@@ -227,7 +227,6 @@ button:focus-visible {
   text-align: center; /* Center the text */
   color: #000000;
   width: 100%; /* Ensure full width */
-  flex-grow: 1; /* Allow the card to grow */
   box-sizing: border-box; /* Ensure padding and border are included in width */
   border: 1px solid #d3d3d3; /* Light grey border */
   cursor: pointer;

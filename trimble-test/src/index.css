@@ -215,7 +215,7 @@ button:focus-visible {
 
 .attribute-cards {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap; /* Allow cards to wrap to the next line */
   gap: 10px;
   width: 100%; /* Ensure full width */
   padding: 10px; /* Add padding around attribute cards */
@@ -233,7 +233,7 @@ button:focus-visible {
   border-radius: 8px;
   text-align: center; /* Center the text */
   color: #000000;
-  width: 100%; /* Ensure full width */
+  flex: 1 1 calc(33.333% - 20px); /* Adjust width and spacing */
   box-sizing: border-box; /* Ensure padding and border are included in width */
   border: 1px solid #d3d3d3; /* Light grey border */
   cursor: pointer;

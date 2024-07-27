@@ -140,7 +140,8 @@ button:focus-visible {
   width: 100%;
   background-color: #ffffff; /* Set content background to white */
   flex-grow: 1; /* Allow content to grow and fill space */
-  padding: 0 10px;
+  padding: 0 20px; /* Ensure content has padding */
+  box-sizing: border-box; /* Ensure padding is included in width calculation */
 }
 
 .input-section {
@@ -173,6 +174,8 @@ button:focus-visible {
   gap: 10px;
   flex-wrap: wrap;
   width: 100%; /* Ensure full width */
+  padding: 10px; /* Add padding around attribute cards */
+  box-sizing: border-box; /* Ensure padding is included in width */
 }
 
 .attribute-card {

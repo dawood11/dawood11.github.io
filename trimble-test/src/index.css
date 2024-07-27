@@ -227,6 +227,7 @@ button:focus-visible {
   text-align: center; /* Center the text */
   color: #000000;
   width: 100%; /* Ensure full width */
+  flex-grow: 1; /* Allow the card to grow */
   box-sizing: border-box; /* Ensure padding and border are included in width */
   border: 1px solid #d3d3d3; /* Light grey border */
   cursor: pointer;

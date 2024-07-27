@@ -11,7 +11,7 @@ class App extends Component {
     this.state = {
       attributeData: [],
       psetName: "Example: AndfjordSalmon",
-      attribute: "Example: A22 MMI",
+      attribute: "K21 Pos.nr.",
       selectedGroups: {},
       views: [],
       projectId: null,
@@ -98,7 +98,7 @@ class App extends Component {
             propertySet.properties.forEach((prop) => {
               if (prop.name === psetName.replace("Example: ", "")) {
                 prop.properties.forEach((subProp) => {
-                  if (subProp.name === attribute.replace("Example: ", "")) {
+                  if (subProp.name === attribute) {
                     primaryAttribute = { 
                       modelId, 
                       id: propertySet.id, 
@@ -412,13 +412,6 @@ class App extends Component {
                 placeholder="Example: AndfjordSalmon"
                 value={this.state.psetName}
                 onChange={(e) => this.setState({ psetName: e.target.value })}
-                className="input-field"
-              />
-              <input
-                type="text"
-                placeholder="Example: A22 MMI"
-                value={this.state.attribute}
-                onChange={(e) => this.setState({ attribute: e.target.value })}
                 className="input-field"
               />
             </div>

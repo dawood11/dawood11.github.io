@@ -10,8 +10,6 @@ class App extends Component {
     super(props);
     this.state = {
       attributeData: [],
-      psetName: "Example: AndfjordSalmon",
-      attribute: "K21 Pos.nr.",
       selectedGroups: {},
       views: [],
       projectId: null,
@@ -59,7 +57,6 @@ class App extends Component {
   };
 
   getAttributeDataFromTrimble = async () => {
-    const { psetName, attribute } = this.state;
     const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
 
     console.log("GET ATTRIBUTE DATA");
@@ -96,25 +93,23 @@ class App extends Component {
             };
 
             propertySet.properties.forEach((prop) => {
-              if (prop.name === psetName.replace("Example: ", "")) {
-                prop.properties.forEach((subProp) => {
-                  if (subProp.name === attribute) {
-                    primaryAttribute = { 
-                      modelId, 
-                      id: propertySet.id, 
-                      class: propertySet.class, 
-                      name: subProp.name,
-                      value: subProp.value 
-                    };
-                  }
+              prop.properties.forEach((subProp) => {
+                if (subProp.name === "K21 Pos.nr.") {
+                  primaryAttribute = { 
+                    modelId, 
+                    id: propertySet.id, 
+                    class: propertySet.class, 
+                    name: subProp.name,
+                    value: subProp.value 
+                  };
+                }
 
-                  dimensionAttributes.forEach(dimAttr => {
-                    if (subProp.name.includes(dimAttr)) {
-                      dimensions[dimAttr] = subProp.value;
-                    }
-                  });
+                dimensionAttributes.forEach(dimAttr => {
+                  if (subProp.name.includes(dimAttr)) {
+                    dimensions[dimAttr] = subProp.value;
+                  }
                 });
-              }
+              });
             });
 
             if (primaryAttribute) {
@@ -406,15 +401,6 @@ class App extends Component {
             </div>
           </header>
           <main className="content">
-            <div className="input-section">
-              <input
-                type="text"
-                placeholder="Example: AndfjordSalmon"
-                value={this.state.psetName}
-                onChange={(e) => this.setState({ psetName: e.target.value })}
-                className="input-field"
-              />
-            </div>
             <div className="buttons">
               <button>Skyggemodus</button>
             </div>

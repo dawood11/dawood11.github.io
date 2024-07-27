@@ -215,7 +215,7 @@ button:focus-visible {
 
 .attribute-cards {
   display: flex;
-  flex-wrap: wrap; /* Allow cards to wrap to the next line */
+  flex-direction: column;
   gap: 10px;
   width: 100%; /* Ensure full width */
   padding: 10px; /* Add padding around attribute cards */
@@ -233,7 +233,7 @@ button:focus-visible {
   border-radius: 8px;
   text-align: center; /* Center the text */
   color: #000000;
-  flex: 1 1 calc(33.333% - 20px); /* Adjust width and spacing */
+  width: 100%; /* Ensure full width */
   box-sizing: border-box; /* Ensure padding and border are included in width */
   border: 1px solid #d3d3d3; /* Light grey border */
   cursor: pointer;
@@ -250,7 +250,7 @@ footer {
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+ 	align-items: center;
   color: #000000; /* Set footer text color to black */
   position: fixed; /* Fix the footer */
   bottom: 0; /* Align to bottom */

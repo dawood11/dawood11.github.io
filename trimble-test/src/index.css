@@ -27,7 +27,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%; /* Full width */
+  width: auto;
   min-height: 100vh;
   background-color: #ffffff;
   overflow-x: hidden; /* Prevent horizontal scroll */
@@ -141,7 +141,7 @@ button:focus-visible {
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  width: 100%; /* Full width */
+  width: auto;
   justify-content: flex-start;
   background-color: #ffffff; /* Set container background to white */
   padding-top: 60px; /* Space for fixed header */
@@ -158,8 +158,7 @@ button:focus-visible {
 
 .content {
   flex: 1;
-  width: 100%;
-  max-width: 1200px; /* Optional: limit content width */
+  width: 100%; /* Ensure it takes full width */
   background-color: #ffffff; /* Set content background to white */
   padding: 20px; /* Add padding around content */
   box-sizing: border-box;
@@ -213,18 +212,31 @@ button:focus-visible {
   justify-content: center; /* Center align buttons */
 }
 
+.attribute-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%; /* Ensure full width */
+  padding: 10px; /* Add padding around attribute cards */
+  box-sizing: border-box; /* Ensure padding is included in width */
+}
+
+.attribute-cards::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
 .attribute-card {
   background-color: #DCE0E6;
   padding: 20px;
   border-radius: 8px;
   text-align: center; /* Center the text */
   color: #000000;
-  width: calc(100% - 40px); /* Ensure full width and account for padding */
+  width: 100%; /* Ensure full width */
   box-sizing: border-box; /* Ensure padding and border are included in width */
   border: 1px solid #d3d3d3; /* Light grey border */
   cursor: pointer;
   transition: background-color 0.3s;
-  margin: 10px auto; /* Center align and add margin for spacing */
 }
 .attribute-card.selected {
   background-color: #a9a9a9; /* Change background color when selected */
@@ -237,7 +249,7 @@ footer {
   width: 100%;
   display: flex;
   flex-direction: column;
- 	align-items: center;
+  align-items: center;
   color: #000000; /* Set footer text color to black */
   position: fixed; /* Fix the footer */
   bottom: 0; /* Align to bottom */

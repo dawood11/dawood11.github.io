@@ -27,10 +27,14 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: auto;
+  width: 100%;
   min-height: 100vh;
   background-color: #ffffff;
   overflow-x: hidden; /* Prevent horizontal scroll */
+  padding-top: 60px; /* Space for fixed header */
+  padding-bottom: 60px; /* Space for fixed footer */
+  box-sizing: border-box;
+  overflow-y: auto; /* Enable vertical scroll */
 }
 
 body::-webkit-scrollbar {
@@ -134,26 +138,6 @@ button:focus-visible {
   button:hover {
     background-color: #d3d3d3; /* Ensure hover background color is light grey in light mode */
   }
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  width: auto;
-  justify-content: flex-start;
-  background-color: #ffffff; /* Set container background to white */
-  padding-top: 60px; /* Space for fixed header */
-  padding-bottom: 60px; /* Space for fixed footer */
-  box-sizing: border-box;
-  overflow-x: hidden; /* Prevent horizontal scroll */
-  overflow-y: auto; /* Enable vertical scroll */
-}
-
-.container::-webkit-scrollbar {
-  width: 0;
-  height: 0;
 }
 
 .content {

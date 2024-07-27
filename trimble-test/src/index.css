@@ -218,7 +218,7 @@ button:focus-visible {
   flex-direction: column;
   gap: 10px;
   width: 100%; /* Ensure full width */
-  padding: 0; /* Remove padding around attribute cards */
+  padding: 10px; /* Add padding around attribute cards */
   box-sizing: border-box; /* Ensure padding is included in width */
 }
 
@@ -233,11 +233,12 @@ button:focus-visible {
   border-radius: 8px;
   text-align: center; /* Center the text */
   color: #000000;
-  width: 100%; /* Ensure full width */
+  width: calc(100% - 20px); /* Ensure full width and account for padding */
   box-sizing: border-box; /* Ensure padding and border are included in width */
   border: 1px solid #d3d3d3; /* Light grey border */
   cursor: pointer;
   transition: background-color 0.3s;
+  margin: 0 auto; /* Center align */
   margin-bottom: 10px; /* Add margin-bottom for spacing */
 }
 .attribute-card.selected {

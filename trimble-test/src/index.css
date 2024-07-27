@@ -229,7 +229,7 @@ button:focus-visible {
 
 .attribute-card {
   background-color: #DCE0E6;
-  padding: 20px;
+  padding: 20px 40px; /* Added 40px padding on left and right sides */
   border-radius: 8px;
   text-align: center; /* Center the text */
   color: #000000;

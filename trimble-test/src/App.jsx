@@ -14,7 +14,7 @@ class App extends Component {
       views: [],
       projectId: null,
       modelName: "Model",
-      wireframeMode: false, // New state for wireframe mode
+      ghostMode: false, // New state for ghost mode
     };
   }
 
@@ -345,13 +345,17 @@ class App extends Component {
     console.log("Exported data to Excel");
   };
 
-  toggleWireframeMode = async () => {
+  toggleGhostMode = async () => {
     const api = await this.dotConnect();
-    const newMode = !this.state.wireframeMode;
+    const newMode = !this.state.ghostMode;
 
-    await api.viewer.activateTool("wireframe", newMode ? "activate" : "deactivate");
+    // activating
+    await api.viewer.activateTool("ghostMode");
+    
+    // de-activating
+    await api.viewer.activateTool("ghostMode");
 
-    this.setState({ wireframeMode: newMode });
+    this.setState({ ghostMode: newMode });
   };
 
   renderGroupedAttributeObjects = () => {
@@ -413,8 +417,8 @@ class App extends Component {
           </header>
           <main className="content">
             <div className="buttons">
-              <button onClick={this.toggleWireframeMode}>
-                Skyggemodus {this.state.wireframeMode ? 'Deaktivert' : 'Aktivert'}
+              <button onClick={this.toggleGhostMode}>
+                Skyggemodus {this.state.ghostMode ? 'Deaktivert' : 'Aktivert'}
               </button>
             </div>
             {this.renderGroupedAttributeObjects()}

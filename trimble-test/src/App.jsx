@@ -14,6 +14,7 @@ class App extends Component {
       views: [],
       projectId: null,
       modelName: "Model",
+      wireframeMode: false, // New state for wireframe mode
     };
   }
 
@@ -344,6 +345,15 @@ class App extends Component {
     console.log("Exported data to Excel");
   };
 
+  toggleWireframeMode = async () => {
+    const api = await this.dotConnect();
+    const newMode = !this.state.wireframeMode;
+
+    await api.viewer.activateTool("wireframe", newMode ? "activate" : "deactivate");
+
+    this.setState({ wireframeMode: newMode });
+  };
+
   renderGroupedAttributeObjects = () => {
     const groupedData = this.groupAttributeData();
     const selectedData = groupedData.filter(group => this.state.selectedGroups[group.value]);
@@ -403,7 +413,9 @@ class App extends Component {
           </header>
           <main className="content">
             <div className="buttons">
-              <button>Skyggemodus</button>
+              <button onClick={this.toggleWireframeMode}>
+                Skyggemodus {this.state.wireframeMode ? 'Deaktivert' : 'Aktivert'}
+              </button>
             </div>
             {this.renderGroupedAttributeObjects()}
           </main>

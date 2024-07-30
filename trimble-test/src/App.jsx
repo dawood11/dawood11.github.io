@@ -350,10 +350,10 @@ class App extends Component {
     const newMode = !this.state.ghostMode;
 
     // activating
-    await api.viewer.activateTool("wireFrame");
+    await api.viewer.activateTool("wireframeMode");
     
     // de-activating
-    await api.viewer.activateTool("wireFrame");
+    await api.viewer.activateTool("wireframeMode");
 
     this.setState({ ghostMode: newMode });
   };

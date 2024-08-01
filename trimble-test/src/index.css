@@ -210,10 +210,12 @@ button:focus-visible {
   box-sizing: border-box; /* Ensure padding and border are included in width */
   background-color: #ffffff; /* Set input background to white */
   color: #000000; /* Set input text color to black */
+  text-align: center; /* Center the text */
 }
 
 .input-field::placeholder {
   color: #a9a9a9; /* Set placeholder text color to grey */
+  text-align: center; /* Center the placeholder text */
 }
 
 .search-container {

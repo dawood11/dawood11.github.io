@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import Component from 'react';
 import * as Extensions from 'trimble-connect-workspace-api';
 import './index.css'; // Import the CSS file
 import { saveAs } from 'file-saver'; // Import the file-saver library
@@ -16,6 +16,7 @@ class App extends Component {
       modelName: "Model",
       ghostMode: false, // New state for ghost mode
       searchTerm: "", // New state for search term
+      showSubHeader: false, // State to control the visibility of the sub-header (set to false to hide it)
     };
   }
 
@@ -447,38 +448,14 @@ class App extends Component {
             </div>
           </header>
 
-          {/* Sub-header section */}
-          <div className="sub-header">
-            <div className="header-content">
-              <nav>
-                <a href="#" onClick={this.toggleGhostMode}>
-                  <img src="https://dawood11.github.io/trimble-test/src/assets/M.png" alt="F1" className="nav-icon" />
-                </a>
-                <a href="#">
-                  <img src="https://dawood11.github.io/trimble-test/src/assets/V.png" alt="F2" className="nav-icon" />
-                </a>
-                <a href="#">
-                  <img src="https://dawood11.github.io/trimble-test/src/assets/F.png" alt="F3" className="nav-icon" />
-                </a>
-                <a href="#">
-                  <img src="https://dawood11.github.io/trimble-test/src/assets/S.png" alt="F4" className="nav-icon" />
-                </a>
-                <a href="#">
-                  <img src="https://dawood11.github.io/trimble-test/src/assets/H.png" alt="F5" className="nav-icon" />
-                </a>
-                <a href="#">
-                  <img src="https://dawood11.github.io/trimble-test/src/assets/A.png" alt="F6" className="nav-icon" />
-                </a>
-              </nav>
-            </div>
-          </div>
+          {/* Sub-header section is hidden, not rendered */}
 
           <main className="content">
             <div className="search-container">
               <input
                 type="text"
                 className="input-field"
-                placeholder="Søk etter attributter..."
+                placeholder="Søk"
                 value={this.state.searchTerm}
                 onChange={this.handleSearchChange}
               />
@@ -488,7 +465,7 @@ class App extends Component {
           <footer>
             <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
             <p>Utviklet av Yasin Rafiq</p>
-            <p>Beta 1.0</p>
+            <p>Beta 1.1</p>
           </footer>
         </div>
       </>

@@ -452,7 +452,7 @@ class App extends Component {
             <div className="header-content">
               <nav>
                 <a href="#" onClick={this.toggleGhostMode}>
-                  <img src="https://via.placeholder.com/20" alt="F1" className="nav-icon" />
+                  <img src="https://dawood11.github.io/trimble-test/src/assets/H.png" alt="F1" className="nav-icon" />
                 </a>
                 <a href="#">
                   <img src="https://via.placeholder.com/20" alt="F2" className="nav-icon" />

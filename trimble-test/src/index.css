@@ -38,7 +38,8 @@ body::-webkit-scrollbar {
   height: 0;
 }
 
-.header {
+.header,
+.sub-header {
   width: 100%;
   background-color: #003D6A;
   display: flex;
@@ -49,6 +50,10 @@ body::-webkit-scrollbar {
   position: fixed;
   top: 0;
   z-index: 1000;
+}
+
+.header + .sub-header {
+  top: 40px; /* This will move the sub-header right below the header */
 }
 
 .header-content {
@@ -120,35 +125,6 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-.sub-header {
-  background-color: #91A5BE; /* Oppdatert bakgrunnsfarge */
-  padding: 10px 20px; /* Samme padding som header */
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  box-sizing: border-box; /* Ensure padding is included in width */
-  position: relative;
-  top: 0;
-  z-index: 999;
-  margin-top: 0; /* Fjerner mellomrom mellom header og sub-header */
-}
-
-.sub-header .header-content {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.sub-header nav a {
-  margin: 0;
-}
-
-.sub-header .nav-icon {
-  width: 20px; /* Oppdatert ikonstørrelse */
-  height: 20px;
-}
-
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -173,7 +149,7 @@ button:focus-visible {
   width: auto;
   justify-content: flex-start;
   background-color: #ffffff; /* Set container background to white */
-  padding-top: 60px; /* Space for fixed header */
+  padding-top: 80px; /* Adjust for fixed header and sub-header */
   padding-bottom: 60px; /* Space for fixed footer */
   box-sizing: border-box;
   overflow-x: hidden; /* Prevent horizontal scroll */

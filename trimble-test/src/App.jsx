@@ -452,22 +452,22 @@ class App extends Component {
             <div className="header-content">
               <nav>
                 <a href="#" onClick={this.toggleGhostMode}>
-                  <img src="https://dawood11.github.io/trimble-test/src/assets/H.png" alt="F1" className="nav-icon" />
+                  <img src="https://dawood11.github.io/trimble-test/src/assets/M.png" alt="F1" className="nav-icon" />
                 </a>
                 <a href="#">
-                  <img src="https://via.placeholder.com/20" alt="F2" className="nav-icon" />
+                  <img src="https://dawood11.github.io/trimble-test/src/assets/V.png" alt="F2" className="nav-icon" />
                 </a>
                 <a href="#">
-                  <img src="https://via.placeholder.com/20" alt="F3" className="nav-icon" />
+                  <img src="https://dawood11.github.io/trimble-test/src/assets/F.png" alt="F3" className="nav-icon" />
                 </a>
                 <a href="#">
-                  <img src="https://via.placeholder.com/20" alt="F4" className="nav-icon" />
+                  <img src="https://dawood11.github.io/trimble-test/src/assets/S.png" alt="F4" className="nav-icon" />
                 </a>
                 <a href="#">
-                  <img src="https://via.placeholder.com/20" alt="F5" className="nav-icon" />
+                  <img src="https://dawood11.github.io/trimble-test/src/assets/H.png" alt="F5" className="nav-icon" />
                 </a>
                 <a href="#">
-                  <img src="https://via.placeholder.com/20" alt="F6" className="nav-icon" />
+                  <img src="https://dawood11.github.io/trimble-test/src/assets/A.png" alt="F6" className="nav-icon" />
                 </a>
               </nav>
             </div>
@@ -488,7 +488,7 @@ class App extends Component {
           <footer>
             <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
             <p>Utviklet av Yasin Rafiq</p>
-            <p>Beta 1.1</p>
+            <p>Beta 1.0</p>
           </footer>
         </div>
       </>

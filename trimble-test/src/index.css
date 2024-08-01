@@ -38,8 +38,7 @@ body::-webkit-scrollbar {
   height: 0;
 }
 
-.header,
-.sub-header {
+.header {
   width: 100%;
   background-color: #003D6A;
   display: flex;
@@ -52,8 +51,17 @@ body::-webkit-scrollbar {
   z-index: 1000;
 }
 
-.header + .sub-header {
-  top: 40px; /* This will move the sub-header right below the header */
+.sub-header {
+  width: 100%;
+  background-color: #DCE0E6; /* Updated background color */
+  display: flex;
+  justify-content: center; /* Center the icons */
+  align-items: center;
+  padding: 0.5em 1em; /* Adjust padding as needed */
+  box-sizing: border-box; /* Ensure padding is included in width */
+  position: fixed;
+  top: 40px; /* Positioned directly under the header */
+  z-index: 999;
 }
 
 .header-content {
@@ -84,9 +92,8 @@ header .flow {
 nav {
   display: flex;
   gap: 20px; /* Adjusted gap for icons */
-  justify-content: flex-end; /* Align nav items to the right */
+  justify-content: center; /* Center the icons in sub-header */
   align-items: center; /* Center align icons vertically */
-  flex-grow: 1; /* Allow nav to grow */
 }
 
 .nav-icon {
@@ -149,7 +156,7 @@ button:focus-visible {
   width: auto;
   justify-content: flex-start;
   background-color: #ffffff; /* Set container background to white */
-  padding-top: 80px; /* Adjust for fixed header and sub-header */
+  padding-top: 80px; /* Space for fixed header and sub-header */
   padding-bottom: 60px; /* Space for fixed footer */
   box-sizing: border-box;
   overflow-x: hidden; /* Prevent horizontal scroll */

@@ -139,8 +139,8 @@ button:focus-visible {
 }
 
 .sub-header .nav-icon {
-  width: 40px; /* Placeholder icon size */
-  height: 40px;
+  width: 20px; /* Oppdatert ikonstørrelse */
+  height: 20px;
 }
 
 @media (prefers-color-scheme: light) {
@@ -215,8 +215,8 @@ button:focus-visible {
 
 .input-field {
   padding: 0.5em;
-  border-radius: 4px;
-  border: 1px solid #d3d3d3; /* Light grey border */
+  border-radius: 5px;
+  border: 1px solid #010000; /* Light grey border */
   width: 100%; /* Ensure full width */
   box-sizing: border-box; /* Ensure padding and border are included in width */
   background-color: #ffffff; /* Set input background to white */
@@ -225,6 +225,12 @@ button:focus-visible {
 
 .input-field::placeholder {
   color: #a9a9a9; /* Set placeholder text color to grey */
+}
+
+.search-container {
+  margin-top: 20px; /* 20px under sub-headeren */
+  display: flex;
+  justify-content: center;
 }
 
 .buttons {

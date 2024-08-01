@@ -446,44 +446,39 @@ class App extends Component {
               </nav>
             </div>
           </header>
-
+  
           {/* Sub-header section */}
           <div className="sub-header">
             <div className="header-content">
               <nav>
-                <a href="#">
-                  <img src="https://via.placeholder.com/40" alt="F1" className="nav-icon" />
+                <a href="#" onClick={this.toggleGhostMode}>
+                  <img src="https://via.placeholder.com/20" alt="F1" className="nav-icon" />
                 </a>
                 <a href="#">
-                  <img src="https://via.placeholder.com/40" alt="F2" className="nav-icon" />
+                  <img src="https://via.placeholder.com/20" alt="F2" className="nav-icon" />
                 </a>
                 <a href="#">
-                  <img src="https://via.placeholder.com/40" alt="F3" className="nav-icon" />
+                  <img src="https://via.placeholder.com/20" alt="F3" className="nav-icon" />
                 </a>
                 <a href="#">
-                  <img src="https://via.placeholder.com/40" alt="F4" className="nav-icon" />
+                  <img src="https://via.placeholder.com/20" alt="F4" className="nav-icon" />
                 </a>
                 <a href="#">
-                  <img src="https://via.placeholder.com/40" alt="F5" className="nav-icon" />
+                  <img src="https://via.placeholder.com/20" alt="F5" className="nav-icon" />
                 </a>
                 <a href="#">
-                  <img src="https://via.placeholder.com/40" alt="F6" className="nav-icon" />
+                  <img src="https://via.placeholder.com/20" alt="F6" className="nav-icon" />
                 </a>
               </nav>
             </div>
           </div>
-          
+  
           <main className="content">
-            <div className="buttons">
-              <button onClick={this.toggleGhostMode}>
-                Skyggemodus {this.state.ghostMode ? 'Deaktivert' : 'Aktivert'}
-              </button>
-            </div>
             <div className="search-container">
               <input
                 type="text"
                 className="input-field"
-                placeholder="Søk etter POS.NR"
+                placeholder="Søk etter attributter..."
                 value={this.state.searchTerm}
                 onChange={this.handleSearchChange}
               />

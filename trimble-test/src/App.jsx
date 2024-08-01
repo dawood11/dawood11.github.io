@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import React, { Component } from 'react';
 import * as Extensions from 'trimble-connect-workspace-api';
 import './index.css'; // Import the CSS file
 import { saveAs } from 'file-saver'; // Import the file-saver library
@@ -446,7 +446,7 @@ class App extends Component {
               </nav>
             </div>
           </header>
-  
+
           {/* Sub-header section */}
           <div className="sub-header">
             <div className="header-content">
@@ -472,7 +472,7 @@ class App extends Component {
               </nav>
             </div>
           </div>
-  
+
           <main className="content">
             <div className="search-container">
               <input
@@ -488,7 +488,7 @@ class App extends Component {
           <footer>
             <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
             <p>Utviklet av Yasin Rafiq</p>
-            <p>Beta 1.1</p>
+            <p>Beta 1.0</p>
           </footer>
         </div>
       </>

@@ -15,6 +15,7 @@ class App extends Component {
       projectId: null,
       modelName: "Model",
       ghostMode: false, // New state for ghost mode
+      searchTerm: "", // New state for search term
     };
   }
 
@@ -207,8 +208,38 @@ class App extends Component {
     console.log(`View set as active.`);
   };
 
+  handleSearchChange = (event) => {
+    this.setState({ searchTerm: event.target.value });
+  };
+
+  // Function to sort attribute data by letters + numbers (e.g., A1, B2, etc.)
+  sortAttributeData = (data) => {
+    return data.sort((a, b) => {
+      const regex = /(\D+)(\d+)/;
+      const aMatch = a.value.match(regex);
+      const bMatch = b.value.match(regex);
+
+      if (aMatch && bMatch) {
+        if (aMatch[1] === bMatch[1]) {
+          return parseInt(aMatch[2]) - parseInt(bMatch[2]);
+        } else {
+          return aMatch[1].localeCompare(bMatch[1]);
+        }
+      }
+
+      return a.value.localeCompare(b.value);
+    });
+  };
+
   groupAttributeData = (data = this.state.attributeData) => {
-    const groupedData = data.reduce((acc, obj) => {
+    // Filter based on search term
+    const filteredData = data.filter(obj =>
+      obj.value.toLowerCase().includes(this.state.searchTerm.toLowerCase())
+    );
+
+    const sortedData = this.sortAttributeData(filteredData);
+
+    const groupedData = sortedData.reduce((acc, obj) => {
       const { value } = obj;
       if (!acc[value]) {
         acc[value] = { value, antall: 0, models: [], dimensions: obj.dimensions };
@@ -421,12 +452,21 @@ class App extends Component {
                 Skyggemodus {this.state.ghostMode ? 'Deaktivert' : 'Aktivert'}
               </button>
             </div>
+            <div className="search-container">
+              <input
+                type="text"
+                className="input-field"
+                placeholder="Søk etter attributter..."
+                value={this.state.searchTerm}
+                onChange={this.handleSearchChange}
+              />
+            </div>
             {this.renderGroupedAttributeObjects()}
           </main>
           <footer>
             <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
             <p>Utviklet av Yasin Rafiq</p>
-            <p>Beta 1.0</p>
+            <p>Beta 1.1</p>
           </footer>
         </div>
       </>

@@ -120,6 +120,29 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.sub-header {
+  background-color: #91A5BE; /* Oppdatert bakgrunnsfarge */
+  padding: 10px 20px; /* Samme padding som header */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sub-header .header-content {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.sub-header nav a {
+  margin: 0 10px;
+}
+
+.sub-header .nav-icon {
+  width: 40px; /* Placeholder icon size */
+  height: 40px;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

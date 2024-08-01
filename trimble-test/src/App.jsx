@@ -1,4 +1,4 @@
-import Component from 'react';
+import React, { Component } from 'react';
 import * as Extensions from 'trimble-connect-workspace-api';
 import './index.css'; // Import the CSS file
 import { saveAs } from 'file-saver'; // Import the file-saver library

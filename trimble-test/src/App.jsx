@@ -63,14 +63,12 @@ class App extends Component {
     const posAttributes = ["Pos.nr.", "Pos.nr", "Pos nr.", "Pos"];
     const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
 
-    console.log("GET ATTRIBUTE DATA");
     const api = await this.dotConnect();
     await this.getProjectId();
     await this.getModelName();
     await this.getViews();
 
     const viewerObjects = await api.viewer.getObjects();
-    console.log("viewerObjects: ", viewerObjects);
 
     const attributeObjects = [];
     const batchSize = 1000;
@@ -78,12 +76,10 @@ class App extends Component {
     for (const modelObjectsSet of viewerObjects) {
       const modelId = modelObjectsSet["modelId"];
       let modelObjectIdsList = modelObjectsSet["objects"].map((obj) => obj.id);
-      console.log("Fetching properties for model ID:", modelId);
 
       for (let i = 0; i < modelObjectIdsList.length; i += batchSize) {
         const batch = modelObjectIdsList.slice(i, i + batchSize);
         const properties = await api.viewer.getObjectProperties(modelId, batch);
-        console.log("Fetched properties:", properties);
 
         properties.forEach((propertySet) => {
           if (propertySet.properties) {
@@ -125,7 +121,6 @@ class App extends Component {
     }
 
     this.setState({ attributeData: attributeObjects });
-    console.log("Attribute Objects: ", attributeObjects);
   };
 
   handleGroupClick = async (value) => {
@@ -158,15 +153,11 @@ class App extends Component {
       return acc;
     }, []);
 
-    console.log(`Selecting objects: ${JSON.stringify(modelEntities)}`);
-
     // Show only the selected objects
     await api.viewer.isolateEntities(modelEntities);
-    console.log(`Isolated selected objects.`);
   
     // Fit the view to the selected objects
     await api.viewer.setCamera("reset");
-    console.log(`View reset to fit selected objects.`);
   };
 
   deselectObjects = async (api, objects) => {
@@ -179,7 +170,6 @@ class App extends Component {
       modelObjectIds: modelEntities
     };
     await api.viewer.setSelection(objectSelector, "remove");
-    console.log(`Objects deselected.`);
   };
 
   createView = async () => {
@@ -187,7 +177,6 @@ class App extends Component {
     const selectedData = this.state.attributeData.filter(obj => this.state.selectedGroups[obj.value]);
 
     if (selectedData.length === 0) {
-      console.log("No objects selected to create a view.");
       return;
     }
 
@@ -203,10 +192,8 @@ class App extends Component {
     };
 
     const viewSpec = await api.view.createView(viewInfo);
-    console.log(`View created with objects:`, viewSpec.objects);
 
     await api.view.setView(viewSpec.id);
-    console.log(`View set as active.`);
   };
 
   handleSearchChange = (event) => {
@@ -374,7 +361,6 @@ class App extends Component {
 
     const filename = `${this.state.modelName}_Bøyeliste.xlsx`;
     saveAs(blob, filename);
-    console.log("Exported data to Excel");
   };
 
   toggleGhostMode = async () => {

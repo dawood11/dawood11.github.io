@@ -426,45 +426,45 @@ class App extends Component {
     return (
       <>
         <div className="container">
-          <header className="header">
-            <div className="header-content">
-              <div className="logo">
-                <h1>
-                  <span className="pos">POS.</span>
-                  <span className="flow">Flow</span>
-                </h1>
-              </div>
-              <nav>
-                <a href="#" onClick={this.getAttributeDataFromTrimble}>
-                  <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
-                </a>
-                <a href="#" onClick={this.createView}>
-                  <img src="https://dawood11.github.io/trimble-test/src/assets/camera.png" alt="Lag visning" className="nav-icon" />
-                </a>
-                <a href="#" onClick={this.exportToExcel}>
-                  <img src="https://dawood11.github.io/trimble-test/src/assets/download.png" alt="Generer" className="nav-icon" />
-                </a>
-              </nav>
+        <header className="header">
+          <div className="header-content">
+            <div className="logo">
+              <h1>
+                <span className="pos">POS.</span>
+                <span className="flow">Flow</span>
+              </h1>
             </div>
-          </header>
+            <nav>
+              <a href="#" onClick={this.getAttributeDataFromTrimble}>
+                <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
+              </a>
+              <a href="#" onClick={this.createView}>
+                <img src="https://dawood11.github.io/trimble-test/src/assets/camera.png" alt="Lag visning" className="nav-icon" />
+              </a>
+              <a href="#" onClick={this.exportToExcel}>
+                <img src="https://dawood11.github.io/trimble-test/src/assets/download.png" alt="Generer" className="nav-icon" />
+              </a>
+            </nav>
+          </div>
+        </header>
 
-          {/* Sub-header section is hidden, not rendered */}
+        {/* Sub-header section */}
+        <div className="sub-header">
+          <input
+            type="text"
+            className="input-field"
+            placeholder="Søk"
+            value={this.state.searchTerm}
+            onChange={this.handleSearchChange}
+          />
+        </div>
 
-          <main className="content">
-            <div className="search-container">
-              <input
-                type="text"
-                className="input-field"
-                placeholder="Søk"
-                value={this.state.searchTerm}
-                onChange={this.handleSearchChange}
-              />
-            </div>
-            {this.renderGroupedAttributeObjects()}
-          </main>
-          <footer>
-            <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
-            <p>Utviklet av Yasin Rafiq</p>
+        <main className="content">
+          {this.renderGroupedAttributeObjects()}
+        </main>
+        <footer>
+          <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
+          <p>Utviklet av Yasin Rafiq</p>
             <p>Beta 1.1</p>
           </footer>
         </div>

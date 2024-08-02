@@ -132,12 +132,15 @@ class App extends Component {
       } else {
         updatedGroups[value] = true;
       }
-
+  
       return { selectedGroups: updatedGroups };
     }, async () => {
       const selectedData = this.state.attributeData.filter(obj => this.state.selectedGroups[obj.value]);
       if (Object.keys(this.state.selectedGroups).length > 0) {
         await this.selectObjects(api, selectedData);
+      } else {
+        // If no objects are selected, reset the view to show the entire model
+        await api.viewer.setCamera("reset");
       }
     });
   };

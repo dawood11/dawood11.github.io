@@ -62,7 +62,6 @@ class App extends Component {
   getAttributeDataFromTrimble = async () => {
     const posAttributes = ["Pos.nr.", "Pos.nr", "Pos nr.", "Pos"];
     const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
-    const additionalAttributes = ["Material", "Weight", "ProductType"]; // Example additional attributes needed
 
     const api = await this.dotConnect();
     await this.getProjectId();
@@ -70,6 +69,7 @@ class App extends Component {
     await this.getViews();
 
     const viewerObjects = await api.viewer.getObjects();
+
     const attributeObjects = [];
     const batchSize = 1000;
 
@@ -91,9 +91,6 @@ class App extends Component {
               "DIM C": "--",
               "DIM R": "--"
             };
-            let material = "Unknown"; // Placeholder for material attribute
-            let weight = "0.00"; // Placeholder for weight attribute
-            let productType = "BF2D"; // Placeholder for product type
 
             propertySet.properties.forEach((prop) => {
               prop.properties.forEach((subProp) => {
@@ -112,29 +109,11 @@ class App extends Component {
                     dimensions[dimAttr] = subProp.value;
                   }
                 });
-
-                if (subProp.name.includes("Material")) {
-                  material = subProp.value; // Assuming material is directly available
-                }
-
-                if (subProp.name.includes("Weight")) {
-                  weight = subProp.value; // Assuming weight is directly available
-                }
-
-                if (subProp.name.includes("ProductType")) {
-                  productType = subProp.value; // Assuming product type is directly available
-                }
               });
             });
 
             if (primaryAttribute) {
-              attributeObjects.push({ 
-                ...primaryAttribute, 
-                dimensions, 
-                material, 
-                weight, 
-                productType 
-              });
+              attributeObjects.push({ ...primaryAttribute, dimensions });
             }
           }
         });
@@ -251,7 +230,7 @@ class App extends Component {
     const groupedData = sortedData.reduce((acc, obj) => {
       const { value } = obj;
       if (!acc[value]) {
-        acc[value] = { value, antall: 0, models: [], dimensions: obj.dimensions, material: obj.material, weight: obj.weight, productType: obj.productType };
+        acc[value] = { value, antall: 0, models: [], dimensions: obj.dimensions };
       }
       acc[value].antall += 1;
       acc[value].models.push(obj);
@@ -384,81 +363,6 @@ class App extends Component {
     saveAs(blob, filename);
   };
 
-  exportToBVBS = async () => {
-    const groupedData = this.groupAttributeData();
-    let bvbsContent = "";
-
-    groupedData.forEach(group => {
-        const productType = "BF2D"; // Fixed product type
-        const projectNumber = this.state.projectId || "123"; // Example project number
-        const drawingNumber = "MC"; // Example drawing number, replace as needed
-        const drawingRevision = "01"; // Example drawing revision
-        const rebarPosition = `${group.dimensions["Prefix"] || ''}-${group.dimensions["Serienummer"] || ''}`; // Combine Prefix and Serienummer if available
-        const singleRebarLength = group.dimensions["Lengde"] || ''; // Lengde
-        const quantity = group.dimensions["Antall"] || ''; // Antall
-        const rebarWeight = group.dimensions["Vekt"] || ''; // Vekt
-        const diameter = group.dimensions["Stangdiameter"] || ''; // Stangdiameter
-        const materialGrade = group.dimensions["Kvalitet"] || ''; // Kvalitet
-        const coreDiameter = group.dimensions["Dordiameter"] || ''; // Dordiameter
-
-        // Initialize dimension variables
-        let dimA = '', dimB = '', dimC = '', dimD = '', dimE = '', dimF = '', dimG = '', dimH = '', dimH1 = '', dimH2 = '', dimR = '', vA = '', vB = '', vC = '', vD = '';
-
-        // Loop through the group's dimensions to assign values based on keywords
-        for (const [key, value] of Object.entries(group.dimensions)) {
-            if (key.includes("Dim A")) dimA = value;
-            if (key.includes("Dim B")) dimB = value;
-            if (key.includes("Dim C")) dimC = value;
-            if (key.includes("Dim D")) dimD = value;
-            if (key.includes("Dim E")) dimE = value;
-            if (key.includes("Dim F")) dimF = value;
-            if (key.includes("Dim G")) dimG = value;
-            if (key.includes("Dim H")) dimH = value;
-            if (key.includes("Dim H1")) dimH1 = value;
-            if (key.includes("Dim H2")) dimH2 = value;
-            if (key.includes("Dim R")) dimR = value;
-            if (key.includes("Va")) vA = value;
-            if (key.includes("Vb")) vB = value;
-            if (key.includes("Vc")) vC = value;
-            if (key.includes("Vd")) vD = value;
-        }
-
-        // Construct the BVBS line with only available attributes
-        let bvbsLine = `${productType}@Hj${projectNumber}@r${drawingNumber}@i${drawingRevision}@p${rebarPosition}`;
-        
-        if (singleRebarLength) bvbsLine += `@l${singleRebarLength}`;
-        if (quantity) bvbsLine += `@n${quantity}`;
-        if (rebarWeight) bvbsLine += `@e${rebarWeight}`;
-        if (diameter) bvbsLine += `@d${diameter}`;
-        if (materialGrade) bvbsLine += `@g${materialGrade}`;
-        if (coreDiameter) bvbsLine += `@s${coreDiameter}`;
-        if (dimA) bvbsLine += `@a${dimA}`;
-        if (vD) bvbsLine += `@t${vD}`;
-        if (dimD) bvbsLine += `@Gl${dimD}`;
-        if (vC) bvbsLine += `@w${vC}`;
-        if (dimC) bvbsLine += `@l${dimC}`;
-        if (vB) bvbsLine += `@w${vB}`;
-        if (dimB) bvbsLine += `@l${dimB}`;
-        if (vA) bvbsLine += `@w${vA}`;
-        if (dimA) bvbsLine += `@l${dimA}`;
-        if (dimE) bvbsLine += `@w${dimE}`;  // Now using dimE in the BVBS line
-        if (dimF) bvbsLine += `@w${dimF}`;
-        if (dimG) bvbsLine += `@w${dimG}`;
-        if (dimH) bvbsLine += `@w${dimH}`;
-        if (dimH1) bvbsLine += `@w${dimH1}`;
-        if (dimH2) bvbsLine += `@w${dimH2}`;
-        if (dimR) bvbsLine += `@w${dimR}`;
-
-        bvbsLine += "@C77@\n";
-
-        bvbsContent += bvbsLine;
-    });
-
-    const blob = new Blob([bvbsContent], { type: 'text/plain;charset=utf-8' });
-    const filename = `${this.state.modelName}_BVBS.abs`;
-    saveAs(blob, filename);
-  };
-
   toggleGhostMode = async () => {
     const api = await this.dotConnect();
     const newMode = !this.state.ghostMode;
@@ -525,9 +429,6 @@ class App extends Component {
               </a>
               <a href="#" onClick={this.exportToExcel}>
                 <img src="https://dawood11.github.io/trimble-test/src/assets/exportxl.png" alt="Generer" className="nav-icon" />
-              </a>
-              <a href="#" onClick={this.exportToBVBS}>
-                <img src="https://dawood11.github.io/trimble-test/src/assets/bvbs.png" alt="Export BVBS" className="nav-icon" />
               </a>
             </nav>
           </div>

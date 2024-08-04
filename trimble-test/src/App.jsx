@@ -62,6 +62,7 @@ class App extends Component {
   getAttributeDataFromTrimble = async () => {
     const posAttributes = ["Pos.nr.", "Pos.nr", "Pos nr.", "Pos"];
     const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
+    const additionalAttributes = ["Material", "Weight", "ProductType"]; // Example additional attributes needed
 
     const api = await this.dotConnect();
     await this.getProjectId();
@@ -69,7 +70,6 @@ class App extends Component {
     await this.getViews();
 
     const viewerObjects = await api.viewer.getObjects();
-
     const attributeObjects = [];
     const batchSize = 1000;
 
@@ -91,6 +91,9 @@ class App extends Component {
               "DIM C": "--",
               "DIM R": "--"
             };
+            let material = "Unknown"; // Placeholder for material attribute
+            let weight = "0.00"; // Placeholder for weight attribute
+            let productType = "BF2D"; // Placeholder for product type
 
             propertySet.properties.forEach((prop) => {
               prop.properties.forEach((subProp) => {
@@ -109,11 +112,29 @@ class App extends Component {
                     dimensions[dimAttr] = subProp.value;
                   }
                 });
+
+                if (subProp.name.includes("Material")) {
+                  material = subProp.value; // Assuming material is directly available
+                }
+
+                if (subProp.name.includes("Weight")) {
+                  weight = subProp.value; // Assuming weight is directly available
+                }
+
+                if (subProp.name.includes("ProductType")) {
+                  productType = subProp.value; // Assuming product type is directly available
+                }
               });
             });
 
             if (primaryAttribute) {
-              attributeObjects.push({ ...primaryAttribute, dimensions });
+              attributeObjects.push({ 
+                ...primaryAttribute, 
+                dimensions, 
+                material, 
+                weight, 
+                productType 
+              });
             }
           }
         });
@@ -230,7 +251,7 @@ class App extends Component {
     const groupedData = sortedData.reduce((acc, obj) => {
       const { value } = obj;
       if (!acc[value]) {
-        acc[value] = { value, antall: 0, models: [], dimensions: obj.dimensions };
+        acc[value] = { value, antall: 0, models: [], dimensions: obj.dimensions, material: obj.material, weight: obj.weight, productType: obj.productType };
       }
       acc[value].antall += 1;
       acc[value].models.push(obj);
@@ -366,31 +387,29 @@ class App extends Component {
   exportToBVBS = async () => {
     const groupedData = this.groupAttributeData();
     let bvbsContent = "";
-  
+
     groupedData.forEach(group => {
-      const productType = "BF2D"; // Example product type, replace with actual value
-      const projectNumber = this.state.projectId || "000000"; // Project number, ensure it's padded to match the required length
-      const drawingNumber = group.value; // Assuming the group value corresponds to a drawing number
-      const drawingRevision = "0"; // Revision number, example value
-      const rebarPosition = "001"; // Position number, example value
-      const singleRebarLength = group.dimensions["DIM A"] || "0"; // Single rebar length
-      const quantity = group.antall || "0"; // Product quantity
-      const rebarWeight = "1.00"; // Single rebar weight, example value
+      const productType = group.productType || "BF2D"; // Product type from data or default
+      const projectNumber = this.state.projectId || "000000"; // Project number
+      const drawingNumber = group.value; // Drawing number (assuming value represents it)
+      const drawingRevision = "0"; // Revision number, placeholder
+      const rebarPosition = "001"; // Example position number, adjust as needed
+      const singleRebarLength = group.dimensions["DIM A"] || "0"; // Rebar length
+      const quantity = group.antall || "0"; // Quantity
+      const rebarWeight = group.weight || "1.00"; // Rebar weight
       const diameter = group.dimensions.Diameter || "0"; // Rebar diameter
-      const materialGrade = "B500B"; // Material grade, example value
-      const bendingDiameter = "10"; // Bending diameter, example value
-      const rebarLayer = "0"; // Rebar layer, not used but included
-      const stepTapering = "0"; // Step tapering, not used but included
-      const legLength = "100"; // Leg length, example value
-      const bendingAngle = "90"; // Bending angle after the leg, example value
-      const checksum = "C6E7"; // Checksum, example value
-  
-      // Construct the BVBS line according to the format
+      const materialGrade = group.material || "B500B"; // Material grade
+      const bendingDiameter = "10"; // Placeholder bending diameter
+      const rebarLayer = "0"; // Placeholder rebar layer
+      const stepTapering = "0"; // Placeholder step tapering
+      const legLength = "100"; // Placeholder leg length
+      const bendingAngle = "90"; // Placeholder bending angle
+      const checksum = "C6E7"; // Placeholder checksum
+
       const bvbsLine = `${productType}j${projectNumber}@${drawingNumber}e${drawingRevision}.${rebarPosition}l${singleRebarLength}@${quantity}@${rebarWeight}@${diameter}@${materialGrade}@${bendingDiameter}@${rebarLayer}@${stepTapering}@${legLength}@${bendingAngle}@${checksum}\n`;
-      
       bvbsContent += bvbsLine;
     });
-  
+
     const blob = new Blob([bvbsContent], { type: 'text/plain;charset=utf-8' });
     const filename = `${this.state.modelName}_BVBS.abs`;
     saveAs(blob, filename);
@@ -461,10 +480,10 @@ class App extends Component {
                 <img src="https://dawood11.github.io/trimble-test/src/assets/camera.png" alt="Lag visning" className="nav-icon" />
               </a>
               <a href="#" onClick={this.exportToExcel}>
-                <img src="https://dawood11.github.io/trimble-test/src/assets/exportxl.png" alt="Generer" className="nav-icon" />
+                <img src="https://dawood11.github.io/trimble-test/src/assets/download.png" alt="Generer" className="nav-icon" />
               </a>
               <a href="#" onClick={this.exportToBVBS}>
-                <img src="https://dawood11.github.io/trimble-test/src/assets/bvbs.png" alt="Export BVBS" className="nav-icon" />
+                <img src="https://dawood11.github.io/trimble-test/src/assets/download.png" alt="Export BVBS" className="nav-icon" />
               </a>
             </nav>
           </div>

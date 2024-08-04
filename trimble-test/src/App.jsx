@@ -393,52 +393,61 @@ class App extends Component {
         const projectNumber = this.state.projectId || "123"; // Example project number
         const drawingNumber = "MC"; // Example drawing number, replace as needed
         const drawingRevision = "01"; // Example drawing revision
-        const rebarPosition = `${group.dimensions["K-M10"]}-${group.dimensions["K-M11"]}` || "A1-6002"; // Combining Prefix and Serienummer or default
-        const singleRebarLength = group.dimensions["K-M41"] || "3000"; // Lengde or default
-        const quantity = group.dimensions["K-M07"] || "49"; // Antall or default
-        const rebarWeight = group.dimensions["K-M44"] || "7.4"; // Vekt or default
-        const diameter = group.dimensions["K-M03"] || "20"; // Stangdiameter or default
-        const materialGrade = group.dimensions["K-M15"] || "B500NC"; // Kvalitet or default
-        const coreDiameter = group.dimensions["K-M40"] || "80"; // Dordiameter or default
+        const rebarPosition = `${group.dimensions["Prefix"] || ''}-${group.dimensions["Serienummer"] || ''}`; // Combine Prefix and Serienummer if available
+        const singleRebarLength = group.dimensions["Lengde"] || ''; // Lengde
+        const quantity = group.dimensions["Antall"] || ''; // Antall
+        const rebarWeight = group.dimensions["Vekt"] || ''; // Vekt
+        const diameter = group.dimensions["Stangdiameter"] || ''; // Stangdiameter
+        const materialGrade = group.dimensions["Kvalitet"] || ''; // Kvalitet
+        const coreDiameter = group.dimensions["Dordiameter"] || ''; // Dordiameter
 
-        // Extract dimensions, with fallback to defaults if not provided
-        const dimA = group.dimensions["K-M50"] || "250"; // Dim A
-        const dimB = group.dimensions["K-M51"] || "1825"; // Dim B
-        const dimC = group.dimensions["K-M52"] || "385"; // Dim C
-        const dimD = group.dimensions["K-M53"] || "340"; // Dim D
-        const dimE = group.dimensions["K-M54"] || "265"; // Dim E
-        const dimF = group.dimensions["K-M55"] || "2550"; // Dim F
-        const dimG = group.dimensions["K-M56"] || "0"; // Dim G (defaulted to 0 if not present)
-        const dimH = group.dimensions["K-M57"] || "0"; // Dim H (defaulted to 0 if not present)
-        const dimH1 = group.dimensions["K-M58"] || "350"; // Dim H1
-        const dimH2 = group.dimensions["K-M59"] || "350"; // Dim H2
-        const dimR = group.dimensions["K-M63"] || "0"; // Dim R (defaulted to 0 if not present)
-        const vA = group.dimensions["K-M64"] || "87"; // Va
-        const vB = group.dimensions["K-M65"] || "3"; // Vb
-        const vC = group.dimensions["K-M66"] || "14"; // Vc
-        const vD = group.dimensions["K-M67"] || "76"; // Vd
+        // Initialize dimension variables
+        let dimA = '', dimB = '', dimC = '', dimD = '', dimE = '', dimF = '', dimG = '', dimH = '', dimH1 = '', dimH2 = '', dimR = '', vA = '', vB = '', vC = '', vD = '';
 
-        // Construct the BVBS line with conditional inclusion of optional dimensions
-        let bvbsLine = `${productType}@Hj${projectNumber}@r${drawingNumber}@i${drawingRevision}@p${rebarPosition}@l${singleRebarLength}@n${quantity}@e${rebarWeight}@d${diameter}@g${materialGrade}@s${coreDiameter}@a${dimE}@t${vD}@Gl${dimD}@w${vC}@l${dimC}@w${vB}@l${dimB}@w${vA}@l${dimA}`;
+        // Loop through the group's dimensions to assign values based on keywords
+        for (const [key, value] of Object.entries(group.dimensions)) {
+            if (key.includes("Dim A")) dimA = value;
+            if (key.includes("Dim B")) dimB = value;
+            if (key.includes("Dim C")) dimC = value;
+            if (key.includes("Dim D")) dimD = value;
+            if (key.includes("Dim E")) dimE = value;
+            if (key.includes("Dim F")) dimF = value;
+            if (key.includes("Dim G")) dimG = value;
+            if (key.includes("Dim H")) dimH = value;
+            if (key.includes("Dim H1")) dimH1 = value;
+            if (key.includes("Dim H2")) dimH2 = value;
+            if (key.includes("Dim R")) dimR = value;
+            if (key.includes("Va")) vA = value;
+            if (key.includes("Vb")) vB = value;
+            if (key.includes("Vc")) vC = value;
+            if (key.includes("Vd")) vD = value;
+        }
+
+        // Construct the BVBS line with only available attributes
+        let bvbsLine = `${productType}@Hj${projectNumber}@r${drawingNumber}@i${drawingRevision}@p${rebarPosition}`;
         
-        if (dimF !== "0") {
-            bvbsLine += `@w${dimF}`;
-        }
-        if (dimG !== "0") {
-            bvbsLine += `@w${dimG}`;
-        }
-        if (dimH !== "0") {
-            bvbsLine += `@w${dimH}`;
-        }
-        if (dimH1 !== "0") {
-            bvbsLine += `@w${dimH1}`;
-        }
-        if (dimH2 !== "0") {
-            bvbsLine += `@w${dimH2}`;
-        }
-        if (dimR !== "0") {
-            bvbsLine += `@w${dimR}`;
-        }
+        if (singleRebarLength) bvbsLine += `@l${singleRebarLength}`;
+        if (quantity) bvbsLine += `@n${quantity}`;
+        if (rebarWeight) bvbsLine += `@e${rebarWeight}`;
+        if (diameter) bvbsLine += `@d${diameter}`;
+        if (materialGrade) bvbsLine += `@g${materialGrade}`;
+        if (coreDiameter) bvbsLine += `@s${coreDiameter}`;
+        if (dimA) bvbsLine += `@a${dimA}`;
+        if (vD) bvbsLine += `@t${vD}`;
+        if (dimD) bvbsLine += `@Gl${dimD}`;
+        if (vC) bvbsLine += `@w${vC}`;
+        if (dimC) bvbsLine += `@l${dimC}`;
+        if (vB) bvbsLine += `@w${vB}`;
+        if (dimB) bvbsLine += `@l${dimB}`;
+        if (vA) bvbsLine += `@w${vA}`;
+        if (dimA) bvbsLine += `@l${dimA}`;
+        if (dimE) bvbsLine += `@w${dimE}`;  // Now using dimE in the BVBS line
+        if (dimF) bvbsLine += `@w${dimF}`;
+        if (dimG) bvbsLine += `@w${dimG}`;
+        if (dimH) bvbsLine += `@w${dimH}`;
+        if (dimH1) bvbsLine += `@w${dimH1}`;
+        if (dimH2) bvbsLine += `@w${dimH2}`;
+        if (dimR) bvbsLine += `@w${dimR}`;
 
         bvbsLine += "@C77@\n";
 
@@ -515,10 +524,10 @@ class App extends Component {
                 <img src="https://dawood11.github.io/trimble-test/src/assets/camera.png" alt="Lag visning" className="nav-icon" />
               </a>
               <a href="#" onClick={this.exportToExcel}>
-                <img src="https://dawood11.github.io/trimble-test/src/assets/download.png" alt="Generer" className="nav-icon" />
+                <img src="https://dawood11.github.io/trimble-test/src/assets/exportxl.png" alt="Generer" className="nav-icon" />
               </a>
               <a href="#" onClick={this.exportToBVBS}>
-                <img src="https://dawood11.github.io/trimble-test/src/assets/download.png" alt="Export BVBS" className="nav-icon" />
+                <img src="https://dawood11.github.io/trimble-test/src/assets/bvbs.png" alt="Export BVBS" className="nav-icon" />
               </a>
             </nav>
           </div>

@@ -366,18 +366,31 @@ class App extends Component {
   exportToBVBS = async () => {
     const groupedData = this.groupAttributeData();
     let bvbsContent = "";
-
+  
     groupedData.forEach(group => {
-      const shapeCode = "00"; // Example shape code, replace with actual value based on your data
-      const diameter = group.dimensions.Diameter || "0";
-      const length = group.dimensions["DIM A"] || "0";
-      const bendingDimensions = `${group.dimensions["DIM B"] || "0"},${group.dimensions["DIM C"] || "0"},${group.dimensions["DIM R"] || "0"}`;
-      const quantity = group.antall || "0";
-
-      const bvbsLine = `${shapeCode};${diameter};${length};${bendingDimensions};${quantity};\n`;
+      const productType = "BF2D"; // Example product type, replace with actual value
+      const projectNumber = this.state.projectId || "000000"; // Project number, ensure it's padded to match the required length
+      const drawingNumber = group.value; // Assuming the group value corresponds to a drawing number
+      const drawingRevision = "0"; // Revision number, example value
+      const rebarPosition = "001"; // Position number, example value
+      const singleRebarLength = group.dimensions["DIM A"] || "0"; // Single rebar length
+      const quantity = group.antall || "0"; // Product quantity
+      const rebarWeight = "1.00"; // Single rebar weight, example value
+      const diameter = group.dimensions.Diameter || "0"; // Rebar diameter
+      const materialGrade = "B500B"; // Material grade, example value
+      const bendingDiameter = "10"; // Bending diameter, example value
+      const rebarLayer = "0"; // Rebar layer, not used but included
+      const stepTapering = "0"; // Step tapering, not used but included
+      const legLength = "100"; // Leg length, example value
+      const bendingAngle = "90"; // Bending angle after the leg, example value
+      const checksum = "C6E7"; // Checksum, example value
+  
+      // Construct the BVBS line according to the format
+      const bvbsLine = `${productType}j${projectNumber}@${drawingNumber}e${drawingRevision}.${rebarPosition}l${singleRebarLength}@${quantity}@${rebarWeight}@${diameter}@${materialGrade}@${bendingDiameter}@${rebarLayer}@${stepTapering}@${legLength}@${bendingAngle}@${checksum}\n`;
+      
       bvbsContent += bvbsLine;
     });
-
+  
     const blob = new Blob([bvbsContent], { type: 'text/plain;charset=utf-8' });
     const filename = `${this.state.modelName}_BVBS.abs`;
     saveAs(blob, filename);
@@ -448,10 +461,10 @@ class App extends Component {
                 <img src="https://dawood11.github.io/trimble-test/src/assets/camera.png" alt="Lag visning" className="nav-icon" />
               </a>
               <a href="#" onClick={this.exportToExcel}>
-                <img src="https://dawood11.github.io/trimble-test/src/assets/download.png" alt="Generer" className="nav-icon" />
+                <img src="https://dawood11.github.io/trimble-test/src/assets/exportxl.png" alt="Generer" className="nav-icon" />
               </a>
               <a href="#" onClick={this.exportToBVBS}>
-                <img src="https://dawood11.github.io/trimble-test/src/assets/download.png" alt="Export BVBS" className="nav-icon" />
+                <img src="https://dawood11.github.io/trimble-test/src/assets/bvbs.png" alt="Export BVBS" className="nav-icon" />
               </a>
             </nav>
           </div>

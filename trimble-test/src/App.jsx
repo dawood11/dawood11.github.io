@@ -363,6 +363,26 @@ class App extends Component {
     saveAs(blob, filename);
   };
 
+  exportToBVBS = async () => {
+    const groupedData = this.groupAttributeData();
+    let bvbsContent = "";
+
+    groupedData.forEach(group => {
+      const shapeCode = "00"; // Example shape code, replace with actual value based on your data
+      const diameter = group.dimensions.Diameter || "0";
+      const length = group.dimensions["DIM A"] || "0";
+      const bendingDimensions = `${group.dimensions["DIM B"] || "0"},${group.dimensions["DIM C"] || "0"},${group.dimensions["DIM R"] || "0"}`;
+      const quantity = group.antall || "0";
+
+      const bvbsLine = `${shapeCode};${diameter};${length};${bendingDimensions};${quantity};\n`;
+      bvbsContent += bvbsLine;
+    });
+
+    const blob = new Blob([bvbsContent], { type: 'text/plain;charset=utf-8' });
+    const filename = `${this.state.modelName}_BVBS.abs`;
+    saveAs(blob, filename);
+  };
+
   toggleGhostMode = async () => {
     const api = await this.dotConnect();
     const newMode = !this.state.ghostMode;
@@ -429,6 +449,9 @@ class App extends Component {
               </a>
               <a href="#" onClick={this.exportToExcel}>
                 <img src="https://dawood11.github.io/trimble-test/src/assets/download.png" alt="Generer" className="nav-icon" />
+              </a>
+              <a href="#" onClick={this.exportToBVBS}>
+                <img src="https://dawood11.github.io/trimble-test/src/assets/download.png" alt="Export BVBS" className="nav-icon" />
               </a>
             </nav>
           </div>

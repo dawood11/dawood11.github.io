@@ -389,25 +389,60 @@ class App extends Component {
     let bvbsContent = "";
 
     groupedData.forEach(group => {
-      const productType = group.productType || "BF2D"; // Product type from data or default
-      const projectNumber = this.state.projectId || "000000"; // Project number
-      const drawingNumber = group.value; // Drawing number (assuming value represents it)
-      const drawingRevision = "0"; // Revision number, placeholder
-      const rebarPosition = "001"; // Example position number, adjust as needed
-      const singleRebarLength = group.dimensions["DIM A"] || "0"; // Rebar length
-      const quantity = group.antall || "0"; // Quantity
-      const rebarWeight = group.weight || "1.00"; // Rebar weight
-      const diameter = group.dimensions.Diameter || "0"; // Rebar diameter
-      const materialGrade = group.material || "B500B"; // Material grade
-      const bendingDiameter = "10"; // Placeholder bending diameter
-      const rebarLayer = "0"; // Placeholder rebar layer
-      const stepTapering = "0"; // Placeholder step tapering
-      const legLength = "100"; // Placeholder leg length
-      const bendingAngle = "90"; // Placeholder bending angle
-      const checksum = "C6E7"; // Placeholder checksum
+        const productType = "BF2D"; // Fixed product type
+        const projectNumber = this.state.projectId || "123"; // Example project number
+        const drawingNumber = "MC"; // Example drawing number, replace as needed
+        const drawingRevision = "01"; // Example drawing revision
+        const rebarPosition = `${group.dimensions["K-M10"]}-${group.dimensions["K-M11"]}` || "A1-6002"; // Combining Prefix and Serienummer or default
+        const singleRebarLength = group.dimensions["K-M41"] || "3000"; // Lengde or default
+        const quantity = group.dimensions["K-M07"] || "49"; // Antall or default
+        const rebarWeight = group.dimensions["K-M44"] || "7.4"; // Vekt or default
+        const diameter = group.dimensions["K-M03"] || "20"; // Stangdiameter or default
+        const materialGrade = group.dimensions["K-M15"] || "B500NC"; // Kvalitet or default
+        const coreDiameter = group.dimensions["K-M40"] || "80"; // Dordiameter or default
 
-      const bvbsLine = `${productType}j${projectNumber}@${drawingNumber}e${drawingRevision}.${rebarPosition}l${singleRebarLength}@${quantity}@${rebarWeight}@${diameter}@${materialGrade}@${bendingDiameter}@${rebarLayer}@${stepTapering}@${legLength}@${bendingAngle}@${checksum}\n`;
-      bvbsContent += bvbsLine;
+        // Extract dimensions, with fallback to defaults if not provided
+        const dimA = group.dimensions["K-M50"] || "250"; // Dim A
+        const dimB = group.dimensions["K-M51"] || "1825"; // Dim B
+        const dimC = group.dimensions["K-M52"] || "385"; // Dim C
+        const dimD = group.dimensions["K-M53"] || "340"; // Dim D
+        const dimE = group.dimensions["K-M54"] || "265"; // Dim E
+        const dimF = group.dimensions["K-M55"] || "2550"; // Dim F
+        const dimG = group.dimensions["K-M56"] || "0"; // Dim G (defaulted to 0 if not present)
+        const dimH = group.dimensions["K-M57"] || "0"; // Dim H (defaulted to 0 if not present)
+        const dimH1 = group.dimensions["K-M58"] || "350"; // Dim H1
+        const dimH2 = group.dimensions["K-M59"] || "350"; // Dim H2
+        const dimR = group.dimensions["K-M63"] || "0"; // Dim R (defaulted to 0 if not present)
+        const vA = group.dimensions["K-M64"] || "87"; // Va
+        const vB = group.dimensions["K-M65"] || "3"; // Vb
+        const vC = group.dimensions["K-M66"] || "14"; // Vc
+        const vD = group.dimensions["K-M67"] || "76"; // Vd
+
+        // Construct the BVBS line with conditional inclusion of optional dimensions
+        let bvbsLine = `${productType}@Hj${projectNumber}@r${drawingNumber}@i${drawingRevision}@p${rebarPosition}@l${singleRebarLength}@n${quantity}@e${rebarWeight}@d${diameter}@g${materialGrade}@s${coreDiameter}@a${dimE}@t${vD}@Gl${dimD}@w${vC}@l${dimC}@w${vB}@l${dimB}@w${vA}@l${dimA}`;
+        
+        if (dimF !== "0") {
+            bvbsLine += `@w${dimF}`;
+        }
+        if (dimG !== "0") {
+            bvbsLine += `@w${dimG}`;
+        }
+        if (dimH !== "0") {
+            bvbsLine += `@w${dimH}`;
+        }
+        if (dimH1 !== "0") {
+            bvbsLine += `@w${dimH1}`;
+        }
+        if (dimH2 !== "0") {
+            bvbsLine += `@w${dimH2}`;
+        }
+        if (dimR !== "0") {
+            bvbsLine += `@w${dimR}`;
+        }
+
+        bvbsLine += "@C77@\n";
+
+        bvbsContent += bvbsLine;
     });
 
     const blob = new Blob([bvbsContent], { type: 'text/plain;charset=utf-8' });

@@ -156,13 +156,21 @@ class App extends Component {
     // Show only the selected objects
     await api.viewer.isolateEntities(modelEntities);
   
-    // Fit the view to the selected objects more accurately
+    // Fit the view to the selected objects with a closer zoom
     const boundingBox = await api.viewer.getBoundingBox(modelEntities);
+    
+    // Set the camera to the bounding box center and adjust the zoom level
+    const cameraDistanceFactor = 0.75; // Adjust this value for closer or further zoom
+    const cameraPosition = {
+      x: boundingBox.center.x + boundingBox.size.x * cameraDistanceFactor,
+      y: boundingBox.center.y + boundingBox.size.y * cameraDistanceFactor,
+      z: boundingBox.center.z + boundingBox.size.z * cameraDistanceFactor,
+    };
+
     await api.viewer.setCamera({
-      position: boundingBox.center,
+      position: cameraPosition,
       target: boundingBox.center,
-      up: { x: 0, y: 1, z: 0 },
-      zoom: 1.5 // Adjust zoom level to ensure the camera is not too far
+      up: { x: 0, y: 1, z: 0 }
     });
   };
 

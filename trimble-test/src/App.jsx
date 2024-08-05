@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import * as Extensions from 'trimble-connect-workspace-api';
-import './index.css'; 
-import { saveAs } from 'file-saver'; 
-import QRCode from 'qrcode'; 
-import ExcelJS from 'exceljs'; 
-import { SVG } from '@svgdotjs/svg.js';
+import './index.css'; // Import the CSS file
+import { saveAs } from 'file-saver'; // Import the file-saver library
+import QRCode from 'qrcode'; // Import the qrcode library
+import ExcelJS from 'exceljs'; // Import the exceljs library
 
 class App extends Component {
   constructor(props) {
@@ -15,9 +14,9 @@ class App extends Component {
       views: [],
       projectId: null,
       modelName: "Model",
-      ghostMode: false,
-      searchTerm: "",
-      showSubHeader: false,
+      ghostMode: false, // New state for ghost mode
+      searchTerm: "", // New state for search term
+      showSubHeader: false, // State to control the visibility of the sub-header (set to false to hide it)
     };
   }
 
@@ -63,7 +62,6 @@ class App extends Component {
   getAttributeDataFromTrimble = async () => {
     const posAttributes = ["Pos.nr.", "Pos.nr", "Pos nr.", "Pos"];
     const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
-    const bvbsAttributes = ["BVBS"]; 
 
     const api = await this.dotConnect();
     await this.getProjectId();
@@ -86,7 +84,6 @@ class App extends Component {
         properties.forEach((propertySet) => {
           if (propertySet.properties) {
             let primaryAttribute = null;
-            let bvbs = null;
             let dimensions = {
               Diameter: "--",
               "DIM A": "--",
@@ -112,19 +109,11 @@ class App extends Component {
                     dimensions[dimAttr] = subProp.value;
                   }
                 });
-
-                if (bvbsAttributes.some(attr => subProp.name.includes(attr))) {
-                  bvbs = subProp.value;
-                }
               });
             });
 
             if (primaryAttribute) {
-              attributeObjects.push({ 
-                ...primaryAttribute, 
-                dimensions,
-                bvbs 
-              });
+              attributeObjects.push({ ...primaryAttribute, dimensions });
             }
           }
         });
@@ -164,8 +153,10 @@ class App extends Component {
       return acc;
     }, []);
 
+    // Show only the selected objects
     await api.viewer.isolateEntities(modelEntities);
   
+    // Fit the view to the selected objects
     await api.viewer.setCamera("reset");
   };
 
@@ -209,6 +200,7 @@ class App extends Component {
     this.setState({ searchTerm: event.target.value });
   };
 
+  // Function to sort attribute data by letters + numbers (e.g., A1, B2, etc.)
   sortAttributeData = (data) => {
     return data.sort((a, b) => {
       const regex = /(\D+)(\d+)/;
@@ -228,6 +220,7 @@ class App extends Component {
   };
 
   groupAttributeData = (data = this.state.attributeData) => {
+    // Filter based on search term
     const filteredData = data.filter(obj =>
       obj.value.toLowerCase().includes(this.state.searchTerm.toLowerCase())
     );
@@ -247,193 +240,98 @@ class App extends Component {
     return Object.values(groupedData);
   };
 
-  parseBVBS = (bvbsString) => {
-    const segments = bvbsString.split('@');
-    const bvbsData = {};
-
-    segments.forEach(segment => {
-      const key = segment[0];
-      const value = segment.slice(1);
-
-      switch (key) {
-        case 'l':
-          if (!bvbsData.lengths) bvbsData.lengths = [];
-          bvbsData.lengths.push(parseFloat(value));
-          break;
-        case 'w':
-          if (!bvbsData.angles) bvbsData.angles = [];
-          bvbsData.angles.push(parseFloat(value));
-          break;
-        case 'p':
-          bvbsData.position = value;
-          break;
-        case 'n':
-          bvbsData.count = parseInt(value, 10);
-          break;
-        case 'e':
-          bvbsData.weight = parseFloat(value);
-          break;
-        case 'd':
-          bvbsData.diameter = parseFloat(value);
-          break;
-        case 'g':
-          bvbsData.material = value;
-          break;
-        case 's':
-          bvbsData.spacing = parseFloat(value);
-          break;
-        case 'G':
-          if (!bvbsData.dimensions) bvbsData.dimensions = {};
-          if (!bvbsData.dimensions.A) bvbsData.dimensions.A = parseFloat(value);
-          else if (!bvbsData.dimensions.B) bvbsData.dimensions.B = parseFloat(value);
-          else bvbsData.dimensions.C = parseFloat(value);
-          break;
-        default:
-          bvbsData[key] = value;
-          break;
-      }
-    });
-
-    return bvbsData;
-  };
-
-  generate2DDrawing = (bvbsData) => {
-    const draw = SVG().size(500, 500).viewbox(0, 0, 500, 500);
-
-    let currentX = 50; 
-    let currentY = 450;
-    let currentAngle = 0;
-
-    if (bvbsData.lengths && bvbsData.angles) {
-      bvbsData.lengths.forEach((length, index) => {
-        const endX = currentX + length * Math.cos((Math.PI / 180) * currentAngle);
-        const endY = currentY - length * Math.sin((Math.PI / 180) * currentAngle);
-
-        if (index < bvbsData.angles.length && bvbsData.angles[index] !== 0) {
-          const angle = bvbsData.angles[index];
-          const radius = bvbsData.diameter / 2;
-          const largeArcFlag = angle > 180 ? 1 : 0;
-          
-          const path = `M${currentX},${currentY} A${radius},${radius} 0 ${largeArcFlag},1 ${endX},${endY}`;
-          draw.path(path).stroke({ width: 2 }).fill('none');
-        } else {
-          draw.line(currentX, currentY, endX, endY).stroke({ width: 2 });
-        }
-
-        currentX = endX;
-        currentY = endY;
-
-        if (index < bvbsData.angles.length) {
-          currentAngle += bvbsData.angles[index];
-        }
-      });
-    }
-
-    const svgString = draw.svg();
-    return svgString;
-  };
-
   exportToExcel = async () => {
     const groupedData = this.groupAttributeData();
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Attribute Data');
-
+  
+    // Set column widths
     worksheet.columns = [
-      { width: 20 },
-      { width: 15 },
-      { width: 15 },
-      { width: 15 },
-      { width: 15 },
-      { width: 15 },
-      { width: 15 },
-      { width: 15 },
-      { width: 15 },
-      { width: 15 },
+      { width: 20 }, // A
+      { width: 15 }, // B
+      { width: 15 }, // C
+      { width: 15 }, // D
     ];
-
+  
     await Promise.all(groupedData.map(async (group, index) => {
-      const rowStart = index * 10 + 2;
-      const view = this.state.views.find(v => v.name === group.value);
-      const viewId = view ? view.id : null;
-      const projId = this.state.projectId || null;
-      const viewUrl = projId && viewId ? `https://web.connect.trimble.com/projects/${projId}/viewer/3d?viewId=${viewId}&region=europe` : null;
-      let qrCodeDataUrl = null;
-
-      if (viewUrl) {
-        qrCodeDataUrl = await QRCode.toDataURL(viewUrl);
-      }
-
-      // Merge cells for the design
-      worksheet.mergeCells(`A${rowStart}:A${rowStart + 4}`);
-      worksheet.mergeCells(`D${rowStart}:E${rowStart + 4}`);
-
-      // Set values and styles
-      worksheet.getCell(`A${rowStart}`).value = group.value;
-      worksheet.getCell(`A${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
-      worksheet.getCell(`A${rowStart}`).font = { size: 14, bold: true };
-
-      worksheet.getCell(`B${rowStart}`).value = 'DIAMETER';
-      worksheet.getCell(`B${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
-      worksheet.getCell(`B${rowStart}`).font = { bold: true };
-
-      worksheet.getCell(`C${rowStart}`).value = group.dimensions.Diameter;
-      worksheet.getCell(`C${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
-
-      worksheet.getCell(`B${rowStart + 1}`).value = 'ANTALL';
-      worksheet.getCell(`B${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
-      worksheet.getCell(`B${rowStart + 1}`).font = { bold: true };
-
-      worksheet.getCell(`C${rowStart + 1}`).value = group.antall;
-      worksheet.getCell(`C${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
-
-      const parsedBVBS = this.parseBVBS(group.bvbs);
-      const drawingSVG = this.generate2DDrawing(parsedBVBS);
-      const imageId = workbook.addImage({
-        base64: window.btoa(drawingSVG),
-        extension: 'svg',
-      });
-      worksheet.addImage(imageId, {
-        tl: { col: 7, row: rowStart - 1 },
-        ext: { width: 100, height: 100 },
-      });
-
-      if (qrCodeDataUrl) {
-        const qrImageId = workbook.addImage({
-          base64: qrCodeDataUrl.replace(/^data:image\/png;base64,/, ""),
-          extension: 'png',
-        });
-        worksheet.addImage(qrImageId, {
-          tl: { col: 8.5 + 0.5, row: rowStart - 1 + 0.35 },
-          ext: { width: 90, height: 90 },
-        });
-      }
-
-      for (let r = rowStart; r <= rowStart + 4; r++) {
-        for (let c = 1; c <= 10; c++) {
-          if (r === rowStart || r === rowStart + 4 || c === 1 || c === 10) {
+        const rowStart = index * 10 + 2; // Adjusted for 4 rows spacing between cards
+        const view = this.state.views.find(v => v.name === group.value);
+        const viewId = view ? view.id : null;
+        const projId = this.state.projectId || null;
+        const viewUrl = projId && viewId ? `https://web.connect.trimble.com/projects/${projId}/viewer/3d?viewId=${viewId}&region=europe` : null;
+        let qrCodeDataUrl = null;
+  
+        if (viewUrl) {
+          qrCodeDataUrl = await QRCode.toDataURL(viewUrl);
+        }
+  
+        // Merge cells for the design
+        worksheet.mergeCells(`A${rowStart}:A${rowStart + 4}`);
+        worksheet.mergeCells(`D${rowStart}:E${rowStart + 4}`);
+  
+        // Set values and styles
+        worksheet.getCell(`A${rowStart}`).value = group.value;
+        worksheet.getCell(`A${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell(`A${rowStart}`).font = { size: 14, bold: true };
+  
+        worksheet.getCell(`B${rowStart}`).value = 'DIAMETER';
+        worksheet.getCell(`B${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell(`B${rowStart}`).font = { bold: true };
+  
+        worksheet.getCell(`C${rowStart}`).value = group.dimensions.Diameter;
+        worksheet.getCell(`C${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
+  
+        worksheet.getCell(`B${rowStart + 1}`).value = 'ANTALL';
+        worksheet.getCell(`B${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getCell(`B${rowStart + 1}`).font = { bold: true };
+  
+        worksheet.getCell(`C${rowStart + 1}`).value = group.antall;
+        worksheet.getCell(`C${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
+  
+        // Add QR code
+        if (qrCodeDataUrl) {
+          const imageId = workbook.addImage({
+            base64: qrCodeDataUrl.replace(/^data:image\/png;base64,/, ""),
+            extension: 'png',
+          });
+          worksheet.addImage(imageId, {
+            tl: { col: 3.5, row: rowStart - 1 + 0.35 }, // Adjusted position for QR code
+            ext: { width: 90, height: 90 },
+          });
+        }
+  
+        // Add border to the cells to mimic card style
+        for (let r = rowStart; r <= rowStart + 4; r++) {
+          for (let c = 1; c <= 4; c++) { // Adjusted to cover columns A to D
             worksheet.getCell(r, c).border = {
               top: { style: 'medium' },
               left: { style: 'medium' },
               bottom: { style: 'medium' },
               right: { style: 'medium' },
             };
-          } else {
-            worksheet.getCell(r, c).border = {
-              top: { style: 'thin' },
-              left: { style: 'thin' },
-              bottom: { style: 'thin' },
-              right: { style: 'thin' },
-            };
           }
         }
-      }
     }));
-
+  
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/octet-stream' });
-
+  
     const filename = `${this.state.modelName}_Bøyeliste.xlsx`;
     saveAs(blob, filename);
+  };
+
+  toggleGhostMode = async () => {
+    const api = await this.dotConnect();
+    const newMode = !this.state.ghostMode;
+
+    // Activating ghost mode
+    if (newMode) {
+      await api.viewer.activateTool("ghostMode");
+    } else {
+      await api.viewer.deactivateTool("ghostMode");
+    }
+
+    this.setState({ ghostMode: newMode });
   };
 
   renderGroupedAttributeObjects = () => {
@@ -446,7 +344,7 @@ class App extends Component {
         {selectedData.map(group => (
           <div 
             key={group.value} 
-            className={`attribute-card selected`}
+            className="attribute-card selected"
             onClick={() => this.handleGroupClick(group.value)}
           >
             <strong>{group.value}</strong><br />
@@ -457,7 +355,7 @@ class App extends Component {
         {nonSelectedData.map(group => (
           <div 
             key={group.value} 
-            className={`attribute-card`}
+            className="attribute-card"
             onClick={() => this.handleGroupClick(group.value)}
           >
             <strong>{group.value}</strong><br />
@@ -494,6 +392,7 @@ class App extends Component {
           </div>
         </header>
 
+        {/* Sub-header section */}
         <div className="sub-header">
           <input
             type="text"
@@ -510,7 +409,7 @@ class App extends Component {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Beta 1.1</p>
+          <p>Beta 1.2</p>
         </footer>
         </div>
       </>

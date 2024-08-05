@@ -156,8 +156,14 @@ class App extends Component {
     // Show only the selected objects
     await api.viewer.isolateEntities(modelEntities);
   
-    // Fit the view to the selected objects
-    await api.viewer.setCamera("reset");
+    // Fit the view to the selected objects more accurately
+    const boundingBox = await api.viewer.getBoundingBox(modelEntities);
+    await api.viewer.setCamera({
+      position: boundingBox.center,
+      target: boundingBox.center,
+      up: { x: 0, y: 1, z: 0 },
+      zoom: 1.5 // Adjust zoom level to ensure the camera is not too far
+    });
   };
 
   deselectObjects = async (api, objects) => {

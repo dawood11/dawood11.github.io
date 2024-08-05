@@ -367,11 +367,12 @@ class App extends Component {
     const api = await this.dotConnect();
     const newMode = !this.state.ghostMode;
 
-    // activating
-    await api.viewer.activateTool("ghostMode");
-    
-    // de-activating
-    await api.viewer.activateTool("ghostMode");
+    // Activating ghost mode
+    if (newMode) {
+      await api.viewer.activateTool("ghostMode");
+    } else {
+      await api.viewer.deactivateTool("ghostMode");
+    }
 
     this.setState({ ghostMode: newMode });
   };
@@ -386,7 +387,7 @@ class App extends Component {
         {selectedData.map(group => (
           <div 
             key={group.value} 
-            className={`attribute-card selected`}
+            className="attribute-card selected"
             onClick={() => this.handleGroupClick(group.value)}
           >
             <strong>{group.value}</strong><br />
@@ -397,7 +398,7 @@ class App extends Component {
         {nonSelectedData.map(group => (
           <div 
             key={group.value} 
-            className={`attribute-card`}
+            className="attribute-card"
             onClick={() => this.handleGroupClick(group.value)}
           >
             <strong>{group.value}</strong><br />
@@ -451,8 +452,8 @@ class App extends Component {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-            <p>Beta 1.1</p>
-          </footer>
+          <p>Beta 1.1</p>
+        </footer>
         </div>
       </>
     );

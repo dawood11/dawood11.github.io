@@ -125,12 +125,14 @@ class App extends Component {
 
   handleGroupClick = async (value) => {
     const api = await this.dotConnect();
+
+    // Update state for selected groups
     this.setState((prevState) => {
       const updatedGroups = { ...prevState.selectedGroups };
       if (updatedGroups[value]) {
         delete updatedGroups[value];
       } else {
-        updatedGroups[value] = true;
+        updatedGroups = { [value]: true }; // Clear previous selections and set the new one
       }
 
       return { selectedGroups: updatedGroups };
@@ -143,38 +145,22 @@ class App extends Component {
   };
 
   selectObjects = async (api, objects) => {
-    const modelEntities = objects.reduce((acc, obj) => {
-      const model = acc.find(m => m.modelId === obj.modelId);
-      if (model) {
-        model.entityIds.push(obj.id);
-      } else {
-        acc.push({ modelId: obj.modelId, entityIds: [obj.id] });
-      }
-      return acc;
-    }, []);
+    // Clear any previous selection
+    await api.viewer.setSelection({ modelObjectIds: [] }, "set");
 
-    // Show only the selected objects
-    await api.viewer.isolateEntities(modelEntities);
-  
-    // Highlight (select) the objects
-    await api.viewer.setSelection({ modelObjectIds: modelEntities }, "set");
+    // Map objects to the required format
+    const modelEntities = objects.map(obj => ({
+      modelId: obj.modelId,
+      objectRuntimeIds: [obj.id]
+    }));
 
-    // Fit the view to the selected objects with a closer zoom
-    const boundingBox = await api.viewer.getBoundingBox(modelEntities);
-    
-    // Set the camera to the bounding box center and adjust the zoom level
-    const cameraDistanceFactor = 0.3; // Closer zoom level
-    const cameraPosition = {
-      x: boundingBox.center.x + boundingBox.size.x * cameraDistanceFactor,
-      y: boundingBox.center.y + boundingBox.size.y * cameraDistanceFactor,
-      z: boundingBox.center.z + boundingBox.size.z * cameraDistanceFactor,
+    // Select the objects
+    const objectSelector = {
+      modelObjectIds: modelEntities
     };
+    await api.viewer.setSelection(objectSelector, "set");
 
-    await api.viewer.setCamera({
-      position: cameraPosition,
-      target: boundingBox.center,
-      up: { x: 0, y: 1, z: 0 }
-    });
+    console.log(`Objects selected.`);
   };
 
   deselectObjects = async (api, objects) => {

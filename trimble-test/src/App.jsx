@@ -156,6 +156,9 @@ class App extends Component {
     // Show only the selected objects
     await api.viewer.isolateEntities(modelEntities);
   
+    // Highlight (select) the objects
+    await api.viewer.setSelection({ modelObjectIds: modelEntities }, "set");
+
     // Fit the view to the selected objects with a closer zoom
     const boundingBox = await api.viewer.getBoundingBox(modelEntities);
     

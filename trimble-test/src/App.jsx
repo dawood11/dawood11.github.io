@@ -244,21 +244,15 @@ class App extends Component {
     const groupedData = this.groupAttributeData();
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Attribute Data');
-
+  
     // Set column widths
     worksheet.columns = [
       { width: 20 }, // A
       { width: 15 }, // B
       { width: 15 }, // C
       { width: 15 }, // D
-      { width: 15 }, // E
-      { width: 15 }, // F
-      { width: 15 }, // G
-      { width: 15 }, // H
-      { width: 15 }, // I
-      { width: 15 }, // J
     ];
-
+  
     await Promise.all(groupedData.map(async (group, index) => {
         const rowStart = index * 10 + 2; // Adjusted for 4 rows spacing between cards
         const view = this.state.views.find(v => v.name === group.value);
@@ -266,62 +260,34 @@ class App extends Component {
         const projId = this.state.projectId || null;
         const viewUrl = projId && viewId ? `https://web.connect.trimble.com/projects/${projId}/viewer/3d?viewId=${viewId}&region=europe` : null;
         let qrCodeDataUrl = null;
-
+  
         if (viewUrl) {
           qrCodeDataUrl = await QRCode.toDataURL(viewUrl);
         }
-
+  
         // Merge cells for the design
         worksheet.mergeCells(`A${rowStart}:A${rowStart + 4}`);
-        worksheet.mergeCells(`I${rowStart}:J${rowStart + 4}`);
-
+        worksheet.mergeCells(`D${rowStart}:E${rowStart + 4}`);
+  
         // Set values and styles
         worksheet.getCell(`A${rowStart}`).value = group.value;
         worksheet.getCell(`A${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
         worksheet.getCell(`A${rowStart}`).font = { size: 14, bold: true };
-
+  
         worksheet.getCell(`B${rowStart}`).value = 'DIAMETER';
         worksheet.getCell(`B${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
         worksheet.getCell(`B${rowStart}`).font = { bold: true };
-
+  
         worksheet.getCell(`C${rowStart}`).value = group.dimensions.Diameter;
         worksheet.getCell(`C${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
-
-        worksheet.getCell(`D${rowStart}`).value = 'DIM A';
-        worksheet.getCell(`D${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
-        worksheet.getCell(`D${rowStart}`).font = { bold: true };
-
-        worksheet.getCell(`E${rowStart}`).value = group.dimensions["DIM A"];
-        worksheet.getCell(`E${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
-
-        worksheet.getCell(`F${rowStart}`).value = 'DIM C';
-        worksheet.getCell(`F${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
-        worksheet.getCell(`F${rowStart}`).font = { bold: true };
-
-        worksheet.getCell(`G${rowStart}`).value = group.dimensions["DIM C"];
-        worksheet.getCell(`G${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
-
+  
         worksheet.getCell(`B${rowStart + 1}`).value = 'ANTALL';
         worksheet.getCell(`B${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
         worksheet.getCell(`B${rowStart + 1}`).font = { bold: true };
-
+  
         worksheet.getCell(`C${rowStart + 1}`).value = group.antall;
         worksheet.getCell(`C${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
-
-        worksheet.getCell(`D${rowStart + 1}`).value = 'DIM B';
-        worksheet.getCell(`D${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
-        worksheet.getCell(`D${rowStart + 1}`).font = { bold: true };
-
-        worksheet.getCell(`E${rowStart + 1}`).value = group.dimensions["DIM B"];
-        worksheet.getCell(`E${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
-
-        worksheet.getCell(`F${rowStart + 1}`).value = 'DIM D';
-        worksheet.getCell(`F${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
-        worksheet.getCell(`F${rowStart + 1}`).font = { bold: true };
-
-        worksheet.getCell(`G${rowStart + 1}`).value = group.dimensions["DIM D"];
-        worksheet.getCell(`G${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
-
+  
         // Add QR code
         if (qrCodeDataUrl) {
           const imageId = workbook.addImage({
@@ -329,36 +295,27 @@ class App extends Component {
             extension: 'png',
           });
           worksheet.addImage(imageId, {
-            tl: { col: 8.5 + 0.5, row: rowStart - 1 + 0.35 }, // Move half a cell to the right (0.5 cells) and one cell up (-1 row)
+            tl: { col: 3.5, row: rowStart - 1 + 0.35 }, // Adjusted position for QR code
             ext: { width: 90, height: 90 },
           });
         }
-
+  
         // Add border to the cells to mimic card style
         for (let r = rowStart; r <= rowStart + 4; r++) {
-          for (let c = 1; c <= 10; c++) { // Adjusted to cover column I and J
-            if (r === rowStart || r === rowStart + 4 || c === 1 || c === 10) { // Adjusted to cover column I and J
-              worksheet.getCell(r, c).border = {
-                top: { style: 'medium' },
-                left: { style: 'medium' },
-                bottom: { style: 'medium' },
-                right: { style: 'medium' },
-              };
-            } else {
-              worksheet.getCell(r, c).border = {
-                top: { style: 'thin' },
-                left: { style: 'thin' },
-                bottom: { style: 'thin' },
-                right: { style: 'thin' },
-              };
-            }
+          for (let c = 1; c <= 4; c++) { // Adjusted to cover columns A to D
+            worksheet.getCell(r, c).border = {
+              top: { style: 'medium' },
+              left: { style: 'medium' },
+              bottom: { style: 'medium' },
+              right: { style: 'medium' },
+            };
           }
         }
     }));
-
+  
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/octet-stream' });
-
+  
     const filename = `${this.state.modelName}_Bøyeliste.xlsx`;
     saveAs(blob, filename);
   };

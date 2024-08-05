@@ -125,14 +125,12 @@ class App extends Component {
 
   handleGroupClick = async (value) => {
     const api = await this.dotConnect();
-
-    // Update state for selected groups
     this.setState((prevState) => {
       const updatedGroups = { ...prevState.selectedGroups };
       if (updatedGroups[value]) {
         delete updatedGroups[value];
       } else {
-        updatedGroups = { [value]: true }; // Clear previous selections and set the new one
+        updatedGroups[value] = true;
       }
 
       return { selectedGroups: updatedGroups };
@@ -145,22 +143,21 @@ class App extends Component {
   };
 
   selectObjects = async (api, objects) => {
-    // Clear any previous selection
-    await api.viewer.setSelection({ modelObjectIds: [] }, "set");
+    const modelEntities = objects.reduce((acc, obj) => {
+      const model = acc.find(m => m.modelId === obj.modelId);
+      if (model) {
+        model.entityIds.push(obj.id);
+      } else {
+        acc.push({ modelId: obj.modelId, entityIds: [obj.id] });
+      }
+      return acc;
+    }, []);
 
-    // Map objects to the required format
-    const modelEntities = objects.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id]
-    }));
-
-    // Select the objects
-    const objectSelector = {
-      modelObjectIds: modelEntities
-    };
-    await api.viewer.setSelection(objectSelector, "set");
-
-    console.log(`Objects selected.`);
+    // Show only the selected objects
+    await api.viewer.isolateEntities(modelEntities);
+  
+    // Fit the view to the selected objects
+    await api.viewer.setCamera("reset");
   };
 
   deselectObjects = async (api, objects) => {

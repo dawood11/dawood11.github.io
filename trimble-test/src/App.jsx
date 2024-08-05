@@ -163,7 +163,7 @@ class App extends Component {
     const boundingBox = await api.viewer.getBoundingBox(modelEntities);
     
     // Set the camera to the bounding box center and adjust the zoom level
-    const cameraDistanceFactor = 0.75; // Adjust this value for closer or further zoom
+    const cameraDistanceFactor = 0.3; // Closer zoom level
     const cameraPosition = {
       x: boundingBox.center.x + boundingBox.size.x * cameraDistanceFactor,
       y: boundingBox.center.y + boundingBox.size.y * cameraDistanceFactor,

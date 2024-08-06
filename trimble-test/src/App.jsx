@@ -17,6 +17,7 @@ class App extends Component {
       ghostMode: false, // New state for ghost mode
       searchTerm: "", // New state for search term
       showSubHeader: false, // State to control the visibility of the sub-header (set to false to hide it)
+      loading: false, // New state for loading
     };
   }
 
@@ -60,6 +61,8 @@ class App extends Component {
   };
 
   getAttributeDataFromTrimble = async () => {
+    this.setState({ loading: true }); // Start loading
+
     const posAttributes = ["Pos.nr.", "Pos.nr", "Pos nr.", "Pos"];
     const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
 
@@ -120,7 +123,7 @@ class App extends Component {
       }
     }
 
-    this.setState({ attributeData: attributeObjects });
+    this.setState({ attributeData: attributeObjects, loading: false });
   };
 
   handleGroupClick = async (value) => {
@@ -404,12 +407,18 @@ class App extends Component {
         </div>
 
         <main className="content">
-          {this.renderGroupedAttributeObjects()}
+          {this.state.loading ? (
+            <div className="loading-message">
+              Leser armeringsmodellen, vennligst vent...
+            </div>
+          ) : (
+            this.renderGroupedAttributeObjects()
+          )}
         </main>
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Beta 1.2</p>
+          <p>Beta 1.3</p>
         </footer>
         </div>
       </>

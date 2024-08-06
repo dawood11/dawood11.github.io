@@ -123,7 +123,10 @@ class App extends Component {
       }
     }
 
-    this.setState({ attributeData: attributeObjects, loading: false });
+    // Ensure loading is shown for at least 2 seconds
+    setTimeout(() => {
+      this.setState({ attributeData: attributeObjects, loading: false });
+    }, 2000);
   };
 
   handleGroupClick = async (value) => {
@@ -409,7 +412,7 @@ class App extends Component {
         <main className="content">
           {this.state.loading ? (
             <div className="loading-message">
-              Leser armeringsmodellen, vennligst vent...
+              Ta en kopp kaffe, mens jeg leser armeringsmodellen...
             </div>
           ) : (
             this.renderGroupedAttributeObjects()
@@ -418,7 +421,7 @@ class App extends Component {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Beta 1.3</p>
+          <p>Beta 1.2</p>
         </footer>
         </div>
       </>

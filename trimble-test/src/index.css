@@ -64,6 +64,16 @@ body::-webkit-scrollbar {
   z-index: 999;
 }
 
+.loading-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+}
+
 .header-content {
   display: flex;
   justify-content: space-between;

@@ -16,7 +16,7 @@ class App extends Component {
       modelName: "Model",
       ghostMode: false, // New state for ghost mode
       searchTerm: "", // New state for search term
-      showSubHeader: false, // State to control the visibility of the sub-header (set to false to hide it)
+      showSubHeader: true, // State to control the visibility of the sub-header (set to false to hide it)
       loading: false, // New state for loading
     };
   }
@@ -421,7 +421,7 @@ class App extends Component {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Beta 1.3</p>
+          <p>Beta 1.4</p>
         </footer>
         </div>
       </>

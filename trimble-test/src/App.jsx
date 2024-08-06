@@ -412,7 +412,7 @@ class App extends Component {
         <main className="content">
           {this.state.loading ? (
             <div className="loading-message">
-              Ta en kopp kaffe, mens jeg leser armeringsmodellen...
+              Leser armeringen, vennligst vent...
             </div>
           ) : (
             this.renderGroupedAttributeObjects()
@@ -421,7 +421,7 @@ class App extends Component {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Beta 1.2</p>
+          <p>Beta 1.3</p>
         </footer>
         </div>
       </>

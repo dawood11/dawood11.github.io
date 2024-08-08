@@ -1,4 +1,4 @@
-import React, { Component } from 'react';  // If React is not used, remove this line
+import React, { Component } from 'react';
 import * as Extensions from 'trimble-connect-workspace-api';
 import './index.css';
 import { saveAs } from 'file-saver';
@@ -20,6 +20,7 @@ class App extends Component {
       showSubHeader: true,
       loading: false,
       selectedBVBS: null,
+      bvbsToShow: null, // Track the BVBS string to show in the canvas
     };
   }
 
@@ -66,7 +67,7 @@ class App extends Component {
     this.setState({ loading: true });
 
     const posAttributes = ["Pos.nr.", "Pos.nr", "Pos nr.", "Pos"];
-    const bvbsAttributes = ["BVBS"]; // Attribute name for BVBS
+    const bvbsAttributes = ["BVBS"];
     const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
 
     const api = await this.dotConnect();
@@ -137,20 +138,7 @@ class App extends Component {
 
   handleBVBSSelection = (bvbs) => {
     console.log("BVBS selected:", bvbs);
-    this.setState({ selectedBVBS: bvbs });
-  };
-
-  parseBVBS = (bvbs) => {
-    const segments = bvbs.split('@');
-    const data = {};
-
-    segments.forEach(segment => {
-      const key = segment[0];
-      const value = segment.slice(1);
-      data[key] = value;
-    });
-
-    return data;
+    this.setState({ bvbsToShow: bvbs });
   };
 
   groupAttributeData = (data = this.state.attributeData) => {
@@ -204,7 +192,8 @@ class App extends Component {
             Antall: {group.antall}
             {group.bvbs && (
               <div>
-                <ThreeJSCanvas bvbs={group.bvbs} />
+                <button onClick={() => this.handleBVBSSelection(group.bvbs)}>Vis BVBS</button>
+                {this.state.bvbsToShow === group.bvbs && <ThreeJSCanvas bvbs={group.bvbs} />}
               </div>
             )}
           </div>
@@ -220,7 +209,8 @@ class App extends Component {
             Antall: {group.antall}
             {group.bvbs && (
               <div>
-                <ThreeJSCanvas bvbs={group.bvbs} />
+                <button onClick={() => this.handleBVBSSelection(group.bvbs)}>Vis BVBS</button>
+                {this.state.bvbsToShow === group.bvbs && <ThreeJSCanvas bvbs={group.bvbs} />}
               </div>
             )}
           </div>
@@ -402,7 +392,7 @@ class App extends Component {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>T6</p>
+          <p>T8</p>
         </footer>
         </div>
       </>

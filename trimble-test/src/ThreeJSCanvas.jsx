@@ -1,29 +1,32 @@
-import { useEffect, useRef } from 'react';  // Removed 'React' import if using React 17+
 import PropTypes from 'prop-types';
+import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
 const ThreeJSCanvas = ({ bvbs }) => {
   const canvasRef = useRef(null);
+  const rendererRef = useRef(null);
 
   useEffect(() => {
     if (!bvbs) return;
 
+    // Dispose of any existing renderer and context
+    if (rendererRef.current) {
+      rendererRef.current.dispose();
+      canvasRef.current.innerHTML = '';  // Clear the canvas content
+    }
+
     // Set up the scene, camera, and renderer
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(
-      window.innerWidth / -2, 
-      window.innerWidth / 2, 
-      window.innerHeight / 2, 
-      window.innerHeight / -2, 
-      1, 
-      1000
+      -150, 150, 100, -100, 1, 1000
     );
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(300, 200);  // Adjust as needed
     canvasRef.current.appendChild(renderer.domElement);
+    rendererRef.current = renderer;
 
-    // Create a material and a line geometry
+    // Create material and geometry
     const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
     const points = [];
 
@@ -52,14 +55,14 @@ const ThreeJSCanvas = ({ bvbs }) => {
 
     // Render the scene
     const animate = () => {
-      requestAnimationFrame(animate);
       renderer.render(scene, camera);
     };
     animate();
 
-    // Clean up on component unmount
+    // Clean up on component unmount or when a new BVBS string is provided
     return () => {
       renderer.dispose();
+      rendererRef.current = null;
     };
   }, [bvbs]);
 
@@ -78,7 +81,7 @@ const ThreeJSCanvas = ({ bvbs }) => {
 };
 
 ThreeJSCanvas.propTypes = {
-  bvbs: PropTypes.string.isRequired,  // Use .isRequired or just PropTypes.string if it's optional
+  bvbs: PropTypes.string.isRequired,
 };
 
 export default ThreeJSCanvas;

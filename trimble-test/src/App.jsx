@@ -65,8 +65,8 @@ class App extends Component {
     this.setState({ loading: true });
 
     const posAttributes = ["Pos.nr.", "Pos.nr", "Pos nr.", "Pos"];
+    const bvbsAttributes = ["BVBS"]; // Attribute name for BVBS
     const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
-    const bvbsAttributes = ["BVBS"];
 
     const api = await this.dotConnect();
     await this.getProjectId();
@@ -74,7 +74,6 @@ class App extends Component {
     await this.getViews();
 
     const viewerObjects = await api.viewer.getObjects();
-
     const attributeObjects = [];
     const batchSize = 1000;
 
@@ -110,15 +109,15 @@ class App extends Component {
                   };
                 }
 
+                if (bvbsAttributes.some(attr => subProp.name.includes(attr))) {
+                  bvbs = subProp.value;
+                }
+
                 dimensionAttributes.forEach(dimAttr => {
                   if (subProp.name.includes(dimAttr)) {
                     dimensions[dimAttr] = subProp.value;
                   }
                 });
-
-                if (bvbsAttributes.some(attr => subProp.name.includes(attr))) {
-                  bvbs = subProp.value;
-                }
               });
             });
 
@@ -156,11 +155,15 @@ class App extends Component {
   renderBVBSVisualization = () => {
     const { selectedBVBS } = this.state;
 
-    if (!selectedBVBS) return null;
+    if (!selectedBVBS) return <p>Ingen BVBS-streng valgt</p>;
 
     console.log("Parsing BVBS string:", selectedBVBS);
 
     const bvbsData = this.parseBVBS(selectedBVBS);
+
+    if (!bvbsData.G || !bvbsData.l) {
+      return <p>Ugyldig BVBS-streng</p>;
+    }
 
     const length1 = parseInt(bvbsData.G.slice(1)); // Length before first bend
     const angle1 = parseInt(bvbsData.w); // Angle of the first bend
@@ -171,7 +174,6 @@ class App extends Component {
     const scaledLength1 = length1 * scaleFactor;
     const scaledLength2 = length2 * scaleFactor;
 
-    // Calculate coordinates for the second point after bending
     const x1 = scaledLength1;
     const y1 = 0;
     const x2 = x1 + scaledLength2 * Math.cos((angle1 * Math.PI) / 180);
@@ -179,15 +181,10 @@ class App extends Component {
 
     return (
       <svg width="600" height="400" style={{ border: '1px solid black', margin: '20px 0' }}>
-        {/* Draw start point */}
         <circle cx="0" cy="200" r="5" fill="red" />
-        {/* Draw the first segment */}
         <line x1="0" y1="200" x2={x1} y2="200" stroke="black" strokeWidth="4" />
-        {/* Draw bend point */}
         <circle cx={x1} cy="200" r="5" fill="blue" />
-        {/* Draw the second segment */}
         <line x1={x1} y1="200" x2={x2} y2={200 + y2} stroke="black" strokeWidth="4" />
-        {/* Draw end point */}
         <circle cx={x2} cy={200 + y2} r="5" fill="green" />
       </svg>
     );
@@ -217,7 +214,7 @@ class App extends Component {
     const groupedData = sortedData.reduce((acc, obj) => {
       const { value } = obj;
       if (!acc[value]) {
-        acc[value] = { value, antall: 0, models: [], dimensions: obj.dimensions };
+        acc[value] = { value, antall: 0, models: [], dimensions: obj.dimensions, bvbs: obj.bvbs };
       }
       acc[value].antall += 1;
       acc[value].models.push(obj);
@@ -242,10 +239,10 @@ class App extends Component {
           >
             <strong>{group.value}</strong><br />
             Antall: {group.antall}
-            {group.models[0].bvbs && (
+            {group.bvbs && (
               <button onClick={(e) => {
                 e.stopPropagation(); // Prevent triggering parent onClick
-                this.handleBVBSSelection(group.models[0].bvbs);
+                this.handleBVBSSelection(group.bvbs);
               }}>
                 Vis BVBS
               </button>
@@ -261,10 +258,10 @@ class App extends Component {
           >
             <strong>{group.value}</strong><br />
             Antall: {group.antall}
-            {group.models[0].bvbs && (
+            {group.bvbs && (
               <button onClick={(e) => {
                 e.stopPropagation(); // Prevent triggering parent onClick
-                this.handleBVBSSelection(group.models[0].bvbs);
+                this.handleBVBSSelection(group.bvbs);
               }}>
                 Vis BVBS
               </button>
@@ -449,7 +446,7 @@ class App extends Component {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>T4</p>
+          <p>T5</p>
         </footer>
         </div>
       </>

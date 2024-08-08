@@ -1,9 +1,10 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react';  // If React is not used, remove this line
 import * as Extensions from 'trimble-connect-workspace-api';
 import './index.css';
 import { saveAs } from 'file-saver';
 import QRCode from 'qrcode';
 import ExcelJS from 'exceljs';
+import ThreeJSCanvas from './ThreeJSCanvas.jsx';
 
 class App extends Component {
   constructor(props) {
@@ -152,44 +153,6 @@ class App extends Component {
     return data;
   };
 
-  renderBVBSVisualization = () => {
-    const { selectedBVBS } = this.state;
-
-    if (!selectedBVBS) return <p>Ingen BVBS-streng valgt</p>;
-
-    console.log("Parsing BVBS string:", selectedBVBS);
-
-    const bvbsData = this.parseBVBS(selectedBVBS);
-
-    if (!bvbsData.G || !bvbsData.l) {
-      return <p>Ugyldig BVBS-streng</p>;
-    }
-
-    const length1 = parseInt(bvbsData.G.slice(1)); // Length before first bend
-    const angle1 = parseInt(bvbsData.w); // Angle of the first bend
-    const length2 = parseInt(bvbsData.l); // Length after first bend
-
-    // Scale down large lengths for better visualization
-    const scaleFactor = 0.05; // Adjust this value as needed
-    const scaledLength1 = length1 * scaleFactor;
-    const scaledLength2 = length2 * scaleFactor;
-
-    const x1 = scaledLength1;
-    const y1 = 0;
-    const x2 = x1 + scaledLength2 * Math.cos((angle1 * Math.PI) / 180);
-    const y2 = y1 - scaledLength2 * Math.sin((angle1 * Math.PI) / 180);
-
-    return (
-      <svg width="600" height="400" style={{ border: '1px solid black', margin: '20px 0' }}>
-        <circle cx="0" cy="200" r="5" fill="red" />
-        <line x1="0" y1="200" x2={x1} y2="200" stroke="black" strokeWidth="4" />
-        <circle cx={x1} cy="200" r="5" fill="blue" />
-        <line x1={x1} y1="200" x2={x2} y2={200 + y2} stroke="black" strokeWidth="4" />
-        <circle cx={x2} cy={200 + y2} r="5" fill="green" />
-      </svg>
-    );
-  };
-
   groupAttributeData = (data = this.state.attributeData) => {
     const filteredData = data.filter(obj =>
       obj.value.toLowerCase().includes(this.state.searchTerm.toLowerCase())
@@ -240,12 +203,9 @@ class App extends Component {
             <strong>{group.value}</strong><br />
             Antall: {group.antall}
             {group.bvbs && (
-              <button onClick={(e) => {
-                e.stopPropagation(); // Prevent triggering parent onClick
-                this.handleBVBSSelection(group.bvbs);
-              }}>
-                Vis BVBS
-              </button>
+              <div>
+                <ThreeJSCanvas bvbs={group.bvbs} />
+              </div>
             )}
           </div>
         ))}
@@ -259,12 +219,9 @@ class App extends Component {
             <strong>{group.value}</strong><br />
             Antall: {group.antall}
             {group.bvbs && (
-              <button onClick={(e) => {
-                e.stopPropagation(); // Prevent triggering parent onClick
-                this.handleBVBSSelection(group.bvbs);
-              }}>
-                Vis BVBS
-              </button>
+              <div>
+                <ThreeJSCanvas bvbs={group.bvbs} />
+              </div>
             )}
           </div>
         ))}
@@ -439,14 +396,13 @@ class App extends Component {
           ) : (
             <>
               {this.renderGroupedAttributeObjects()}
-              {this.renderBVBSVisualization()}
             </>
           )}
         </main>
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>T5</p>
+          <p>T6</p>
         </footer>
         </div>
       </>

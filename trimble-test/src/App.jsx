@@ -136,7 +136,6 @@ class App extends Component {
   };
 
   handleBVBSSelection = (bvbs) => {
-    // Logging to check if the function is called correctly
     console.log("BVBS selected:", bvbs);
     this.setState({ selectedBVBS: bvbs });
   };
@@ -159,7 +158,6 @@ class App extends Component {
 
     if (!selectedBVBS) return null;
 
-    // Logging to check if the BVBS string is parsed correctly
     console.log("Parsing BVBS string:", selectedBVBS);
 
     const bvbsData = this.parseBVBS(selectedBVBS);
@@ -168,15 +166,29 @@ class App extends Component {
     const angle1 = parseInt(bvbsData.w); // Angle of the first bend
     const length2 = parseInt(bvbsData.l); // Length after first bend
 
-    const x1 = length1;
+    // Scale down large lengths for better visualization
+    const scaleFactor = 0.05; // Adjust this value as needed
+    const scaledLength1 = length1 * scaleFactor;
+    const scaledLength2 = length2 * scaleFactor;
+
+    // Calculate coordinates for the second point after bending
+    const x1 = scaledLength1;
     const y1 = 0;
-    const x2 = x1 + length2 * Math.cos((angle1 * Math.PI) / 180);
-    const y2 = y1 - length2 * Math.sin((angle1 * Math.PI) / 180);
+    const x2 = x1 + scaledLength2 * Math.cos((angle1 * Math.PI) / 180);
+    const y2 = y1 - scaledLength2 * Math.sin((angle1 * Math.PI) / 180);
 
     return (
       <svg width="600" height="400" style={{ border: '1px solid black', margin: '20px 0' }}>
+        {/* Draw start point */}
+        <circle cx="0" cy="200" r="5" fill="red" />
+        {/* Draw the first segment */}
         <line x1="0" y1="200" x2={x1} y2="200" stroke="black" strokeWidth="4" />
+        {/* Draw bend point */}
+        <circle cx={x1} cy="200" r="5" fill="blue" />
+        {/* Draw the second segment */}
         <line x1={x1} y1="200" x2={x2} y2={200 + y2} stroke="black" strokeWidth="4" />
+        {/* Draw end point */}
+        <circle cx={x2} cy={200 + y2} r="5" fill="green" />
       </svg>
     );
   };
@@ -437,7 +449,7 @@ class App extends Component {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>T3</p>
+          <p>T4</p>
         </footer>
         </div>
       </>

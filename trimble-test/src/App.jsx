@@ -18,7 +18,7 @@ class App extends Component {
       searchTerm: "",
       showSubHeader: true,
       loading: false,
-      selectedBVBS: null, // New state for selected BVBS string
+      selectedBVBS: null,
     };
   }
 
@@ -66,7 +66,7 @@ class App extends Component {
 
     const posAttributes = ["Pos.nr.", "Pos.nr", "Pos nr.", "Pos"];
     const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
-    const bvbsAttributes = ["BVBS"]; // Assuming BVBS attribute is called "BVBS"
+    const bvbsAttributes = ["BVBS"];
 
     const api = await this.dotConnect();
     await this.getProjectId();
@@ -116,7 +116,6 @@ class App extends Component {
                   }
                 });
 
-                // Check for BVBS string
                 if (bvbsAttributes.some(attr => subProp.name.includes(attr))) {
                   bvbs = subProp.value;
                 }
@@ -175,6 +174,40 @@ class App extends Component {
         <line x1={x1} y1="200" x2={x2} y2={200 + y2} stroke="black" strokeWidth="4" />
       </svg>
     );
+  };
+
+  groupAttributeData = (data = this.state.attributeData) => {
+    const filteredData = data.filter(obj =>
+      obj.value.toLowerCase().includes(this.state.searchTerm.toLowerCase())
+    );
+
+    const sortedData = filteredData.sort((a, b) => {
+      const regex = /(\D+)(\d+)/;
+      const aMatch = a.value.match(regex);
+      const bMatch = b.value.match(regex);
+
+      if (aMatch && bMatch) {
+        if (aMatch[1] === bMatch[1]) {
+          return parseInt(aMatch[2]) - parseInt(bMatch[2]);
+        } else {
+          return aMatch[1].localeCompare(bMatch[1]);
+        }
+      }
+
+      return a.value.localeCompare(b.value);
+    });
+
+    const groupedData = sortedData.reduce((acc, obj) => {
+      const { value } = obj;
+      if (!acc[value]) {
+        acc[value] = { value, antall: 0, models: [], dimensions: obj.dimensions };
+      }
+      acc[value].antall += 1;
+      acc[value].models.push(obj);
+      return acc;
+    }, {});
+
+    return Object.values(groupedData);
   };
 
   renderGroupedAttributeObjects = () => {
@@ -307,6 +340,41 @@ class App extends Component {
     this.setState({ ghostMode: newMode });
   };
 
+  handleGroupClick = async (value) => {
+    const api = await this.dotConnect();
+    this.setState((prevState) => {
+      const updatedGroups = { ...prevState.selectedGroups };
+      if (updatedGroups[value]) {
+        delete updatedGroups[value];
+      } else {
+        updatedGroups[value] = true;
+      }
+
+      return { selectedGroups: updatedGroups };
+    }, async () => {
+      const selectedData = this.state.attributeData.filter(obj => this.state.selectedGroups[obj.value]);
+      if (Object.keys(this.state.selectedGroups).length > 0) {
+        await this.selectObjects(api, selectedData);
+      }
+    });
+  };
+
+  selectObjects = async (api, objects) => {
+    const modelEntities = objects.reduce((acc, obj) => {
+      const model = acc.find(m => m.modelId === obj.modelId);
+      if (model) {
+        model.entityIds.push(obj.id);
+      } else {
+        acc.push({ modelId: obj.modelId, entityIds: [obj.id] });
+      }
+      return acc;
+    }, []);
+
+    await api.viewer.isolateEntities(modelEntities);
+  
+    await api.viewer.setCamera("reset");
+  };
+
   render() {
     return (
       <>
@@ -358,7 +426,7 @@ class App extends Component {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Test versjon</p>
+          <p>T2</p>
         </footer>
         </div>
       </>

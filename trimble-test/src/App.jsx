@@ -136,6 +136,8 @@ class App extends Component {
   };
 
   handleBVBSSelection = (bvbs) => {
+    // Logging to check if the function is called correctly
+    console.log("BVBS selected:", bvbs);
     this.setState({ selectedBVBS: bvbs });
   };
 
@@ -157,6 +159,9 @@ class App extends Component {
 
     if (!selectedBVBS) return null;
 
+    // Logging to check if the BVBS string is parsed correctly
+    console.log("Parsing BVBS string:", selectedBVBS);
+
     const bvbsData = this.parseBVBS(selectedBVBS);
 
     const length1 = parseInt(bvbsData.G.slice(1)); // Length before first bend
@@ -170,7 +175,7 @@ class App extends Component {
 
     return (
       <svg width="600" height="400" style={{ border: '1px solid black', margin: '20px 0' }}>
-        <line x1="0" y1="200" x2={x1} y2={200} stroke="black" strokeWidth="4" />
+        <line x1="0" y1="200" x2={x1} y2="200" stroke="black" strokeWidth="4" />
         <line x1={x1} y1="200" x2={x2} y2={200 + y2} stroke="black" strokeWidth="4" />
       </svg>
     );
@@ -226,7 +231,10 @@ class App extends Component {
             <strong>{group.value}</strong><br />
             Antall: {group.antall}
             {group.models[0].bvbs && (
-              <button onClick={() => this.handleBVBSSelection(group.models[0].bvbs)}>
+              <button onClick={(e) => {
+                e.stopPropagation(); // Prevent triggering parent onClick
+                this.handleBVBSSelection(group.models[0].bvbs);
+              }}>
                 Vis BVBS
               </button>
             )}
@@ -242,7 +250,10 @@ class App extends Component {
             <strong>{group.value}</strong><br />
             Antall: {group.antall}
             {group.models[0].bvbs && (
-              <button onClick={() => this.handleBVBSSelection(group.models[0].bvbs)}>
+              <button onClick={(e) => {
+                e.stopPropagation(); // Prevent triggering parent onClick
+                this.handleBVBSSelection(group.models[0].bvbs);
+              }}>
                 Vis BVBS
               </button>
             )}
@@ -426,7 +437,7 @@ class App extends Component {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>T2</p>
+          <p>T3</p>
         </footer>
         </div>
       </>

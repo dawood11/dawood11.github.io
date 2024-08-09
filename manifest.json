@@ -1,6 +1,6 @@
 {
     "icon": "https://raw.githubusercontent.com/dawood11/dawood11.github.io/master/rebar.png",
-    "title": "Elementer",
+    "title": "POS.flow",
     "url": "https://dawood11.github.io/index.html",
     "description": "Pos.Flow extension for Trimble Connect Web Viewer",
     "configCommand": "do_config",

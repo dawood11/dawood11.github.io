@@ -161,9 +161,6 @@ class App extends Component {
 
     // Show only the selected objects
     await api.viewer.isolateEntities(modelEntities);
-  
-    // Fit the view to the selected objects
-    await api.viewer.setCamera("reset");
   };
 
   deselectObjects = async (api, objects) => {

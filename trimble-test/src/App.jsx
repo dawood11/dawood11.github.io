@@ -10,11 +10,11 @@ class App extends Component {
       selectedGroups: {},
       projectId: null,
       modelName: "Model",
-      ghostMode: false,
-      searchTerm: "",
-      showSubHeader: true,
-      loading: false,
-      selectionMode: false, // New state for selection mode
+      ghostMode: false, // State for ghost mode
+      searchTerm: "", // State for search term
+      showSubHeader: true, // State to control the visibility of the sub-header
+      loading: false, // State for loading
+      selectionMode: false, // State for selection mode
     };
   }
 
@@ -51,7 +51,7 @@ class App extends Component {
   };
 
   getAttributeDataFromTrimble = async () => {
-    this.setState({ loading: true });
+    this.setState({ loading: true }); // Start loading
 
     const posAttributes = ["Pos.nr.", "Pos.nr", "Pos nr.", "Pos"];
 
@@ -98,13 +98,13 @@ class App extends Component {
       }
     }
 
+    // Ensure loading is shown for at least 2 seconds
     setTimeout(() => {
       this.setState({ attributeData: attributeObjects, loading: false });
     }, 2000);
   };
 
   handleGroupClick = async (value) => {
-    const api = await this.dotConnect();
     this.setState((prevState) => {
       const updatedGroups = { ...prevState.selectedGroups };
       if (updatedGroups[value]) {
@@ -117,37 +117,110 @@ class App extends Component {
     }, async () => {
       if (this.state.selectionMode) {
         await this.selectModelsInViewer();
+      } else {
+        const api = await this.dotConnect();
+        const selectedData = this.state.attributeData.filter(obj => this.state.selectedGroups[obj.value]);
+        if (Object.keys(this.state.selectedGroups).length > 0) {
+          await this.selectObjects(api, selectedData);
+        }
       }
     });
   };
 
-  // Function to select models without isolating
+  selectObjects = async (api, objects) => {
+    const modelEntities = objects.reduce((acc, obj) => {
+      const model = acc.find(m => m.modelId === obj.modelId);
+      if (model) {
+        model.entityIds.push(obj.id);
+      } else {
+        acc.push({ modelId: obj.modelId, entityIds: [obj.id] });
+      }
+      return acc;
+    }, []);
+
+    // Isolate the selected objects (default behavior)
+    await api.viewer.isolateEntities(modelEntities);
+  };
+
+  // Function to select models without isolating (for M button behavior)
   selectModelsInViewer = async () => {
     const api = await this.dotConnect();
     const modelsToSelect = [];
 
-    // Loop through attribute data and add selected models to the list
     this.state.attributeData.forEach((obj) => {
       if (this.state.selectedGroups[obj.value]) {
         modelsToSelect.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
       }
     });
 
-    // Set selection in the viewer without isolating
     await api.viewer.setSelection({
       clear: true, // Clear previous selection
       models: modelsToSelect, // Select the new models
     });
   };
 
+  toggleGhostMode = async () => {
+    const api = await this.dotConnect();
+    const newMode = !this.state.ghostMode;
+
+    // Activating ghost mode
+    if (newMode) {
+      await api.viewer.activateTool("ghostMode");
+    } else {
+      await api.viewer.deactivateTool("ghostMode");
+    }
+
+    this.setState({ ghostMode: newMode });
+  };
+
   toggleSelectionMode = () => {
     this.setState((prevState) => ({
       selectionMode: !prevState.selectionMode,
-    }), async () => {
-      if (this.state.selectionMode) {
-        await this.selectModelsInViewer();
+    }));
+  };
+
+  handleSearchChange = (event) => {
+    this.setState({ searchTerm: event.target.value });
+  };
+
+  // Function to sort attribute data by letters + numbers (e.g., A1, B2, etc.)
+  sortAttributeData = (data) => {
+    return data.sort((a, b) => {
+      const regex = /(\D+)(\d+)/;
+      const aMatch = a.value.match(regex);
+      const bMatch = b.value.match(regex);
+
+      if (aMatch && bMatch) {
+        if (aMatch[1] === bMatch[1]) {
+          return parseInt(aMatch[2]) - parseInt(bMatch[2]);
+        } else {
+          return aMatch[1].localeCompare(bMatch[1]);
+        }
       }
+
+      return a.value.localeCompare(b.value);
     });
+  };
+
+  groupAttributeData = (data = this.state.attributeData) => {
+    // Filter based on search term
+    const filteredData = data.filter(obj =>
+      obj.value.toLowerCase().includes(this.state.searchTerm.toLowerCase())
+    );
+
+    const sortedData = this.sortAttributeData(filteredData);
+
+    const groupedData = sortedData.reduce((acc, obj) => {
+      const { value } = obj;
+      if (!acc[value]) {
+        acc[value] = { value, antall: 0, models: [] };
+      }
+      acc[value].antall += 1;
+      acc[value].models.push(obj);
+      return acc;
+    }, {});
+
+    return Object.values(groupedData);
   };
 
   renderGroupedAttributeObjects = () => {
@@ -198,6 +271,7 @@ class App extends Component {
               <a href="#" onClick={this.getAttributeDataFromTrimble}>
                 <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
               </a>
+              {/* M button to toggle selection mode */}
               <a href="#" onClick={this.toggleSelectionMode}>
                 <img src="https://dawood11.github.io/trimble-test/src/assets/M.png" alt="Selection Mode" className="nav-icon" />
               </a>
@@ -228,7 +302,7 @@ class App extends Component {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>TEST</p>
+          <p>Test 2</p>
         </footer>
         </div>
       </>

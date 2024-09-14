@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
 import * as Extensions from 'trimble-connect-workspace-api';
 import './index.css'; // Import the CSS file
-import { saveAs } from 'file-saver'; // Import the file-saver library
-import QRCode from 'qrcode'; // Import the qrcode library
-import ExcelJS from 'exceljs'; // Import the exceljs library
 
 class App extends Component {
   constructor(props) {
@@ -11,7 +8,6 @@ class App extends Component {
     this.state = {
       attributeData: [],
       selectedGroups: {},
-      views: [],
       projectId: null,
       modelName: "Model",
       ghostMode: false, // New state for ghost mode
@@ -53,23 +49,14 @@ class App extends Component {
     }
   };
 
-  getViews = async () => {
-    const api = await this.dotConnect();
-    const viewApi = api.view;
-    const allViews = await viewApi.getViews();
-    this.setState({ views: allViews });
-  };
-
   getAttributeDataFromTrimble = async () => {
     this.setState({ loading: true }); // Start loading
 
     const posAttributes = ["Pos.nr.", "Pos.nr", "Pos nr.", "Pos"];
-    const dimensionAttributes = ["Diameter", "DIM A", "DIM B", "DIM C", "DIM R"];
 
     const api = await this.dotConnect();
     await this.getProjectId();
     await this.getModelName();
-    await this.getViews();
 
     const viewerObjects = await api.viewer.getObjects();
 
@@ -87,13 +74,6 @@ class App extends Component {
         properties.forEach((propertySet) => {
           if (propertySet.properties) {
             let primaryAttribute = null;
-            let dimensions = {
-              Diameter: "--",
-              "DIM A": "--",
-              "DIM B": "--",
-              "DIM C": "--",
-              "DIM R": "--"
-            };
 
             propertySet.properties.forEach((prop) => {
               prop.properties.forEach((subProp) => {
@@ -106,17 +86,11 @@ class App extends Component {
                     value: subProp.value 
                   };
                 }
-
-                dimensionAttributes.forEach(dimAttr => {
-                  if (subProp.name.includes(dimAttr)) {
-                    dimensions[dimAttr] = subProp.value;
-                  }
-                });
               });
             });
 
             if (primaryAttribute) {
-              attributeObjects.push({ ...primaryAttribute, dimensions });
+              attributeObjects.push({ ...primaryAttribute });
             }
           }
         });
@@ -163,40 +137,18 @@ class App extends Component {
     await api.viewer.isolateEntities(modelEntities);
   };
 
-  deselectObjects = async (api, objects) => {
-    const modelEntities = objects.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id]
-    }));
-
-    const objectSelector = {
-      modelObjectIds: modelEntities
-    };
-    await api.viewer.setSelection(objectSelector, "remove");
-  };
-
-  createView = async () => {
+  toggleGhostMode = async () => {
     const api = await this.dotConnect();
-    const selectedData = this.state.attributeData.filter(obj => this.state.selectedGroups[obj.value]);
+    const newMode = !this.state.ghostMode;
 
-    if (selectedData.length === 0) {
-      return;
+    // Activating ghost mode
+    if (newMode) {
+      await api.viewer.activateTool("ghostMode");
+    } else {
+      await api.viewer.deactivateTool("ghostMode");
     }
 
-    const modelEntities = selectedData.map(obj => ({
-      modelId: obj.modelId,
-      objectRuntimeIds: [obj.id]
-    }));
-
-    const viewInfo = {
-      name: selectedData[0].value,
-      description: `Beskrivelse\nAntall: ${selectedData.length}\nDiameter: ${selectedData[0].dimensions["Diameter"]}\nDIM A: ${selectedData[0].dimensions["DIM A"]}\nDIM B: ${selectedData[0].dimensions["DIM B"]}\nDIM C: ${selectedData[0].dimensions["DIM C"]}\nDIM R: ${selectedData[0].dimensions["DIM R"]}`,
-      objects: modelEntities
-    };
-
-    const viewSpec = await api.view.createView(viewInfo);
-
-    await api.view.setView(viewSpec.id);
+    this.setState({ ghostMode: newMode });
   };
 
   handleSearchChange = (event) => {
@@ -233,7 +185,7 @@ class App extends Component {
     const groupedData = sortedData.reduce((acc, obj) => {
       const { value } = obj;
       if (!acc[value]) {
-        acc[value] = { value, antall: 0, models: [], dimensions: obj.dimensions };
+        acc[value] = { value, antall: 0, models: [] };
       }
       acc[value].antall += 1;
       acc[value].models.push(obj);
@@ -241,100 +193,6 @@ class App extends Component {
     }, {});
 
     return Object.values(groupedData);
-  };
-
-  exportToExcel = async () => {
-    const groupedData = this.groupAttributeData();
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Attribute Data');
-  
-    // Set column widths
-    worksheet.columns = [
-      { width: 20 }, // A
-      { width: 15 }, // B
-      { width: 15 }, // C
-      { width: 15 }, // D
-    ];
-  
-    await Promise.all(groupedData.map(async (group, index) => {
-        const rowStart = index * 10 + 2; // Adjusted for 4 rows spacing between cards
-        const view = this.state.views.find(v => v.name === group.value);
-        const viewId = view ? view.id : null;
-        const projId = this.state.projectId || null;
-        const viewUrl = projId && viewId ? `https://web.connect.trimble.com/projects/${projId}/viewer/3d?viewId=${viewId}&region=europe` : null;
-        let qrCodeDataUrl = null;
-  
-        if (viewUrl) {
-          qrCodeDataUrl = await QRCode.toDataURL(viewUrl);
-        }
-  
-        // Merge cells for the design
-        worksheet.mergeCells(`A${rowStart}:A${rowStart + 4}`);
-        worksheet.mergeCells(`D${rowStart}:E${rowStart + 4}`);
-  
-        // Set values and styles
-        worksheet.getCell(`A${rowStart}`).value = group.value;
-        worksheet.getCell(`A${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
-        worksheet.getCell(`A${rowStart}`).font = { size: 14, bold: true };
-  
-        worksheet.getCell(`B${rowStart}`).value = 'DIAMETER';
-        worksheet.getCell(`B${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
-        worksheet.getCell(`B${rowStart}`).font = { bold: true };
-  
-        worksheet.getCell(`C${rowStart}`).value = group.dimensions.Diameter;
-        worksheet.getCell(`C${rowStart}`).alignment = { vertical: 'middle', horizontal: 'center' };
-  
-        worksheet.getCell(`B${rowStart + 1}`).value = 'ANTALL';
-        worksheet.getCell(`B${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
-        worksheet.getCell(`B${rowStart + 1}`).font = { bold: true };
-  
-        worksheet.getCell(`C${rowStart + 1}`).value = group.antall;
-        worksheet.getCell(`C${rowStart + 1}`).alignment = { vertical: 'middle', horizontal: 'center' };
-  
-        // Add QR code
-        if (qrCodeDataUrl) {
-          const imageId = workbook.addImage({
-            base64: qrCodeDataUrl.replace(/^data:image\/png;base64,/, ""),
-            extension: 'png',
-          });
-          worksheet.addImage(imageId, {
-            tl: { col: 3.5, row: rowStart - 1 + 0.35 }, // Adjusted position for QR code
-            ext: { width: 90, height: 90 },
-          });
-        }
-  
-        // Add border to the cells to mimic card style
-        for (let r = rowStart; r <= rowStart + 4; r++) {
-          for (let c = 1; c <= 4; c++) { // Adjusted to cover columns A to D
-            worksheet.getCell(r, c).border = {
-              top: { style: 'medium' },
-              left: { style: 'medium' },
-              bottom: { style: 'medium' },
-              right: { style: 'medium' },
-            };
-          }
-        }
-    }));
-  
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/octet-stream' });
-  
-    const filename = `${this.state.modelName}_Bøyeliste.xlsx`;
-    saveAs(blob, filename);
-  };
-
-  toggleGhostMode = async () => {
-    const api = await this.dotConnect();
-    const newMode = !this.state.ghostMode;
-
-    // Activating ghost mode
-    if (newMode) {
-      await api.viewer.activateTool("ghostMode");
-    } else {
-      await api.viewer.deactivateTool("ghostMode");
-    }
-
-    this.setState({ ghostMode: newMode });
   };
 
   renderGroupedAttributeObjects = () => {
@@ -385,12 +243,6 @@ class App extends Component {
               <a href="#" onClick={this.getAttributeDataFromTrimble}>
                 <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
               </a>
-              <a href="#" onClick={this.createView}>
-                <img src="https://dawood11.github.io/trimble-test/src/assets/camera.png" alt="Lag visning" className="nav-icon" />
-              </a>
-              <a href="#" onClick={this.exportToExcel}>
-                <img src="https://dawood11.github.io/trimble-test/src/assets/exportxl.png" alt="Generer" className="nav-icon" />
-              </a>
             </nav>
           </div>
         </header>
@@ -418,7 +270,7 @@ class App extends Component {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Beta 1.5</p>
+          <p>Beta 1.6</p>
         </footer>
         </div>
       </>

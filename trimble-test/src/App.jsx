@@ -142,12 +142,12 @@ class App extends Component {
     await api.viewer.isolateEntities(modelEntities);
   };
 
-  // Function to select models without isolating, based on Pos.nr attribute logic
+  // Function to select models based on selected Pos.nr (filtered attribute cards)
   selectModelsInViewer = async () => {
     const api = await this.dotConnect();
     const modelsToSelect = [];
 
-    // Select models based on selected Pos.nr
+    // Select models only based on the Pos.nr values selected in the attribute cards
     this.state.attributeData.forEach((obj) => {
       if (this.state.selectedGroups[obj.value]) {
         modelsToSelect.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
@@ -155,10 +155,10 @@ class App extends Component {
     });
 
     if (modelsToSelect.length > 0) {
-      // Set selection in the viewer without isolating
+      // Set selection in the viewer without isolating, but only for selected Pos.nr
       await api.viewer.setSelection({
         clear: true, // Clear previous selection
-        models: modelsToSelect, // Select only the models based on Pos.nr
+        models: modelsToSelect, // Select only the models that match the selected Pos.nr
       });
     }
   };
@@ -306,7 +306,7 @@ class App extends Component {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Test 3</p>
+          <p>Test 4</p>
         </footer>
         </div>
       </>

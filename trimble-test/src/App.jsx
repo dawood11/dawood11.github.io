@@ -146,20 +146,23 @@ class App extends Component {
   selectModelsInViewer = async () => {
     const api = await this.dotConnect();
     const modelsToSelect = [];
-  
-    // Collect objects based on selected Pos.nr
-    this.state.attributeData.forEach((obj) => {
+
+    // Only select the objects that match selected Pos.nr values
+    this.state.attributeData.forEach(obj => {
       if (this.state.selectedGroups[obj.value]) {
         modelsToSelect.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
       }
     });
-  
+
     if (modelsToSelect.length > 0) {
-      // Use setSelection method instead of selectObjects
-      await api.viewer.setSelection({
-        clear: true, // Clear previous selection
-        models: modelsToSelect, // Select only the objects based on Pos.nr
-      });
+      const objectSelector = {
+        modelObjectIds: modelsToSelect.map(m => ({
+          modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds
+        }))
+      };
+
+      // Apply selection based on selected Pos.nr only
+      await api.viewer.setSelection(objectSelector);
     }
   };
 
@@ -306,7 +309,7 @@ class App extends Component {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Test 6</p>
+          <p>Test 7</p>
         </footer>
         </div>
       </>

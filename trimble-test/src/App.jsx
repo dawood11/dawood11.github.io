@@ -155,10 +155,11 @@ class App extends Component {
     });
 
     if (modelsToSelect.length > 0) {
-      // Set selection in the viewer without isolating, but only for selected Pos.nr
-      await api.viewer.setSelection({
+      // Use the selectObjects function for correct object selection behavior
+      await api.viewer.selectObjects({
         clear: true, // Clear previous selection
-        models: modelsToSelect, // Select only the models that match the selected Pos.nr
+        models: modelsToSelect, // Select only the objects based on Pos.nr
+        replace: true, // Replace the selection in the viewer
       });
     }
   };
@@ -306,7 +307,7 @@ class App extends Component {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Test 4</p>
+          <p>Test 5</p>
         </footer>
         </div>
       </>

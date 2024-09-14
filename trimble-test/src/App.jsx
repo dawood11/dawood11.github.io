@@ -142,21 +142,25 @@ class App extends Component {
     await api.viewer.isolateEntities(modelEntities);
   };
 
-  // Function to select models without isolating (for M button behavior)
+  // Function to select models without isolating, based on Pos.nr attribute logic
   selectModelsInViewer = async () => {
     const api = await this.dotConnect();
     const modelsToSelect = [];
 
+    // Select models based on selected Pos.nr
     this.state.attributeData.forEach((obj) => {
       if (this.state.selectedGroups[obj.value]) {
         modelsToSelect.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
       }
     });
 
-    await api.viewer.setSelection({
-      clear: true, // Clear previous selection
-      models: modelsToSelect, // Select the new models
-    });
+    if (modelsToSelect.length > 0) {
+      // Set selection in the viewer without isolating
+      await api.viewer.setSelection({
+        clear: true, // Clear previous selection
+        models: modelsToSelect, // Select only the models based on Pos.nr
+      });
+    }
   };
 
   toggleGhostMode = async () => {
@@ -302,7 +306,7 @@ class App extends Component {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Test 2</p>
+          <p>Test 3</p>
         </footer>
         </div>
       </>

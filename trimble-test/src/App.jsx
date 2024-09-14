@@ -14,6 +14,7 @@ class App extends Component {
       searchTerm: "", // New state for search term
       showSubHeader: true, // State to control the visibility of the sub-header (set to false to hide it)
       loading: false, // New state for loading
+      hoverMode: false, // New state for hover mode
     };
   }
 
@@ -104,37 +105,57 @@ class App extends Component {
   };
 
   handleGroupClick = async (value) => {
-    const api = await this.dotConnect();
+    // Remove 'const api = await this.dotConnect();' since it's not used
+  
+    // Only select objects without removing previous selections when hoverMode is active
     this.setState((prevState) => {
       const updatedGroups = { ...prevState.selectedGroups };
-      if (updatedGroups[value]) {
-        delete updatedGroups[value];
+  
+      // In hover mode, don't allow deselection of already selected objects
+      if (!this.state.hoverMode) {
+        // Toggle selection normally
+        if (updatedGroups[value]) {
+          delete updatedGroups[value];
+        } else {
+          updatedGroups[value] = true;
+        }
       } else {
+        // In hover mode, only add to selection
         updatedGroups[value] = true;
       }
-
+  
       return { selectedGroups: updatedGroups };
     }, async () => {
-      const selectedData = this.state.attributeData.filter(obj => this.state.selectedGroups[obj.value]);
-      if (Object.keys(this.state.selectedGroups).length > 0) {
-        await this.selectObjects(api, selectedData);
-      }
+      // After updating selection, apply the selection to the viewer
+      await this.selectModelsInViewer();
     });
   };
 
-  selectObjects = async (api, objects) => {
-    const modelEntities = objects.reduce((acc, obj) => {
-      const model = acc.find(m => m.modelId === obj.modelId);
-      if (model) {
-        model.entityIds.push(obj.id);
-      } else {
-        acc.push({ modelId: obj.modelId, entityIds: [obj.id] });
-      }
-      return acc;
-    }, []);
+  selectModelsInViewer = async () => {
+    const api = await this.dotConnect();
+    const modelsToSelect = [];
 
-    // Show only the selected objects
-    await api.viewer.isolateEntities(modelEntities);
+    // Iterate through attributeData to find selected models
+    this.state.attributeData.forEach(obj => {
+      if (this.state.selectedGroups[obj.value]) {
+        modelsToSelect.push({ modelId: obj.modelId, id: obj.id });
+      }
+    });
+
+    // Now isolate or highlight the selected models in the viewer
+    if (modelsToSelect.length > 0) {
+      const modelEntities = modelsToSelect.reduce((acc, obj) => {
+        const model = acc.find(m => m.modelId === obj.modelId);
+        if (model) {
+          model.entityIds.push(obj.id);
+        } else {
+          acc.push({ modelId: obj.modelId, entityIds: [obj.id] });
+        }
+        return acc;
+      }, []);
+
+      await api.viewer.isolateEntities(modelEntities);
+    }
   };
 
   toggleGhostMode = async () => {
@@ -149,6 +170,12 @@ class App extends Component {
     }
 
     this.setState({ ghostMode: newMode });
+  };
+
+  toggleHoverMode = () => {
+    this.setState((prevState) => ({
+      hoverMode: !prevState.hoverMode
+    }));
   };
 
   handleSearchChange = (event) => {
@@ -243,6 +270,9 @@ class App extends Component {
               <a href="#" onClick={this.getAttributeDataFromTrimble}>
                 <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
               </a>
+              <button onClick={this.toggleHoverMode}>
+                <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Hover Mode" className="nav-icon" />
+              </button>
             </nav>
           </div>
         </header>
@@ -270,7 +300,7 @@ class App extends Component {
         <footer>
           <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
           <p>Utviklet av Yasin Rafiq</p>
-          <p>Beta 1.6</p>
+          <p>Beta 1.5.5</p>
         </footer>
         </div>
       </>

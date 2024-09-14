@@ -266,51 +266,63 @@ class App extends Component {
     return (
       <>
         <div className="container">
-        <header className="header">
-          <div className="header-content">
-            <div className="logo">
-              <h1>
-                <span className="pos">POS.</span>
-                <span className="flow">Flow</span>
-              </h1>
+          <header className="header">
+            <div className="header-content">
+              <div className="logo">
+                <h1>
+                  <span className="pos">POS.</span>
+                  <span className="flow">Flow</span>
+                </h1>
+              </div>
+              <nav>
+                <a href="#" onClick={this.getAttributeDataFromTrimble}>
+                  <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
+                </a>
+                {/* M button to toggle selection mode */}
+                <a href="#" onClick={this.toggleSelectionMode}>
+                  {this.state.selectionMode ? (
+                    <img
+                      src="https://dawood11.github.io/trimble-test/src/assets/M.png"
+                      alt="Selection Mode"
+                      className="nav-icon"
+                    />
+                  ) : (
+                    <img
+                      src="https://dawood11.github.io/trimble-test/src/assets/MN.png"
+                      alt="Selection Mode"
+                      className="nav-icon"
+                    />
+                  )}
+                </a>
+              </nav>
             </div>
-            <nav>
-              <a href="#" onClick={this.getAttributeDataFromTrimble}>
-                <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
-              </a>
-              {/* M button to toggle selection mode */}
-              <a href="#" onClick={this.toggleSelectionMode}>
-                <img src="https://dawood11.github.io/trimble-test/src/assets/M.png" alt="Selection Mode" className="nav-icon" />
-              </a>
-            </nav>
+          </header>
+
+          {/* Sub-header section */}
+          <div className="sub-header">
+            <input
+              type="text"
+              className="input-field"
+              placeholder="Søk"
+              value={this.state.searchTerm}
+              onChange={this.handleSearchChange}
+            />
           </div>
-        </header>
 
-        {/* Sub-header section */}
-        <div className="sub-header">
-          <input
-            type="text"
-            className="input-field"
-            placeholder="Søk"
-            value={this.state.searchTerm}
-            onChange={this.handleSearchChange}
-          />
-        </div>
-
-        <main className="content">
-          {this.state.loading ? (
-            <div className="loading-message">
-              Leser armeringen, vennligst vent...
-            </div>
-          ) : (
-            this.renderGroupedAttributeObjects()
-          )}
-        </main>
-        <footer>
-          <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
-          <p>Utviklet av Yasin Rafiq</p>
-          <p>Test 7</p>
-        </footer>
+          <main className="content">
+            {this.state.loading ? (
+              <div className="loading-message">
+                Leser armeringen, vennligst vent...
+              </div>
+            ) : (
+              this.renderGroupedAttributeObjects()
+            )}
+          </main>
+          <footer>
+            <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
+            <p>Utviklet av Yasin Rafiq</p>
+            <p>Beta 1.7</p>
+          </footer>
         </div>
       </>
     );

@@ -318,7 +318,7 @@ class App extends Component {
           <footer>
             <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
             <p>Utviklet av Yasin Rafiq</p>
-            <p>BETA 1.8</p>
+            <p>Beta 1.8</p>
           </footer>
         </div>
       </>

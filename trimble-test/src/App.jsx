@@ -17,11 +17,6 @@ class App extends Component {
     };
   }
 
-  async componentDidMount() {
-    await this.dotConnect();
-    this.addViewerSelectionListener();
-  }
-
   dotConnect = async () => {
     return await Extensions.connect(
       window.parent,
@@ -36,31 +31,6 @@ class App extends Component {
       },
       30000
     );
-  };
-
-  addViewerSelectionListener = async () => {
-    const api = await this.dotConnect();
-    const viewer = api.viewer;
-
-    viewer.on("selectionChanged", async () => {
-      const selection = await viewer.getSelection(); // Get selected objects
-
-      if (selection && selection.length > 0) {
-        const selectedGroups = {};
-
-        // Loop through attributeData to match selected objects with Pos.nr
-        this.state.attributeData.forEach((obj) => {
-          const selectedObject = selection.find(sel => sel.modelId === obj.modelId && sel.objectRuntimeIds.includes(obj.id));
-          if (selectedObject) {
-            selectedGroups[obj.value] = true; // Mark the corresponding Pos.nr as selected
-          }
-        });
-
-        this.setState({ selectedGroups });
-      } else {
-        this.setState({ selectedGroups: {} }); // Clear selection if nothing is selected
-      }
-    });
   };
 
   getProjectId = async () => {
@@ -243,7 +213,7 @@ class App extends Component {
     return data.sort((a, b) => {
       const regex = /(\D+)(\d+)/;
       const aMatch = a.value.match(regex);
-      const bMatch = b.value.match(regex); // Fixed this line
+      const bMatch = b.value.match(regex);
 
       if (aMatch && bMatch) {
         if (aMatch[1] === bMatch[1]) {
@@ -259,7 +229,7 @@ class App extends Component {
 
   renderGroupedAttributeObjects = () => {
     const groupedData = this.groupAttributeData();
-    const selectedData = groupedData.filter(group => this.state.selectedGroups[group.value]); // Fixed this line
+    const selectedData = groupedData.filter(group => this.state.selectedGroups[group.value]);
     const nonSelectedData = groupedData.filter(group => !this.state.selectedGroups[group.value]);
 
     return (
@@ -348,7 +318,7 @@ class App extends Component {
           <footer>
             <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
             <p>Utviklet av Yasin Rafiq</p>
-            <p>BETA 1.8.4</p>
+            <p>BETA 1.8</p>
           </footer>
         </div>
       </>

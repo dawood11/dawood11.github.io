@@ -43,18 +43,24 @@ class App extends Component {
 
     // Add a listener for selection changes in the viewer
     viewer.on("selectionChanged", (event) => {
-      const selectedObjectIds = event.objectIds;
+      const selectedObjectIds = event.objectIds; // Get selected object IDs from viewer
 
       if (selectedObjectIds && selectedObjectIds.length > 0) {
         const selectedGroups = {};
 
+        // Iterate over attributeData to find matching objects by ID
         this.state.attributeData.forEach((obj) => {
-          if (selectedObjectIds.includes(obj.id)) {
-            selectedGroups[obj.value] = true;
+          // Match selected object IDs from viewer with attributeData object IDs
+          if (selectedObjectIds.some(id => id === obj.id)) {
+            selectedGroups[obj.value] = true; // Mark the corresponding Pos.nr as selected
           }
         });
 
+        // Update state to reflect the selected Pos.nr attribute in PosFlow
         this.setState({ selectedGroups });
+      } else {
+        // Clear selection if no objects are selected in the viewer
+        this.setState({ selectedGroups: {} });
       }
     });
   };
@@ -344,7 +350,7 @@ class App extends Component {
           <footer>
             <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
             <p>Utviklet av Yasin Rafiq</p>
-            <p>BETA 1.8.2</p>
+            <p>BETA 1.8.3</p>
           </footer>
         </div>
       </>

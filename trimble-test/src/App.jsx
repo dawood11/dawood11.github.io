@@ -33,6 +33,32 @@ class App extends Component {
     );
   };
 
+  componentDidMount() {
+    this.addViewerSelectionListener();
+  }
+
+  addViewerSelectionListener = async () => {
+    const api = await this.dotConnect();
+    const viewer = api.viewer;
+
+    // Add a listener for selection changes in the viewer
+    viewer.on("selectionChanged", (event) => {
+      const selectedObjectIds = event.objectIds;
+
+      if (selectedObjectIds && selectedObjectIds.length > 0) {
+        const selectedGroups = {};
+
+        this.state.attributeData.forEach((obj) => {
+          if (selectedObjectIds.includes(obj.id)) {
+            selectedGroups[obj.value] = true;
+          }
+        });
+
+        this.setState({ selectedGroups });
+      }
+    });
+  };
+
   getProjectId = async () => {
     const api = await this.dotConnect();
     const project = await api.project.getProject();
@@ -318,7 +344,7 @@ class App extends Component {
           <footer>
             <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
             <p>Utviklet av Yasin Rafiq</p>
-            <p>BETA 1.8.1</p>
+            <p>BETA 1.8.2</p>
           </footer>
         </div>
       </>

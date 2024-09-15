@@ -17,6 +17,11 @@ class App extends Component {
     };
   }
 
+  async componentDidMount() {
+    await this.dotConnect();
+    this.addViewerSelectionListener();
+  }
+
   dotConnect = async () => {
     return await Extensions.connect(
       window.parent,
@@ -33,34 +38,27 @@ class App extends Component {
     );
   };
 
-  componentDidMount() {
-    this.addViewerSelectionListener();
-  }
-
   addViewerSelectionListener = async () => {
     const api = await this.dotConnect();
     const viewer = api.viewer;
 
-    // Add a listener for selection changes in the viewer
-    viewer.on("selectionChanged", (event) => {
-      const selectedObjectIds = event.objectIds; // Get selected object IDs from viewer
+    viewer.on("selectionChanged", async () => {
+      const selection = await viewer.getSelection(); // Get selected objects
 
-      if (selectedObjectIds && selectedObjectIds.length > 0) {
+      if (selection && selection.length > 0) {
         const selectedGroups = {};
 
-        // Iterate over attributeData to find matching objects by ID
+        // Loop through attributeData to match selected objects with Pos.nr
         this.state.attributeData.forEach((obj) => {
-          // Match selected object IDs from viewer with attributeData object IDs
-          if (selectedObjectIds.some(id => id === obj.id)) {
+          const selectedObject = selection.find(sel => sel.modelId === obj.modelId && sel.objectRuntimeIds.includes(obj.id));
+          if (selectedObject) {
             selectedGroups[obj.value] = true; // Mark the corresponding Pos.nr as selected
           }
         });
 
-        // Update state to reflect the selected Pos.nr attribute in PosFlow
         this.setState({ selectedGroups });
       } else {
-        // Clear selection if no objects are selected in the viewer
-        this.setState({ selectedGroups: {} });
+        this.setState({ selectedGroups: {} }); // Clear selection if nothing is selected
       }
     });
   };
@@ -245,7 +243,7 @@ class App extends Component {
     return data.sort((a, b) => {
       const regex = /(\D+)(\d+)/;
       const aMatch = a.value.match(regex);
-      const bMatch = b.value.match(regex);
+      const bMatch = b.value.match(regex); // Fixed this line
 
       if (aMatch && bMatch) {
         if (aMatch[1] === bMatch[1]) {
@@ -261,7 +259,7 @@ class App extends Component {
 
   renderGroupedAttributeObjects = () => {
     const groupedData = this.groupAttributeData();
-    const selectedData = groupedData.filter(group => this.state.selectedGroups[group.value]);
+    const selectedData = groupedData.filter(group => this.state.selectedGroups[group.value]); // Fixed this line
     const nonSelectedData = groupedData.filter(group => !this.state.selectedGroups[group.value]);
 
     return (
@@ -350,7 +348,7 @@ class App extends Component {
           <footer>
             <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
             <p>Utviklet av Yasin Rafiq</p>
-            <p>BETA 1.8.3</p>
+            <p>BETA 1.8.4</p>
           </footer>
         </div>
       </>

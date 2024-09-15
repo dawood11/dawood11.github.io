@@ -10,7 +10,6 @@ class App extends Component {
       selectedGroups: {},
       projectId: null,
       modelName: "Model",
-      ghostMode: false, // State for ghost mode
       searchTerm: "", // State for search term
       showSubHeader: true, // State to control the visibility of the sub-header
       loading: false, // State for loading
@@ -166,20 +165,6 @@ class App extends Component {
     }
   };
 
-  toggleGhostMode = async () => {
-    const api = await this.dotConnect();
-    const newMode = !this.state.ghostMode;
-
-    // Activating ghost mode
-    if (newMode) {
-      await api.viewer.activateTool("ghostMode");
-    } else {
-      await api.viewer.deactivateTool("ghostMode");
-    }
-
-    this.setState({ ghostMode: newMode });
-  };
-
   toggleSelectionMode = () => {
     this.setState((prevState) => ({
       selectionMode: !prevState.selectionMode,
@@ -188,6 +173,39 @@ class App extends Component {
 
   handleSearchChange = (event) => {
     this.setState({ searchTerm: event.target.value });
+  };
+
+  // Function to normalize strings for flexible searching
+  normalizeString = (str) => {
+    return str
+      .toLowerCase() // Convert to lowercase
+      .replace(/\s+/g, '') // Remove spaces
+      .replace(/[^a-zA-Z0-9]/g, ''); // Remove non-alphanumeric characters
+  };
+
+  groupAttributeData = (data = this.state.attributeData) => {
+    // Normalize the search term
+    const normalizedSearchTerm = this.normalizeString(this.state.searchTerm);
+
+    // Filter based on normalized search term
+    const filteredData = data.filter((obj) => {
+      const normalizedValue = this.normalizeString(obj.value);
+      return normalizedValue.includes(normalizedSearchTerm);
+    });
+
+    const sortedData = this.sortAttributeData(filteredData);
+
+    const groupedData = sortedData.reduce((acc, obj) => {
+      const { value } = obj;
+      if (!acc[value]) {
+        acc[value] = { value, antall: 0, models: [] };
+      }
+      acc[value].antall += 1;
+      acc[value].models.push(obj);
+      return acc;
+    }, {});
+
+    return Object.values(groupedData);
   };
 
   // Function to sort attribute data by letters + numbers (e.g., A1, B2, etc.)
@@ -207,27 +225,6 @@ class App extends Component {
 
       return a.value.localeCompare(b.value);
     });
-  };
-
-  groupAttributeData = (data = this.state.attributeData) => {
-    // Filter based on search term
-    const filteredData = data.filter(obj =>
-      obj.value.toLowerCase().includes(this.state.searchTerm.toLowerCase())
-    );
-
-    const sortedData = this.sortAttributeData(filteredData);
-
-    const groupedData = sortedData.reduce((acc, obj) => {
-      const { value } = obj;
-      if (!acc[value]) {
-        acc[value] = { value, antall: 0, models: [] };
-      }
-      acc[value].antall += 1;
-      acc[value].models.push(obj);
-      return acc;
-    }, {});
-
-    return Object.values(groupedData);
   };
 
   renderGroupedAttributeObjects = () => {
@@ -321,7 +318,7 @@ class App extends Component {
           <footer>
             <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
             <p>Utviklet av Yasin Rafiq</p>
-            <p>BETA 1.8</p>
+            <p>BETA 1.8.1</p>
           </footer>
         </div>
       </>

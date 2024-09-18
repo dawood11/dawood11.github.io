@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import * as Extensions from 'trimble-connect-workspace-api';
+import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom';
 import './index.css'; // Import the CSS file
 
 class App extends Component {
@@ -10,10 +11,10 @@ class App extends Component {
       selectedGroups: {},
       projectId: null,
       modelName: "Model",
-      searchTerm: "", // State for search term
-      showSubHeader: true, // State to control the visibility of the sub-header
-      loading: false, // State for loading
-      selectionMode: false, // State for selection mode
+      searchTerm: "",
+      showSubHeader: true,
+      loading: false,
+      selectionMode: false,
     };
   }
 
@@ -50,7 +51,7 @@ class App extends Component {
   };
 
   getAttributeDataFromTrimble = async () => {
-    this.setState({ loading: true }); // Start loading
+    this.setState({ loading: true });
 
     const posAttributes = ["Pos.nr.", "Pos.nr", "Pos nr.", "Pos"];
 
@@ -97,7 +98,6 @@ class App extends Component {
       }
     }
 
-    // Ensure loading is shown for at least 2 seconds
     setTimeout(() => {
       this.setState({ attributeData: attributeObjects, loading: false });
     }, 2000);
@@ -137,16 +137,13 @@ class App extends Component {
       return acc;
     }, []);
 
-    // Isolate the selected objects (default behavior)
     await api.viewer.isolateEntities(modelEntities);
   };
 
-  // Function to select models based on selected Pos.nr (filtered attribute cards)
   selectModelsInViewer = async () => {
     const api = await this.dotConnect();
     const modelsToSelect = [];
 
-    // Only select the objects that match selected Pos.nr values
     this.state.attributeData.forEach(obj => {
       if (this.state.selectedGroups[obj.value]) {
         modelsToSelect.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
@@ -160,7 +157,6 @@ class App extends Component {
         }))
       };
 
-      // Apply selection based on selected Pos.nr only
       await api.viewer.setSelection(objectSelector);
     }
   };
@@ -175,19 +171,16 @@ class App extends Component {
     this.setState({ searchTerm: event.target.value });
   };
 
-  // Function to normalize strings for flexible searching
   normalizeString = (str) => {
     return str
-      .toLowerCase() // Convert to lowercase
-      .replace(/\s+/g, '') // Remove spaces
-      .replace(/[^a-zA-Z0-9]/g, ''); // Remove non-alphanumeric characters
+      .toLowerCase()
+      .replace(/\s+/g, '')
+      .replace(/[^a-zA-Z0-9]/g, '');
   };
 
   groupAttributeData = (data = this.state.attributeData) => {
-    // Normalize the search term
     const normalizedSearchTerm = this.normalizeString(this.state.searchTerm);
 
-    // Filter based on normalized search term
     const filteredData = data.filter((obj) => {
       const normalizedValue = this.normalizeString(obj.value);
       return normalizedValue.includes(normalizedSearchTerm);
@@ -208,7 +201,6 @@ class App extends Component {
     return Object.values(groupedData);
   };
 
-  // Function to sort attribute data by letters + numbers (e.g., A1, B2, etc.)
   sortAttributeData = (data) => {
     return data.sort((a, b) => {
       const regex = /(\D+)(\d+)/;
@@ -261,70 +253,67 @@ class App extends Component {
 
   render() {
     return (
-      <>
-        <div className="container">
-          <header className="header">
-            <div className="header-content">
-              <div className="logo">
-                <h1>
-                  <span className="pos">POS.</span>
-                  <span className="flow">Flow</span>
-                </h1>
-              </div>
-              <nav>
-                <a href="#" onClick={this.getAttributeDataFromTrimble}>
-                  <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
-                </a>
-                {/* M button to toggle selection mode */}
-                <a href="#" onClick={this.toggleSelectionMode}>
-                  {this.state.selectionMode ? (
-                    <img
-                      src="https://dawood11.github.io/trimble-test/src/assets/M.png"
-                      alt="Selection Mode"
-                      className="nav-icon"
-                    />
-                  ) : (
-                    <img
-                      src="https://dawood11.github.io/trimble-test/src/assets/MN.png"
-                      alt="Selection Mode"
-                      className="nav-icon"
-                    />
-                  )}
-                </a>
-              </nav>
-            </div>
-          </header>
-
-          {/* Sub-header section */}
-          <div className="sub-header">
-            <input
-              type="text"
-              className="input-field"
-              placeholder="Søk"
-              value={this.state.searchTerm}
-              onChange={this.handleSearchChange}
-            />
-          </div>
-
-          <main className="content">
-            {this.state.loading ? (
-              <div className="loading-message">
-                Leser armeringen, vennligst vent...
-              </div>
-            ) : (
-              this.renderGroupedAttributeObjects()
-            )}
-          </main>
-          <footer>
-            <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
-            <p>Utviklet av Yasin Rafiq</p>
-            <p>Beta 1.8</p>
-          </footer>
-        </div>
-      </>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/model/:modelName" element={<ModelDetail />} />
+          <Route path="/newpage" element={<NewPage />} />
+        </Routes>
+        <Footer />
+      </Router>
     );
   }
 }
 
-export default App;
+const Home = () => {
+  return (
+    <div className="home-container">
+      <h1>Welcome to POS Flow</h1>
+      <p>Select a model to view details:</p>
+      <nav>
+        <Link to="/model/ExampleModel">View ExampleModel</Link>
+        <Link to="/model/AnotherModel">View AnotherModel</Link>
+      </nav>
+    </div>
+  );
+};
 
+const ModelDetail = () => {
+  const { modelName } = useParams();
+
+  return (
+    <div className="model-detail-container">
+      <h1>Model: {modelName}</h1>
+      <p>Here you can display detailed information about the model {modelName}.</p>
+      <Link to="/">Back to Home</Link>
+    </div>
+  );
+};
+
+const NewPage = () => {
+  return (
+    <div className="new-page">
+      <h1>This is the new page</h1>
+      <p>Here is some content for the new page.</p>
+      <Link to="/">Back to Home</Link>
+    </div>
+  );
+};
+
+const Footer = () => {
+  const navigate = useNavigate();
+
+  return (
+    <footer className="footer">
+      <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
+      <p>Utviklet av Yasin Rafiq</p>
+      <p>Beta 1.8.1</p>
+
+      <button onClick={() => navigate('/newpage')} className="footer-button">
+        Go to New Page
+      </button>
+    </footer>
+  );
+};
+
+export default App;

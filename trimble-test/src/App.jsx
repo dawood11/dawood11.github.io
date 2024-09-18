@@ -1,7 +1,5 @@
-import React, { Component } from 'react'; 
-import PropTypes from 'prop-types'; // Import PropTypes
+import React, { Component } from 'react';
 import * as Extensions from 'trimble-connect-workspace-api';
-import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom';
 import './index.css'; // Import the CSS file
 
 class App extends Component {
@@ -263,93 +261,69 @@ class App extends Component {
 
   render() {
     return (
-      <Router>
+      <>
         <div className="container">
-          <Routes>
-            <Route path="/" element={<Home getAttributeDataFromTrimble={this.getAttributeDataFromTrimble} toggleSelectionMode={this.toggleSelectionMode} />} />
-            <Route path="/newpage" element={<NewPage />} />
-          </Routes>
-          <Footer />
+          <header className="header">
+            <div className="header-content">
+              <div className="logo">
+                <h1>
+                  <span className="pos">POS.</span>
+                  <span className="flow">Flow</span>
+                </h1>
+              </div>
+              <nav>
+                <a href="#" onClick={this.getAttributeDataFromTrimble}>
+                  <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
+                </a>
+                {/* M button to toggle selection mode */}
+                <a href="#" onClick={this.toggleSelectionMode}>
+                  {this.state.selectionMode ? (
+                    <img
+                      src="https://dawood11.github.io/trimble-test/src/assets/M.png"
+                      alt="Selection Mode"
+                      className="nav-icon"
+                    />
+                  ) : (
+                    <img
+                      src="https://dawood11.github.io/trimble-test/src/assets/MN.png"
+                      alt="Selection Mode"
+                      className="nav-icon"
+                    />
+                  )}
+                </a>
+              </nav>
+            </div>
+          </header>
+
+          {/* Sub-header section */}
+          <div className="sub-header">
+            <input
+              type="text"
+              className="input-field"
+              placeholder="Søk"
+              value={this.state.searchTerm}
+              onChange={this.handleSearchChange}
+            />
+          </div>
+
+          <main className="content">
+            {this.state.loading ? (
+              <div className="loading-message">
+                Leser armeringen, vennligst vent...
+              </div>
+            ) : (
+              this.renderGroupedAttributeObjects()
+            )}
+          </main>
+          <footer>
+            <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
+            <p>Utviklet av Yasin Rafiq</p>
+            <p>Beta 1.8</p>
+          </footer>
         </div>
-      </Router>
+      </>
     );
   }
 }
-
-// Home page component with the original navbar
-const Home = ({ getAttributeDataFromTrimble, toggleSelectionMode }) => (
-  <>
-    <header className="header">
-      <div className="header-content">
-        <div className="logo">
-          <h1>
-            <span className="pos">POS.</span>
-            <span className="flow">Flow</span>
-          </h1>
-        </div>
-        <nav>
-          <a href="#" onClick={getAttributeDataFromTrimble}>
-            <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
-          </a>
-          <a href="#" onClick={toggleSelectionMode}>
-            <img src="https://dawood11.github.io/trimble-test/src/assets/M.png" alt="Selection Mode" className="nav-icon" />
-          </a>
-        </nav>
-      </div>
-    </header>
-
-    <div className="sub-header">
-      <input type="text" className="input-field" placeholder="Søk" />
-    </div>
-
-    <main className="content">
-      <div className="loading-message">Leser armeringen, vennligst vent...</div>
-    </main>
-  </>
-);
-
-// New Page component with the same navbar as Home but customizable later
-const NewPage = () => (
-  <>
-    <header className="header">
-      <div className="header-content">
-        <div className="logo">
-          <h1>
-            <span className="pos">POS.</span>
-            <span className="flow">Flow</span>
-          </h1>
-        </div>
-        <nav>
-          <Link to="/">Back to Home</Link>
-        </nav>
-      </div>
-    </header>
-
-    <main className="content">
-      <h2>This is a new page</h2>
-      <p>You can add new functionality here without affecting the original navbar.</p>
-    </main>
-  </>
-);
-
-// Footer component with navigation to new page
-const Footer = () => {
-  const navigate = useNavigate();
-
-  return (
-    <footer>
-      <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
-      <p>Utviklet av Yasin Rafiq</p>
-      <p>Beta 1.8.1</p>
-      <button onClick={() => navigate('/newpage')}>Go to New Page</button>
-    </footer>
-  );
-};
-
-// Prop type validation
-Home.propTypes = {
-  getAttributeDataFromTrimble: PropTypes.func.isRequired,
-  toggleSelectionMode: PropTypes.func.isRequired,
-};
 
 export default App;

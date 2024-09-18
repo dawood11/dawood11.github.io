@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import * as Extensions from 'trimble-connect-workspace-api';
+import { debounce } from 'lodash';
+import { List } from 'react-virtualized';
 import './index.css'; // Import the CSS file
 
 class App extends Component {
@@ -15,6 +17,9 @@ class App extends Component {
       loading: false, // State for loading
       selectionMode: false, // State for selection mode
     };
+
+    // Debounce the search change handler
+    this.handleSearchChange = debounce(this.handleSearchChange.bind(this), 300);
   }
 
   dotConnect = async () => {
@@ -143,26 +148,31 @@ class App extends Component {
 
   // Function to select models based on selected Pos.nr (filtered attribute cards)
   selectModelsInViewer = async () => {
+    this.setState({ loading: true });
+
     const api = await this.dotConnect();
     const modelsToSelect = [];
 
-    // Only select the objects that match selected Pos.nr values
     this.state.attributeData.forEach(obj => {
       if (this.state.selectedGroups[obj.value]) {
         modelsToSelect.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
       }
     });
 
-    if (modelsToSelect.length > 0) {
+    const batchSize = 500; // Adjust batch size based on model size and performance
+    for (let i = 0; i < modelsToSelect.length; i += batchSize) {
+      const batch = modelsToSelect.slice(i, i + batchSize);
       const objectSelector = {
-        modelObjectIds: modelsToSelect.map(m => ({
+        modelObjectIds: batch.map(m => ({
           modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds
         }))
       };
 
-      // Apply selection based on selected Pos.nr only
+      // Apply selection for the current batch
       await api.viewer.setSelection(objectSelector);
     }
+
+    this.setState({ loading: false });
   };
 
   toggleSelectionMode = () => {
@@ -229,33 +239,28 @@ class App extends Component {
 
   renderGroupedAttributeObjects = () => {
     const groupedData = this.groupAttributeData();
-    const selectedData = groupedData.filter(group => this.state.selectedGroups[group.value]);
-    const nonSelectedData = groupedData.filter(group => !this.state.selectedGroups[group.value]);
 
     return (
-      <div className="attribute-cards">
-        {selectedData.map(group => (
-          <div 
-            key={group.value} 
-            className="attribute-card selected"
-            onClick={() => this.handleGroupClick(group.value)}
-          >
-            <strong>{group.value}</strong><br />
-            Antall: {group.antall}
-          </div>
-        ))}
-        {selectedData.length > 0 && <hr className="separator" />}
-        {nonSelectedData.map(group => (
-          <div 
-            key={group.value} 
-            className="attribute-card"
-            onClick={() => this.handleGroupClick(group.value)}
-          >
-            <strong>{group.value}</strong><br />
-            Antall: {group.antall}
-          </div>
-        ))}
-      </div>
+      <List
+        width={300}
+        height={600}
+        rowCount={groupedData.length}
+        rowHeight={100}
+        rowRenderer={({ index, key, style }) => {
+          const group = groupedData[index];
+          return (
+            <div
+              key={key}
+              style={style}
+              className={`attribute-card ${this.state.selectedGroups[group.value] ? 'selected' : ''}`}
+              onClick={() => this.handleGroupClick(group.value)}
+            >
+              <strong>{group.value}</strong><br />
+              Antall: {group.antall}
+            </div>
+          );
+        }}
+      />
     );
   };
 
@@ -318,7 +323,7 @@ class App extends Component {
           <footer>
             <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
             <p>Utviklet av Yasin Rafiq</p>
-            <p>Beta 1.8</p>
+            <p>Beta 1.8.1</p>
           </footer>
         </div>
       </>
@@ -327,4 +332,3 @@ class App extends Component {
 }
 
 export default App;
-

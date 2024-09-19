@@ -305,15 +305,3 @@ footer p {
   font-size: 0.7em; /* Adjusted font size */
   color: #000000; /* Set footer text color to black */
 }
-
-.order-button {
-  position: absolute; /* Position relative to the footer */
-  right: 20px; /* Adjust this value to control the distance from the right edge */
-  bottom: 10px; /* Adjust this value to control the distance from the bottom edge */
-  cursor: pointer; /* Changes cursor to pointer on hover */
-}
-
-.order-icon {
-  width: 40px; /* Adjust the size of the icon as needed */
-  height: 40px; /* Adjust the size of the icon as needed */
-}

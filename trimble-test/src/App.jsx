@@ -319,9 +319,6 @@ class App extends Component {
             <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
             <p>Utviklet av Yasin Rafiq</p>
             <p>Beta 1.8</p>
-            <a href="#" className="order-button">
-            <img src="https://dawood11.github.io/trimble-test/src/assets/order.png" alt="Order" className="order-icon" />
-            </a>
           </footer>
         </div>
       </>

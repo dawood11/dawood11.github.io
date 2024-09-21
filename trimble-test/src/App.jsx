@@ -14,6 +14,7 @@ class App extends Component {
       showSubHeader: true, // State to control the visibility of the sub-header
       loading: false, // State for loading
       selectionMode: false, // State for selection mode
+      application: null, // State to store application type
     };
   }
 
@@ -61,14 +62,14 @@ class App extends Component {
     const viewerObjects = await api.viewer.getObjects();
 
     const attributeObjects = [];
-    const batchSize = 1000;
+    let isTekla = false; // Flag to check if Tekla Structures is detected
 
     for (const modelObjectsSet of viewerObjects) {
       const modelId = modelObjectsSet["modelId"];
       let modelObjectIdsList = modelObjectsSet["objects"].map((obj) => obj.id);
 
-      for (let i = 0; i < modelObjectIdsList.length; i += batchSize) {
-        const batch = modelObjectIdsList.slice(i, i + batchSize);
+      for (let i = 0; i < modelObjectIdsList.length; i += 1000) {
+        const batch = modelObjectIdsList.slice(i, i + 1000);
         const properties = await api.viewer.getObjectProperties(modelId, batch);
 
         properties.forEach((propertySet) => {
@@ -77,6 +78,16 @@ class App extends Component {
 
             propertySet.properties.forEach((prop) => {
               prop.properties.forEach((subProp) => {
+                // Debugging log to see if Application attribute is found
+                console.log(`Checking property: ${subProp.name} with value: ${subProp.value}`);
+
+                // Check if the Application attribute contains Tekla Structures
+                if (subProp.name === "Application" && subProp.value.includes("Tekla Structures")) {
+                  isTekla = true; // Set flag if Tekla Structures is found
+                  console.log("Tekla Structures detected!"); // Debugging log
+                }
+
+                // Check for position-related attributes
                 if (posAttributes.some(attr => subProp.name.includes(attr))) {
                   primaryAttribute = { 
                     modelId, 
@@ -97,10 +108,10 @@ class App extends Component {
       }
     }
 
-    // Ensure loading is shown for at least 2 seconds
-    setTimeout(() => {
-      this.setState({ attributeData: attributeObjects, loading: false });
-    }, 2000);
+    // Set the state based on whether Tekla Structures was detected
+    this.setState({ attributeData: attributeObjects, application: isTekla ? "Tekla" : null, loading: false }, () => {
+      console.log(`Application set to: ${this.state.application}`); // Debugging log to confirm state update
+    });
   };
 
   handleGroupClick = async (value) => {
@@ -232,6 +243,9 @@ class App extends Component {
     const selectedData = groupedData.filter(group => this.state.selectedGroups[group.value]);
     const nonSelectedData = groupedData.filter(group => !this.state.selectedGroups[group.value]);
 
+    // Determine label based on application type
+    const label = this.state.application === "Tekla" ? "Antall grupper" : "Antall";
+
     return (
       <div className="attribute-cards">
         {selectedData.map(group => (
@@ -241,7 +255,7 @@ class App extends Component {
             onClick={() => this.handleGroupClick(group.value)}
           >
             <strong>{group.value}</strong><br />
-            Antall: {group.antall}
+            {label}: {group.antall}
           </div>
         ))}
         {selectedData.length > 0 && <hr className="separator" />}
@@ -252,7 +266,7 @@ class App extends Component {
             onClick={() => this.handleGroupClick(group.value)}
           >
             <strong>{group.value}</strong><br />
-            Antall: {group.antall}
+            {label}: {group.antall}
           </div>
         ))}
       </div>

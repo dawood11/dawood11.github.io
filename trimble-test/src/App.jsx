@@ -76,15 +76,14 @@ class App extends Component {
           if (propertySet.properties) {
             let primaryAttribute = null;
 
+            // Loop through all property sets to find the Application attribute
             propertySet.properties.forEach((prop) => {
+              // Check all properties in the prop, including general properties
               prop.properties.forEach((subProp) => {
-                // Debugging log to see if Application attribute is found
-                console.log(`Checking property: ${subProp.name} with value: ${subProp.value}`);
-
-                // Check if the Application attribute contains Tekla Structures
-                if (subProp.name === "Application" && subProp.value.includes("Tekla Structures")) {
+                // Check if the Application attribute is found anywhere
+                if (subProp.name.toLowerCase().includes("application") && subProp.value.includes("Tekla Structures")) {
                   isTekla = true; // Set flag if Tekla Structures is found
-                  console.log("Tekla Structures detected!"); // Debugging log
+                  console.log("Tekla Structures detected in general properties!"); // Debugging log
                 }
 
                 // Check for position-related attributes

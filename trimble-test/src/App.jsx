@@ -60,7 +60,6 @@ const App = () => {
     const attributeObjects = [];
     const batchSize = 1000;
 
-    // Bruk Promise.all for å hente objekter i batcher samtidig for å redusere tiden
     await Promise.all(viewerObjects.map(async (modelObjectsSet) => {
       const modelId = modelObjectsSet['modelId'];
       let modelObjectIdsList = modelObjectsSet['objects'].map((obj) => obj.id);
@@ -100,24 +99,27 @@ const App = () => {
   };
 
   const handleGroupClick = async (value) => {
-    // Oppdater tilstanden bare en gang for optimalisering
     setSelectedGroups((prevGroups) => {
       const updatedGroups = { ...prevGroups };
+
+      // Hvis attributten allerede er valgt, deselecter den, ellers velger vi den
       if (updatedGroups[value]) {
         delete updatedGroups[value];
       } else {
         updatedGroups[value] = true;
       }
+
       return updatedGroups;
     });
 
     const api = await dotConnect();
+    const selectedData = attributeData.filter((obj) => selectedGroups[obj.value]);
+
     if (selectionMode) {
       // Hvis modus er på, velger vi hele settet med modeller
       await selectModelsInViewer(api);
     } else {
       // Hvis modus er av, isoler de valgte objektene
-      const selectedData = attributeData.filter((obj) => selectedGroups[obj.value]);
       if (selectedData.length > 0) {
         await selectObjects(api, selectedData);
       }
@@ -135,7 +137,6 @@ const App = () => {
       return acc;
     }, []);
 
-    // Bruk isolateEntities til å raskt isolere flere objekter samtidig
     await api.viewer.isolateEntities(modelEntities);
   };
 
@@ -152,7 +153,6 @@ const App = () => {
         })),
       };
 
-      // Bruk setSelection for å velge modeller i batcher
       await api.viewer.setSelection(objectSelector);
     }
   };
@@ -220,10 +220,10 @@ const App = () => {
 
     return (
       <div className="attribute-cards">
-        {selectedData.map((group) => (
+        {nonSelectedData.map((group) => (
           <div
             key={group.value}
-            className="attribute-card selected"
+            className="attribute-card"
             onClick={() => handleGroupClick(group.value)}
           >
             <strong>{group.value}</strong>
@@ -232,8 +232,8 @@ const App = () => {
           </div>
         ))}
         {selectedData.length > 0 && <hr className="separator" />}
-        {nonSelectedData.map((group) => (
-          <div key={group.value} className="attribute-card" onClick={() => handleGroupClick(group.value)}>
+        {selectedData.map((group) => (
+          <div key={group.value} className="attribute-card selected" onClick={() => handleGroupClick(group.value)}>
             <strong>{group.value}</strong>
             <br />
             Antall: {group.antall}
@@ -291,7 +291,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.03</p>
+        <p>UTVIKLING 0.04</p>
       </footer>
     </div>
   );

@@ -171,7 +171,7 @@ const App = () => {
       .replace(/[^a-zA-Z0-9]/g, '');
   };
 
-  const groupAttributeData = useMemo(() => {
+  const groupAttributeData = () => {
     const normalizedSearchTerm = normalizeString(searchTerm);
 
     const filteredData = attributeData.filter((obj) => {
@@ -192,7 +192,7 @@ const App = () => {
     }, {});
 
     return Object.values(groupedData);
-  }, [attributeData, searchTerm]);
+  };
 
   const sortAttributeData = (data) => {
     return data.sort((a, b) => {
@@ -213,8 +213,9 @@ const App = () => {
   };
 
   const renderGroupedAttributeObjects = () => {
-    const selectedData = groupAttributeData.filter((group) => selectedGroups[group.value]);
-    const nonSelectedData = groupAttributeData.filter((group) => !selectedGroups[group.value]);
+    const groupedData = groupAttributeData();
+    const selectedData = groupedData.filter((group) => selectedGroups[group.value]);
+    const nonSelectedData = groupedData.filter((group) => !selectedGroups[group.value]);
 
     return (
       <div className="attribute-cards">
@@ -289,7 +290,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.01</p>
+        <p>UTVIKLING 0.02</p>
       </footer>
     </div>
   );

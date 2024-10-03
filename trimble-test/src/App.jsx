@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as Extensions from 'trimble-connect-workspace-api';
 import './index.css'; 
 import { defineCustomElements } from '@trimble-oss/modus-web-components/loader';
@@ -60,7 +60,8 @@ const App = () => {
     const attributeObjects = [];
     const batchSize = 1000;
 
-    for (const modelObjectsSet of viewerObjects) {
+    // Bruk Promise.all for å hente objekter i batcher samtidig for å redusere tiden
+    await Promise.all(viewerObjects.map(async (modelObjectsSet) => {
       const modelId = modelObjectsSet['modelId'];
       let modelObjectIdsList = modelObjectsSet['objects'].map((obj) => obj.id);
 
@@ -92,13 +93,14 @@ const App = () => {
           }
         });
       }
-    }
+    }));
 
     setAttributeData(attributeObjects);
     setLoading(false);
   };
 
   const handleGroupClick = async (value) => {
+    // Oppdater tilstanden bare en gang for optimalisering
     setSelectedGroups((prevGroups) => {
       const updatedGroups = { ...prevGroups };
       if (updatedGroups[value]) {
@@ -109,12 +111,14 @@ const App = () => {
       return updatedGroups;
     });
 
+    const api = await dotConnect();
     if (selectionMode) {
-      await selectModelsInViewer();
+      // Hvis modus er på, velger vi hele settet med modeller
+      await selectModelsInViewer(api);
     } else {
-      const api = await dotConnect();
+      // Hvis modus er av, isoler de valgte objektene
       const selectedData = attributeData.filter((obj) => selectedGroups[obj.value]);
-      if (Object.keys(selectedGroups).length > 0) {
+      if (selectedData.length > 0) {
         await selectObjects(api, selectedData);
       }
     }
@@ -131,18 +135,14 @@ const App = () => {
       return acc;
     }, []);
 
+    // Bruk isolateEntities til å raskt isolere flere objekter samtidig
     await api.viewer.isolateEntities(modelEntities);
   };
 
-  const selectModelsInViewer = async () => {
-    const api = await dotConnect();
-    const modelsToSelect = [];
-
-    attributeData.forEach((obj) => {
-      if (selectedGroups[obj.value]) {
-        modelsToSelect.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
-      }
-    });
+  const selectModelsInViewer = async (api) => {
+    const modelsToSelect = attributeData
+      .filter((obj) => selectedGroups[obj.value])
+      .map((obj) => ({ modelId: obj.modelId, objectRuntimeIds: [obj.id] }));
 
     if (modelsToSelect.length > 0) {
       const objectSelector = {
@@ -152,6 +152,7 @@ const App = () => {
         })),
       };
 
+      // Bruk setSelection for å velge modeller i batcher
       await api.viewer.setSelection(objectSelector);
     }
   };
@@ -290,7 +291,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.02</p>
+        <p>UTVIKLING 0.03</p>
       </footer>
     </div>
   );

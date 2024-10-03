@@ -1,30 +1,25 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as Extensions from 'trimble-connect-workspace-api';
 import './index.css'; // Import the CSS file
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      attributeData: [],
-      selectedGroups: {},
-      projectId: null,
-      modelName: "Model",
-      searchTerm: "", // State for search term
-      showSubHeader: true, // State to control the visibility of the sub-header
-      loading: false, // State for loading
-      selectionMode: false, // State for selection mode
-    };
-  }
+const App = () => {
+  const [attributeData, setAttributeData] = useState([]);
+  const [selectedGroups, setSelectedGroups] = useState({});
+  const [projectId, setProjectId] = useState(null);
+  const [modelName, setModelName] = useState('Model');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showSubHeader] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [selectionMode, setSelectionMode] = useState(false);
 
-  dotConnect = async () => {
+  const dotConnect = async () => {
     return await Extensions.connect(
       window.parent,
       (event) => {
         switch (event) {
-          case "extension.command":
-          case "extension.accessToken":
-          case "extension.userSettingsChanged":
+          case 'extension.command':
+          case 'extension.accessToken':
+          case 'extension.userSettingsChanged':
             break;
           default:
         }
@@ -33,39 +28,37 @@ class App extends Component {
     );
   };
 
-  getProjectId = async () => {
-    const api = await this.dotConnect();
+  const getProjectId = async () => {
+    const api = await dotConnect();
     const project = await api.project.getProject();
-    this.setState({ projectId: project.id });
+    setProjectId(project.id);
     return project.id;
   };
 
-  getModelName = async () => {
-    const api = await this.dotConnect();
+  const getModelName = async () => {
+    const api = await dotConnect();
     const viewer = api.viewer;
     const models = await viewer.getModels();
     if (models.length > 0) {
-      this.setState({ modelName: models[0].name });
+      setModelName(models[0].name);
     }
   };
 
-  getAttributeDataFromTrimble = async () => {
-    this.setState({ loading: true }); // Start loading
+  const getAttributeDataFromTrimble = async () => {
+    setLoading(true);
 
-    const posAttributes = ["Pos.nr.", "Pos.nr", "Pos nr.", "Pos"];
-
-    const api = await this.dotConnect();
-    await this.getProjectId();
-    await this.getModelName();
+    const posAttributes = ['Pos.nr.', 'Pos.nr', 'Pos nr.', 'Pos'];
+    const api = await dotConnect();
+    await getProjectId();
+    await getModelName();
 
     const viewerObjects = await api.viewer.getObjects();
-
     const attributeObjects = [];
     const batchSize = 1000;
 
     for (const modelObjectsSet of viewerObjects) {
-      const modelId = modelObjectsSet["modelId"];
-      let modelObjectIdsList = modelObjectsSet["objects"].map((obj) => obj.id);
+      const modelId = modelObjectsSet['modelId'];
+      let modelObjectIdsList = modelObjectsSet['objects'].map((obj) => obj.id);
 
       for (let i = 0; i < modelObjectIdsList.length; i += batchSize) {
         const batch = modelObjectIdsList.slice(i, i + batchSize);
@@ -77,13 +70,13 @@ class App extends Component {
 
             propertySet.properties.forEach((prop) => {
               prop.properties.forEach((subProp) => {
-                if (posAttributes.some(attr => subProp.name.includes(attr))) {
-                  primaryAttribute = { 
-                    modelId, 
-                    id: propertySet.id, 
-                    class: propertySet.class, 
+                if (posAttributes.some((attr) => subProp.name.includes(attr))) {
+                  primaryAttribute = {
+                    modelId,
+                    id: propertySet.id,
+                    class: propertySet.class,
                     name: subProp.name,
-                    value: subProp.value 
+                    value: subProp.value,
                   };
                 }
               });
@@ -97,38 +90,37 @@ class App extends Component {
       }
     }
 
-    // Ensure loading is shown for at least 2 seconds
     setTimeout(() => {
-      this.setState({ attributeData: attributeObjects, loading: false });
+      setAttributeData(attributeObjects);
+      setLoading(false);
     }, 2000);
   };
 
-  handleGroupClick = async (value) => {
-    this.setState((prevState) => {
-      const updatedGroups = { ...prevState.selectedGroups };
+  const handleGroupClick = async (value) => {
+    setSelectedGroups((prevGroups) => {
+      const updatedGroups = { ...prevGroups };
       if (updatedGroups[value]) {
         delete updatedGroups[value];
       } else {
         updatedGroups[value] = true;
       }
-
-      return { selectedGroups: updatedGroups };
-    }, async () => {
-      if (this.state.selectionMode) {
-        await this.selectModelsInViewer();
-      } else {
-        const api = await this.dotConnect();
-        const selectedData = this.state.attributeData.filter(obj => this.state.selectedGroups[obj.value]);
-        if (Object.keys(this.state.selectedGroups).length > 0) {
-          await this.selectObjects(api, selectedData);
-        }
-      }
+      return updatedGroups;
     });
+
+    if (selectionMode) {
+      await selectModelsInViewer();
+    } else {
+      const api = await dotConnect();
+      const selectedData = attributeData.filter((obj) => selectedGroups[obj.value]);
+      if (Object.keys(selectedGroups).length > 0) {
+        await selectObjects(api, selectedData);
+      }
+    }
   };
 
-  selectObjects = async (api, objects) => {
+  const selectObjects = async (api, objects) => {
     const modelEntities = objects.reduce((acc, obj) => {
-      const model = acc.find(m => m.modelId === obj.modelId);
+      const model = acc.find((m) => m.modelId === obj.modelId);
       if (model) {
         model.entityIds.push(obj.id);
       } else {
@@ -137,63 +129,55 @@ class App extends Component {
       return acc;
     }, []);
 
-    // Isolate the selected objects (default behavior)
     await api.viewer.isolateEntities(modelEntities);
   };
 
-  // Function to select models based on selected Pos.nr (filtered attribute cards)
-  selectModelsInViewer = async () => {
-    const api = await this.dotConnect();
+  const selectModelsInViewer = async () => {
+    const api = await dotConnect();
     const modelsToSelect = [];
 
-    // Only select the objects that match selected Pos.nr values
-    this.state.attributeData.forEach(obj => {
-      if (this.state.selectedGroups[obj.value]) {
+    attributeData.forEach((obj) => {
+      if (selectedGroups[obj.value]) {
         modelsToSelect.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
       }
     });
 
     if (modelsToSelect.length > 0) {
       const objectSelector = {
-        modelObjectIds: modelsToSelect.map(m => ({
-          modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds
-        }))
+        modelObjectIds: modelsToSelect.map((m) => ({
+          modelId: m.modelId,
+          objectRuntimeIds: m.objectRuntimeIds,
+        })),
       };
 
-      // Apply selection based on selected Pos.nr only
       await api.viewer.setSelection(objectSelector);
     }
   };
 
-  toggleSelectionMode = () => {
-    this.setState((prevState) => ({
-      selectionMode: !prevState.selectionMode,
-    }));
+  const toggleSelectionMode = () => {
+    setSelectionMode(!selectionMode);
   };
 
-  handleSearchChange = (event) => {
-    this.setState({ searchTerm: event.target.value });
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
   };
 
-  // Function to normalize strings for flexible searching
-  normalizeString = (str) => {
+  const normalizeString = (str) => {
     return str
-      .toLowerCase() // Convert to lowercase
-      .replace(/\s+/g, '') // Remove spaces
-      .replace(/[^a-zA-Z0-9]/g, ''); // Remove non-alphanumeric characters
+      .toLowerCase()
+      .replace(/\s+/g, '')
+      .replace(/[^a-zA-Z0-9]/g, '');
   };
 
-  groupAttributeData = (data = this.state.attributeData) => {
-    // Normalize the search term
-    const normalizedSearchTerm = this.normalizeString(this.state.searchTerm);
+  const groupAttributeData = (data = attributeData) => {
+    const normalizedSearchTerm = normalizeString(searchTerm);
 
-    // Filter based on normalized search term
     const filteredData = data.filter((obj) => {
-      const normalizedValue = this.normalizeString(obj.value);
+      const normalizedValue = normalizeString(obj.value);
       return normalizedValue.includes(normalizedSearchTerm);
     });
 
-    const sortedData = this.sortAttributeData(filteredData);
+    const sortedData = sortAttributeData(filteredData);
 
     const groupedData = sortedData.reduce((acc, obj) => {
       const { value } = obj;
@@ -208,8 +192,7 @@ class App extends Component {
     return Object.values(groupedData);
   };
 
-  // Function to sort attribute data by letters + numbers (e.g., A1, B2, etc.)
-  sortAttributeData = (data) => {
+  const sortAttributeData = (data) => {
     return data.sort((a, b) => {
       const regex = /(\D+)(\d+)/;
       const aMatch = a.value.match(regex);
@@ -227,31 +210,29 @@ class App extends Component {
     });
   };
 
-  renderGroupedAttributeObjects = () => {
-    const groupedData = this.groupAttributeData();
-    const selectedData = groupedData.filter(group => this.state.selectedGroups[group.value]);
-    const nonSelectedData = groupedData.filter(group => !this.state.selectedGroups[group.value]);
+  const renderGroupedAttributeObjects = () => {
+    const groupedData = groupAttributeData();
+    const selectedData = groupedData.filter((group) => selectedGroups[group.value]);
+    const nonSelectedData = groupedData.filter((group) => !selectedGroups[group.value]);
 
     return (
       <div className="attribute-cards">
-        {selectedData.map(group => (
-          <div 
-            key={group.value} 
+        {selectedData.map((group) => (
+          <div
+            key={group.value}
             className="attribute-card selected"
-            onClick={() => this.handleGroupClick(group.value)}
+            onClick={() => handleGroupClick(group.value)}
           >
-            <strong>{group.value}</strong><br />
+            <strong>{group.value}</strong>
+            <br />
             Antall: {group.antall}
           </div>
         ))}
         {selectedData.length > 0 && <hr className="separator" />}
-        {nonSelectedData.map(group => (
-          <div 
-            key={group.value} 
-            className="attribute-card"
-            onClick={() => this.handleGroupClick(group.value)}
-          >
-            <strong>{group.value}</strong><br />
+        {nonSelectedData.map((group) => (
+          <div key={group.value} className="attribute-card" onClick={() => handleGroupClick(group.value)}>
+            <strong>{group.value}</strong>
+            <br />
             Antall: {group.antall}
           </div>
         ))}
@@ -259,71 +240,58 @@ class App extends Component {
     );
   };
 
-  render() {
-    return (
-      <>
-        <div className="container">
-          <header className="header">
-            <div className="header-content">
-              <div className="logo">
-                <h1>
-                  <span className="pos">POS.</span>
-                  <span className="flow">Flow</span>
-                </h1>
-              </div>
-              <nav>
-                <a href="#" onClick={this.getAttributeDataFromTrimble}>
-                  <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
-                </a>
-                {/* M button to toggle selection mode */}
-                <a href="#" onClick={this.toggleSelectionMode}>
-                  {this.state.selectionMode ? (
-                    <img
-                      src="https://dawood11.github.io/trimble-test/src/assets/M.png"
-                      alt="Selection Mode"
-                      className="nav-icon"
-                    />
-                  ) : (
-                    <img
-                      src="https://dawood11.github.io/trimble-test/src/assets/MN.png"
-                      alt="Selection Mode"
-                      className="nav-icon"
-                    />
-                  )}
-                </a>
-              </nav>
-            </div>
-          </header>
-
-          {/* Sub-header section */}
-          <div className="sub-header">
-            <input
-              type="text"
-              className="input-field"
-              placeholder="Søk"
-              value={this.state.searchTerm}
-              onChange={this.handleSearchChange}
-            />
+  return (
+    <div className="container">
+      <header className="header">
+        <div className="header-content">
+          <div className="logo">
+            <h1>
+              <span className="pos">POS.</span>
+              <span className="flow">Flow</span>
+            </h1>
           </div>
-
-          <main className="content">
-            {this.state.loading ? (
-              <div className="loading-message">
-                Leser armeringen, vennligst vent...
-              </div>
-            ) : (
-              this.renderGroupedAttributeObjects()
-            )}
-          </main>
-          <footer>
-            <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
-            <p>Utviklet av Yasin Rafiq</p>
-            <p>UTVIKLING</p>
-          </footer>
+          <nav>
+            <a href="#" onClick={getAttributeDataFromTrimble}>
+              <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
+            </a>
+            <a href="#" onClick={toggleSelectionMode}>
+              <img
+                src={selectionMode
+                  ? 'https://dawood11.github.io/trimble-test/src/assets/M.png'
+                  : 'https://dawood11.github.io/trimble-test/src/assets/MN.png'}
+                alt="Selection Mode"
+                className="nav-icon"
+              />
+            </a>
+          </nav>
         </div>
-      </>
-    );
-  }
-}
+      </header>
+
+      <div className="sub-header">
+        <input
+          type="text"
+          className="input-field"
+          placeholder="Søk"
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+      </div>
+
+      <main className="content">
+        {loading ? (
+          <div className="loading-message">Leser armeringen, vennligst vent...</div>
+        ) : (
+          renderGroupedAttributeObjects()
+        )}
+      </main>
+      <footer>
+        <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
+        
+        <p>Utviklet av Yasin Rafiq</p>
+        <p>UTVIKLING</p>
+      </footer>
+    </div>
+  );
+};
 
 export default App;

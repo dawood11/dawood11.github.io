@@ -102,7 +102,6 @@ const App = () => {
     setSelectedGroups((prevGroups) => {
       const updatedGroups = { ...prevGroups };
 
-      // Hvis attributten allerede er valgt, deselecter den, ellers velger vi den
       if (updatedGroups[value]) {
         delete updatedGroups[value];
       } else {
@@ -116,10 +115,8 @@ const App = () => {
     const selectedData = attributeData.filter((obj) => selectedGroups[obj.value]);
 
     if (selectionMode) {
-      // Hvis modus er på, velger vi hele settet med modeller
       await selectModelsInViewer(api);
     } else {
-      // Hvis modus er av, isoler de valgte objektene
       if (selectedData.length > 0) {
         await selectObjects(api, selectedData);
       }
@@ -220,20 +217,22 @@ const App = () => {
 
     return (
       <div className="attribute-cards">
-        {nonSelectedData.map((group) => (
-          <div
-            key={group.value}
-            className="attribute-card"
-            onClick={() => handleGroupClick(group.value)}
-          >
+        {/* Valgte kort vises først */}
+        {selectedData.map((group) => (
+          <div key={group.value} className="attribute-card selected" onClick={() => handleGroupClick(group.value)}>
             <strong>{group.value}</strong>
             <br />
             Antall: {group.antall}
           </div>
         ))}
         {selectedData.length > 0 && <hr className="separator" />}
-        {selectedData.map((group) => (
-          <div key={group.value} className="attribute-card selected" onClick={() => handleGroupClick(group.value)}>
+        {/* Ikke-valgte kort vises etter */}
+        {nonSelectedData.map((group) => (
+          <div
+            key={group.value}
+            className="attribute-card"
+            onClick={() => handleGroupClick(group.value)}
+          >
             <strong>{group.value}</strong>
             <br />
             Antall: {group.antall}
@@ -291,7 +290,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.04</p>
+        <p>UTVIKLING 0.05</p>
       </footer>
     </div>
   );

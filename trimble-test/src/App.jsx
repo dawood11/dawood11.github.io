@@ -273,19 +273,19 @@ class App extends Component {
               </div>
               <nav>
                 <a href="#" onClick={this.getAttributeDataFromTrimble}>
-                  <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
+                  <img src="https://bimyr.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
                 </a>
                 {/* M button to toggle selection mode */}
                 <a href="#" onClick={this.toggleSelectionMode}>
                   {this.state.selectionMode ? (
                     <img
-                      src="https://dawood11.github.io/trimble-test/src/assets/M.png"
+                      src="https://bimyr.github.io/trimble-test/src/assets/M.png"
                       alt="Selection Mode"
                       className="nav-icon"
                     />
                   ) : (
                     <img
-                      src="https://dawood11.github.io/trimble-test/src/assets/MN.png"
+                      src="https://bimyr.github.io/trimble-test/src/assets/MN.png"
                       alt="Selection Mode"
                       className="nav-icon"
                     />
@@ -316,9 +316,9 @@ class App extends Component {
             )}
           </main>
           <footer>
-            <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
+            <img src="https://bimyr.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo"/>
             <p>Utviklet av Yasin Rafiq</p>
-            <p>Beta 1.9</p>
+            <p>Beta 1.7</p>
           </footer>
         </div>
       </>

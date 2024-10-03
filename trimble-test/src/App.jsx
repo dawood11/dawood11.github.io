@@ -2,7 +2,15 @@ import React, { useState, useEffect } from 'react';
 import * as Extensions from 'trimble-connect-workspace-api';
 import './index.css'; // Import the CSS file
 
+// Importer defineCustomElements fra Modus Web Components
+import { defineCustomElements } from '@trimble-oss/modus-web-components/loader';
+
 const App = () => {
+  // Definer Modus Web Components når komponenten lastes
+  useEffect(() => {
+    defineCustomElements();
+  }, []);
+
   const [attributeData, setAttributeData] = useState([]);
   const [selectedGroups, setSelectedGroups] = useState({});
   const [projectId, setProjectId] = useState(null);
@@ -253,6 +261,7 @@ const App = () => {
           <nav>
             <a href="#" onClick={getAttributeDataFromTrimble}>
               <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
+              <modus-alert message="You've installed Modus Web Components!" type="success"></modus-alert>
             </a>
             <a href="#" onClick={toggleSelectionMode}>
               <img
@@ -284,9 +293,9 @@ const App = () => {
           renderGroupedAttributeObjects()
         )}
       </main>
+
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
-        
         <p>Utviklet av Yasin Rafiq</p>
         <p>UTVIKLING</p>
       </footer>

@@ -13,6 +13,7 @@
     "@babel/preset-env": "^7.24.8",
     "@babel/preset-react": "^7.24.7",
     "@svgdotjs/svg.js": "^3.2.4",
+    "@trimble-oss/modus-web-components": "^0.39.0",
     "canvas": "^2.11.2",
     "code": "^5.2.4",
     "exceljs": "^4.4.0",

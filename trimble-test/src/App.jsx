@@ -1,12 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import * as Extensions from 'trimble-connect-workspace-api';
-import './index.css'; // Import the CSS file
-
-// Importer defineCustomElements fra Modus Web Components
+import './index.css'; 
 import { defineCustomElements } from '@trimble-oss/modus-web-components/loader';
 
 const App = () => {
-  // Definer Modus Web Components når komponenten lastes
   useEffect(() => {
     defineCustomElements();
   }, []);
@@ -16,7 +13,6 @@ const App = () => {
   const [projectId, setProjectId] = useState(null);
   const [modelName, setModelName] = useState('Model');
   const [searchTerm, setSearchTerm] = useState('');
-  const [showSubHeader] = useState(true);
   const [loading, setLoading] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
 
@@ -98,10 +94,8 @@ const App = () => {
       }
     }
 
-    setTimeout(() => {
-      setAttributeData(attributeObjects);
-      setLoading(false);
-    }, 2000);
+    setAttributeData(attributeObjects);
+    setLoading(false);
   };
 
   const handleGroupClick = async (value) => {
@@ -177,10 +171,10 @@ const App = () => {
       .replace(/[^a-zA-Z0-9]/g, '');
   };
 
-  const groupAttributeData = (data = attributeData) => {
+  const groupAttributeData = useMemo(() => {
     const normalizedSearchTerm = normalizeString(searchTerm);
 
-    const filteredData = data.filter((obj) => {
+    const filteredData = attributeData.filter((obj) => {
       const normalizedValue = normalizeString(obj.value);
       return normalizedValue.includes(normalizedSearchTerm);
     });
@@ -198,7 +192,7 @@ const App = () => {
     }, {});
 
     return Object.values(groupedData);
-  };
+  }, [attributeData, searchTerm]);
 
   const sortAttributeData = (data) => {
     return data.sort((a, b) => {
@@ -219,9 +213,8 @@ const App = () => {
   };
 
   const renderGroupedAttributeObjects = () => {
-    const groupedData = groupAttributeData();
-    const selectedData = groupedData.filter((group) => selectedGroups[group.value]);
-    const nonSelectedData = groupedData.filter((group) => !selectedGroups[group.value]);
+    const selectedData = groupAttributeData.filter((group) => selectedGroups[group.value]);
+    const nonSelectedData = groupAttributeData.filter((group) => !selectedGroups[group.value]);
 
     return (
       <div className="attribute-cards">
@@ -261,11 +254,6 @@ const App = () => {
           <nav>
             <a href="#" onClick={getAttributeDataFromTrimble}>
               <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
-              <modus-toolbar>
-              <modus-button>Button 1</modus-button>
-              <modus-button>Button 2</modus-button>
-              <modus-button>Button 3</modus-button>
-              </modus-toolbar>
             </a>
             <a href="#" onClick={toggleSelectionMode}>
               <img
@@ -301,7 +289,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING</p>
+        <p>UTVIKLING 0.01</p>
       </footer>
     </div>
   );

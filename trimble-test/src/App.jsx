@@ -261,7 +261,11 @@ const App = () => {
           <nav>
             <a href="#" onClick={getAttributeDataFromTrimble}>
               <img src="https://dawood11.github.io/trimble-test/src/assets/power-button.png" alt="Start" className="nav-icon" />
-              <modus-alert message="You've installed Modus Web Components!" type="success"></modus-alert>
+              <modus-toolbar>
+              <modus-button>Button 1</modus-button>
+              <modus-button>Button 2</modus-button>
+              <modus-button>Button 3</modus-button>
+              </modus-toolbar>
             </a>
             <a href="#" onClick={toggleSelectionMode}>
               <img

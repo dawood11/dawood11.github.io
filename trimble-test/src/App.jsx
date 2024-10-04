@@ -117,16 +117,19 @@ const App = () => {
     setSelectedGroups(updatedGroups);
 
     const api = await dotConnect();
-    // Filtrerer kun objekter som matcher den valgte verdien (kortet)
-    const selectedData = attributeData.filter((obj) => obj.value === value);
+
+    // Filtrer objektene basert på "Pos.nr."-verdien
+    const selectedData = attributeData.filter((obj) => {
+      return obj.value === value; // Filtrerer kun objekter som matcher valgt verdi
+    });
 
     if (selectionMode) {
-      // Hvis toggle-modus er PÅ, velg objektene uten å isolere resten av modellen
+      // Når toggle-modus er PÅ, velg objektene uten å isolere resten av modellen
       if (selectedData.length > 0) {
         await selectModelsInViewer(api, selectedData);
       }
     } else {
-      // Hvis toggle-modus er AV, isoler de valgte objektene
+      // Når toggle-modus er AV, isoler de valgte objektene
       if (selectedData.length > 0) {
         await selectObjects(api, selectedData);
       }
@@ -286,7 +289,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.1.0</p>
+        <p>UTVIKLING 0.1.1</p>
       </footer>
     </div>
   );

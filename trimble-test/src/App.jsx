@@ -16,6 +16,14 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
 
+  const debounce = (func, delay) => {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => func(...args), delay);
+    };
+  };
+
   const dotConnect = async () => {
     return await Extensions.connect(
       window.parent,
@@ -58,14 +66,14 @@ const App = () => {
 
     const viewerObjects = await api.viewer.getObjects();
     const attributeObjects = [];
-    const batchSize = 1000;
+    const dynamicBatchSize = Math.max(500, Math.min(viewerObjects.length / 10, 2000));
 
     await Promise.all(viewerObjects.map(async (modelObjectsSet) => {
       const modelId = modelObjectsSet['modelId'];
       let modelObjectIdsList = modelObjectsSet['objects'].map((obj) => obj.id);
 
-      for (let i = 0; i < modelObjectIdsList.length; i += batchSize) {
-        const batch = modelObjectIdsList.slice(i, i + batchSize);
+      for (let i = 0; i < modelObjectIdsList.length; i += dynamicBatchSize) {
+        const batch = modelObjectIdsList.slice(i, i + dynamicBatchSize);
         const properties = await api.viewer.getObjectProperties(modelId, batch);
 
         properties.forEach((propertySet) => {
@@ -98,38 +106,99 @@ const App = () => {
     setLoading(false);
   };
 
-  const handleGroupClick = async (value) => {
-    setSelectedGroups((prevGroups) => {
-      const updatedGroups = { ...prevGroups };
-  
-      if (updatedGroups[value]) {
-        delete updatedGroups[value];
-      } else {
-        updatedGroups[value] = true;
-      }
-  
-      return updatedGroups;
-    });
-  
+  // Inline funksjon for å håndtere gruppens klikk med debouncing
+  const debouncedHandleGroupClick = debounce(async (value) => {
+    const updatedGroups = { ...selectedGroups };
+    if (updatedGroups[value]) {
+      delete updatedGroups[value];
+    } else {
+      updatedGroups[value] = true;
+    }
+    setSelectedGroups(updatedGroups);
+
     const api = await dotConnect();
-    // Bruker den oppdaterte tilstanden umiddelbart
-    setSelectedGroups((updatedGroups) => {
-      const selectedData = attributeData.filter((obj) => updatedGroups[obj.value]);
-  
-      if (selectionMode) {
-        selectModelsInViewer(api);
-      } else {
-        if (selectedData.length > 0) {
-          selectObjects(api, selectedData);
+    const selectedData = attributeData.filter((obj) => updatedGroups[obj.value]);
+
+    if (selectionMode) {
+      // Umiddelbart isoler de valgte objektene i visningen
+      if (selectedData.length > 0) {
+        await selectObjects(api, selectedData);
+      }
+    } else {
+      // Hvis ikke toggle-modus, utfør normal seleksjon
+      if (selectedData.length > 0) {
+        await selectObjects(api, selectedData);
+      }
+    }
+  }, 300);
+
+  const groupAttributeData = () => {
+    const normalizedSearchTerm = searchTerm.toLowerCase().replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+
+    const filteredData = attributeData.filter((obj) => {
+      const normalizedValue = obj.value.toLowerCase().replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+      return normalizedValue.includes(normalizedSearchTerm);
+    });
+
+    const sortedData = filteredData.sort((a, b) => {
+      const regex = /(\D+)(\d+)/;
+      const aMatch = a.value.match(regex);
+      const bMatch = b.value.match(regex);
+
+      if (aMatch && bMatch) {
+        if (aMatch[1] === bMatch[1]) {
+          return parseInt(aMatch[2]) - parseInt(bMatch[2]);
+        } else {
+          return aMatch[1].localeCompare(bMatch[1]);
         }
       }
-      
-      return updatedGroups;
+
+      return a.value.localeCompare(b.value);
     });
+
+    const groupedData = sortedData.reduce((acc, obj) => {
+      const { value } = obj;
+      if (!acc[value]) {
+        acc[value] = { value, antall: 0, models: [] };
+      }
+      acc[value].antall += 1;
+      acc[value].models.push(obj);
+      return acc;
+    }, {});
+
+    return Object.values(groupedData);
   };
-  
+
+  const renderGroupedAttributeObjects = () => {
+    const groupedData = groupAttributeData();
+    
+    const selectedData = groupedData.filter((group) => selectedGroups[group.value]);
+    const nonSelectedData = groupedData.filter((group) => !selectedGroups[group.value]);
+
+    return (
+      <div className="attribute-cards">
+        {selectedData.map((group) => (
+          <div key={group.value} className="attribute-card selected" onClick={() => debouncedHandleGroupClick(group.value)}>
+            <strong>{group.value}</strong>
+            <br />
+            Antall: {group.antall}
+          </div>
+        ))}
+        {selectedData.length > 0 && <hr className="separator" />}
+        {nonSelectedData.map((group) => (
+          <div key={group.value} className="attribute-card" onClick={() => debouncedHandleGroupClick(group.value)}>
+            <strong>{group.value}</strong>
+            <br />
+            Antall: {group.antall}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   const selectObjects = async (api, objects) => {
+    if (objects.length === 0) return;
+
     const modelEntities = objects.reduce((acc, obj) => {
       const model = acc.find((m) => m.modelId === obj.modelId);
       if (model) {
@@ -140,6 +209,7 @@ const App = () => {
       return acc;
     }, []);
 
+    // Skjuler alt annet ved å isolere kun de valgte objektene
     await api.viewer.isolateEntities(modelEntities);
   };
 
@@ -166,86 +236,6 @@ const App = () => {
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
-  };
-
-  const normalizeString = (str) => {
-    return str
-      .toLowerCase()
-      .replace(/\s+/g, '')
-      .replace(/[^a-zA-Z0-9]/g, '');
-  };
-
-  const groupAttributeData = () => {
-    const normalizedSearchTerm = normalizeString(searchTerm);
-
-    const filteredData = attributeData.filter((obj) => {
-      const normalizedValue = normalizeString(obj.value);
-      return normalizedValue.includes(normalizedSearchTerm);
-    });
-
-    const sortedData = sortAttributeData(filteredData);
-
-    const groupedData = sortedData.reduce((acc, obj) => {
-      const { value } = obj;
-      if (!acc[value]) {
-        acc[value] = { value, antall: 0, models: [] };
-      }
-      acc[value].antall += 1;
-      acc[value].models.push(obj);
-      return acc;
-    }, {});
-
-    return Object.values(groupedData);
-  };
-
-  const sortAttributeData = (data) => {
-    return data.sort((a, b) => {
-      const regex = /(\D+)(\d+)/;
-      const aMatch = a.value.match(regex);
-      const bMatch = b.value.match(regex);
-
-      if (aMatch && bMatch) {
-        if (aMatch[1] === bMatch[1]) {
-          return parseInt(aMatch[2]) - parseInt(bMatch[2]);
-        } else {
-          return aMatch[1].localeCompare(bMatch[1]);
-        }
-      }
-
-      return a.value.localeCompare(b.value);
-    });
-  };
-
-  const renderGroupedAttributeObjects = () => {
-    const groupedData = groupAttributeData();
-    const selectedData = groupedData.filter((group) => selectedGroups[group.value]);
-    const nonSelectedData = groupedData.filter((group) => !selectedGroups[group.value]);
-
-    return (
-      <div className="attribute-cards">
-        {/* Valgte kort vises først */}
-        {selectedData.map((group) => (
-          <div key={group.value} className="attribute-card selected" onClick={() => handleGroupClick(group.value)}>
-            <strong>{group.value}</strong>
-            <br />
-            Antall: {group.antall}
-          </div>
-        ))}
-        {selectedData.length > 0 && <hr className="separator" />}
-        {/* Ikke-valgte kort vises etter */}
-        {nonSelectedData.map((group) => (
-          <div
-            key={group.value}
-            className="attribute-card"
-            onClick={() => handleGroupClick(group.value)}
-          >
-            <strong>{group.value}</strong>
-            <br />
-            Antall: {group.antall}
-          </div>
-        ))}
-      </div>
-    );
   };
 
   return (
@@ -296,7 +286,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.07</p>
+        <p>UTVIKLING 0.08</p>
       </footer>
     </div>
   );

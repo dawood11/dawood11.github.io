@@ -16,6 +16,14 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
 
+  const debounce = (func, delay) => {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => func(...args), delay);
+    };
+  };
+
   const dotConnect = async () => {
     return await Extensions.connect(
       window.parent,
@@ -98,33 +106,32 @@ const App = () => {
     setLoading(false);
   };
 
-  // Funksjon for å håndtere gruppens klikk med debouncing
-  const handleGroupClick = async (value) => {
-    setSelectedGroups((prevGroups) => {
-      const updatedGroups = { ...prevGroups };
-      if (updatedGroups[value]) {
-        delete updatedGroups[value];
-      } else {
-        updatedGroups[value] = true;
-      }
-      return updatedGroups;
-    });
+  // Inline funksjon for å håndtere gruppens klikk med debouncing
+  const debouncedHandleGroupClick = debounce(async (value) => {
+    const updatedGroups = { ...selectedGroups };
+    if (updatedGroups[value]) {
+      delete updatedGroups[value];
+    } else {
+      updatedGroups[value] = true;
+    }
+    setSelectedGroups(updatedGroups);
 
     const api = await dotConnect();
-    const selectedData = attributeData.filter((obj) => selectedGroups[obj.value]);
+    // Filtrerer kun objekter som matcher den valgte verdien (kortet)
+    const selectedData = attributeData.filter((obj) => obj.value === value);
 
     if (selectionMode) {
-      // Når toggle-modus er på, velg objektene uten å isolere resten av modellen basert på "Pos.nr."
+      // Hvis toggle-modus er PÅ, velg objektene uten å isolere resten av modellen
       if (selectedData.length > 0) {
         await selectModelsInViewer(api, selectedData);
       }
     } else {
-      // Når toggle-modus er av, isoler de valgte objektene
+      // Hvis toggle-modus er AV, isoler de valgte objektene
       if (selectedData.length > 0) {
         await selectObjects(api, selectedData);
       }
     }
-  };
+  }, 300);
 
   const groupAttributeData = () => {
     const normalizedSearchTerm = searchTerm.toLowerCase().replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
@@ -165,11 +172,22 @@ const App = () => {
 
   const renderGroupedAttributeObjects = () => {
     const groupedData = groupAttributeData();
+    
+    const selectedData = groupedData.filter((group) => selectedGroups[group.value]);
+    const nonSelectedData = groupedData.filter((group) => !selectedGroups[group.value]);
 
     return (
       <div className="attribute-cards">
-        {groupedData.map((group) => (
-          <div key={group.value} className="attribute-card" onClick={() => handleGroupClick(group.value)}>
+        {selectedData.map((group) => (
+          <div key={group.value} className="attribute-card selected" onClick={() => debouncedHandleGroupClick(group.value)}>
+            <strong>{group.value}</strong>
+            <br />
+            Antall: {group.antall}
+          </div>
+        ))}
+        {selectedData.length > 0 && <hr className="separator" />}
+        {nonSelectedData.map((group) => (
+          <div key={group.value} className="attribute-card" onClick={() => debouncedHandleGroupClick(group.value)}>
             <strong>{group.value}</strong>
             <br />
             Antall: {group.antall}
@@ -180,6 +198,8 @@ const App = () => {
   };
 
   const selectObjects = async (api, objects) => {
+    if (objects.length === 0) return;
+
     const modelEntities = objects.reduce((acc, obj) => {
       const model = acc.find((m) => m.modelId === obj.modelId);
       if (model) {
@@ -190,10 +210,11 @@ const App = () => {
       return acc;
     }, []);
 
-    // Isoler de valgte objektene
+    // Skjuler alt annet ved å isolere kun de valgte objektene
     await api.viewer.isolateEntities(modelEntities);
   };
 
+  // Funksjon for å velge modeller uten å skjule resten av modellen
   const selectModelsInViewer = async (api, objects) => {
     const modelEntities = objects.reduce((acc, obj) => {
       const model = acc.find((m) => m.modelId === obj.modelId);
@@ -205,12 +226,16 @@ const App = () => {
       return acc;
     }, []);
 
-    // Velg objektene uten å skjule resten av modellen
+    // Velger objektene uten å skjule resten av modellen
     await api.viewer.setSelection(modelEntities);
   };
 
   const toggleSelectionMode = () => {
     setSelectionMode(!selectionMode);
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
   };
 
   return (
@@ -246,7 +271,7 @@ const App = () => {
           className="input-field"
           placeholder="Søk"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={handleSearchChange}
         />
       </div>
 
@@ -261,7 +286,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.1.2</p>
+        <p>UTVIKLING 0.1.3</p>
       </footer>
     </div>
   );

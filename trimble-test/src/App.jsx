@@ -101,27 +101,33 @@ const App = () => {
   const handleGroupClick = async (value) => {
     setSelectedGroups((prevGroups) => {
       const updatedGroups = { ...prevGroups };
-
+  
       if (updatedGroups[value]) {
         delete updatedGroups[value];
       } else {
         updatedGroups[value] = true;
       }
-
+  
       return updatedGroups;
     });
-
+  
     const api = await dotConnect();
-    const selectedData = attributeData.filter((obj) => selectedGroups[obj.value]);
-
-    if (selectionMode) {
-      await selectModelsInViewer(api);
-    } else {
-      if (selectedData.length > 0) {
-        await selectObjects(api, selectedData);
+    // Bruker den oppdaterte tilstanden umiddelbart
+    setSelectedGroups((updatedGroups) => {
+      const selectedData = attributeData.filter((obj) => updatedGroups[obj.value]);
+  
+      if (selectionMode) {
+        selectModelsInViewer(api);
+      } else {
+        if (selectedData.length > 0) {
+          selectObjects(api, selectedData);
+        }
       }
-    }
+      
+      return updatedGroups;
+    });
   };
+  
 
   const selectObjects = async (api, objects) => {
     const modelEntities = objects.reduce((acc, obj) => {
@@ -290,7 +296,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.06</p>
+        <p>UTVIKLING 0.07</p>
       </footer>
     </div>
   );

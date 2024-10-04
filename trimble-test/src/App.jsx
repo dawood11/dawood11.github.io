@@ -123,23 +123,15 @@ const App = () => {
   
     if (selectedData.length > 0) {
       if (selectionMode) {
-        // Når toggle er på, velg kun objektene knyttet til valgt attributt (bruker setSelection)
-        await api.viewer.setSelection({
-          models: selectedData.map((obj) => ({
-            modelId: obj.modelId,
-            entityIds: [obj.id],
-          })),
-        });
+        // Når toggle er på, velg kun de objektene som tilhører den valgte attributten uten å skjule resten
+        await selectModelsInViewer(api, selectedData);
       } else {
         // Når toggle er av, isoler de valgte objektene
-        await api.viewer.isolateEntities(selectedData.map((obj) => ({
-          modelId: obj.modelId,
-          entityIds: [obj.id],
-        })));
+        await selectObjects(api, selectedData);
       }
     }
   }, 300);
-
+  
   const groupAttributeData = () => {
     const normalizedSearchTerm = searchTerm.toLowerCase().replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
 
@@ -293,7 +285,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.1.6</p>
+        <p>UTVIKLING 0.1.7</p>
       </footer>
     </div>
   );

@@ -117,8 +117,7 @@ const App = () => {
     setSelectedGroups(updatedGroups);
 
     const api = await dotConnect();
-    // Filtrerer kun objekter som matcher den valgte verdien (kortet)
-    const selectedData = attributeData.filter((obj) => obj.value === value);
+    const selectedData = attributeData.filter((obj) => updatedGroups[obj.value]);
 
     if (selectionMode) {
       // Hvis toggle-modus er PÅ, velg objektene uten å isolere resten av modellen
@@ -286,7 +285,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.1.3</p>
+        <p>UTVIKLING 0.1.4</p>
       </footer>
     </div>
   );

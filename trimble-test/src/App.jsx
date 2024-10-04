@@ -120,12 +120,12 @@ const App = () => {
     const selectedData = attributeData.filter((obj) => updatedGroups[obj.value]);
 
     if (selectionMode) {
-      // Umiddelbart isoler de valgte objektene i visningen
+      // Hvis toggle-modus er PÅ, velg objektene uten å isolere resten av modellen
       if (selectedData.length > 0) {
-        await selectObjects(api, selectedData);
+        await selectModelsInViewer(api, selectedData);
       }
     } else {
-      // Hvis ikke toggle-modus, utfør normal seleksjon
+      // Hvis toggle-modus er AV, isoler de valgte objektene
       if (selectedData.length > 0) {
         await selectObjects(api, selectedData);
       }
@@ -213,21 +213,20 @@ const App = () => {
     await api.viewer.isolateEntities(modelEntities);
   };
 
-  const selectModelsInViewer = async (api) => {
-    const modelsToSelect = attributeData
-      .filter((obj) => selectedGroups[obj.value])
-      .map((obj) => ({ modelId: obj.modelId, objectRuntimeIds: [obj.id] }));
+  // Funksjon for å velge modeller uten å skjule resten av modellen
+  const selectModelsInViewer = async (api, objects) => {
+    const modelEntities = objects.reduce((acc, obj) => {
+      const model = acc.find((m) => m.modelId === obj.modelId);
+      if (model) {
+        model.entityIds.push(obj.id);
+      } else {
+        acc.push({ modelId: obj.modelId, entityIds: [obj.id] });
+      }
+      return acc;
+    }, []);
 
-    if (modelsToSelect.length > 0) {
-      const objectSelector = {
-        modelObjectIds: modelsToSelect.map((m) => ({
-          modelId: m.modelId,
-          objectRuntimeIds: m.objectRuntimeIds,
-        })),
-      };
-
-      await api.viewer.setSelection(objectSelector);
-    }
+    // Velger objektene uten å skjule resten av modellen
+    await api.viewer.setSelection(modelEntities);
   };
 
   const toggleSelectionMode = () => {
@@ -286,7 +285,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.08</p>
+        <p>UTVIKLING 0.09</p>
       </footer>
     </div>
   );

@@ -304,7 +304,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.2.3</p>
+        <p>UTVIKLING 0.2.5</p>
       </footer>
     </div>
   );

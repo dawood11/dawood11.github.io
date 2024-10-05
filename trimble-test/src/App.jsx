@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as Extensions from 'trimble-connect-workspace-api';
-import './index.css'; 
+import './index.css';
 import { defineCustomElements } from '@trimble-oss/modus-web-components/loader';
 
 const App = () => {
@@ -132,6 +132,8 @@ const App = () => {
       // Når toggle er av, isoler de valgte objektene
       if (selectedData.length > 0) {
         await isolateObjects(api, selectedData);
+      } else {
+        await api.viewer.showAll();
       }
     }
   }, 300);
@@ -289,7 +291,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.1.9</p>
+        <p>UTVIKLING 0.2.0</p>
       </footer>
     </div>
   );

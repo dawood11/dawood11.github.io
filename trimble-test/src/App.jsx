@@ -117,21 +117,21 @@ const App = () => {
     setSelectedGroups(updatedGroups);
   
     const api = await dotConnect();
-  
+    
     // Filtrerer objekter som samsvarer med de valgte attributtgruppene
     const selectedData = attributeData.filter((obj) => updatedGroups[obj.value]);
   
     if (selectionMode) {
       // Når toggle er på, velg kun de objektene som tilhører den valgte attributten uten å skjule resten
       if (selectedData.length > 0) {
-        await selectModelsInViewer(api, selectedData);
+        await selectObjectsInViewer(api, selectedData);
       } else {
         await api.viewer.clearSelection();
       }
     } else {
       // Når toggle er av, isoler de valgte objektene
       if (selectedData.length > 0) {
-        await selectObjects(api, selectedData);
+        await isolateObjects(api, selectedData);
       }
     }
   }, 300);
@@ -200,7 +200,7 @@ const App = () => {
     );
   };
 
-  const selectObjects = async (api, objects) => {
+  const isolateObjects = async (api, objects) => {
     if (objects.length === 0) return;
 
     const modelEntities = objects.reduce((acc, obj) => {
@@ -214,11 +214,11 @@ const App = () => {
     }, []);
 
     // Skjuler alt annet ved å isolere kun de valgte objektene
-    await api.viewer.isolateEntities(modelEntities);
+    await api.viewer.isolateEntities({ models: modelEntities });
   };
 
   // Funksjon for å velge modeller uten å skjule resten av modellen
-  const selectModelsInViewer = async (api, objects) => {
+  const selectObjectsInViewer = async (api, objects) => {
     const modelEntities = objects.reduce((acc, obj) => {
       const model = acc.find((m) => m.modelId === obj.modelId);
       if (model) {
@@ -230,7 +230,7 @@ const App = () => {
     }, []);
 
     // Velger objektene uten å skjule resten av modellen
-    await api.viewer.setSelection(modelEntities);
+    await api.viewer.setSelection({ models: modelEntities, clear: true });
   };
 
   const toggleSelectionMode = () => {
@@ -289,7 +289,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.1.8</p>
+        <p>UTVIKLING 0.1.9</p>
       </footer>
     </div>
   );

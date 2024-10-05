@@ -158,7 +158,7 @@ const App = () => {
         if (Object.keys(selectedGroups).length > 0) {
           await selectObjects(api, selectedData);
         } else {
-          await api.viewer.showAll();
+          await api.viewer.resetModel(); // Use ModelResetCallback when no attribute cards are selected
         }
       }
     };
@@ -304,7 +304,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.2.1</p>
+        <p>UTVIKLING 0.2.2</p>
       </footer>
     </div>
   );

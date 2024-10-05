@@ -117,16 +117,20 @@ const App = () => {
     setSelectedGroups(updatedGroups);
   
     const api = await dotConnect();
-    
+  
     // Filtrerer objekter som samsvarer med de valgte attributtgruppene
     const selectedData = attributeData.filter((obj) => updatedGroups[obj.value]);
   
-    if (selectedData.length > 0) {
-      if (selectionMode) {
-        // Når toggle er på, velg kun de objektene som tilhører den valgte attributten uten å skjule resten
+    if (selectionMode) {
+      // Når toggle er på, velg kun de objektene som tilhører den valgte attributten uten å skjule resten
+      if (selectedData.length > 0) {
         await selectModelsInViewer(api, selectedData);
       } else {
-        // Når toggle er av, isoler de valgte objektene
+        await api.viewer.clearSelection();
+      }
+    } else {
+      // Når toggle er av, isoler de valgte objektene
+      if (selectedData.length > 0) {
         await selectObjects(api, selectedData);
       }
     }
@@ -285,7 +289,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.1.7</p>
+        <p>UTVIKLING 0.1.8</p>
       </footer>
     </div>
   );

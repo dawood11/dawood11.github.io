@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import * as Extensions from 'trimble-connect-workspace-api';
 import './index.css';
 import { defineCustomElements } from '@trimble-oss/modus-web-components/loader';
@@ -15,14 +15,6 @@ const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
-
-  const debounce = (func, delay) => {
-    let timer;
-    return (...args) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => func(...args), delay);
-    };
-  };
 
   const dotConnect = async () => {
     return await Extensions.connect(
@@ -66,14 +58,14 @@ const App = () => {
 
     const viewerObjects = await api.viewer.getObjects();
     const attributeObjects = [];
-    const dynamicBatchSize = Math.max(500, Math.min(viewerObjects.length / 10, 2000));
+    const batchSize = 1000;
 
-    await Promise.all(viewerObjects.map(async (modelObjectsSet) => {
+    for (const modelObjectsSet of viewerObjects) {
       const modelId = modelObjectsSet['modelId'];
       let modelObjectIdsList = modelObjectsSet['objects'].map((obj) => obj.id);
 
-      for (let i = 0; i < modelObjectIdsList.length; i += dynamicBatchSize) {
-        const batch = modelObjectIdsList.slice(i, i + dynamicBatchSize);
+      for (let i = 0; i < modelObjectIdsList.length; i += batchSize) {
+        const batch = modelObjectIdsList.slice(i, i + batchSize);
         const properties = await api.viewer.getObjectProperties(modelId, batch);
 
         properties.forEach((propertySet) => {
@@ -82,13 +74,13 @@ const App = () => {
 
             propertySet.properties.forEach((prop) => {
               prop.properties.forEach((subProp) => {
-                if (posAttributes.some((attr) => subProp.name.includes(attr))) {
+                if (posAttributes.some(attr => subProp.name.includes(attr))) {
                   primaryAttribute = {
                     modelId,
                     id: propertySet.id,
                     class: propertySet.class,
                     name: subProp.name,
-                    value: subProp.value,
+                    value: subProp.value
                   };
                 }
               });
@@ -100,67 +92,106 @@ const App = () => {
           }
         });
       }
-    }));
+    }
 
-    setAttributeData(attributeObjects);
-    setLoading(false);
+    // Ensure loading is shown for at least 2 seconds
+    setTimeout(() => {
+      setAttributeData(attributeObjects);
+      setLoading(false);
+    }, 2000);
   };
 
-  // Inline funksjon for å håndtere gruppens klikk med debouncing
-  const debouncedHandleGroupClick = debounce(async (value) => {
-    const updatedGroups = { ...selectedGroups };
-    if (updatedGroups[value]) {
-      delete updatedGroups[value];
-    } else {
-      updatedGroups[value] = true;
-    }
-    setSelectedGroups(updatedGroups);
-  
-    const api = await dotConnect();
-    
-    // Filtrerer objekter som samsvarer med de valgte attributtgruppene
-    const selectedData = attributeData.filter((obj) => updatedGroups[obj.value]);
-  
-    if (selectionMode) {
-      // Når toggle er på, velg kun de objektene som tilhører den valgte attributten uten å skjule resten
-      if (selectedData.length > 0) {
-        await selectObjectsInViewer(api, selectedData);
+  const handleGroupClick = async (value) => {
+    setSelectedGroups((prevSelectedGroups) => {
+      const updatedGroups = { ...prevSelectedGroups };
+      if (updatedGroups[value]) {
+        delete updatedGroups[value];
       } else {
-        await api.viewer.clearSelection();
+        updatedGroups[value] = true;
       }
-    } else {
-      // Når toggle er av, isoler de valgte objektene
-      if (selectedData.length > 0) {
-        await isolateObjects(api, selectedData);
-      } else {
-        await api.viewer.showAll();
-      }
-    }
-  }, 300);
-  
-  const groupAttributeData = () => {
-    const normalizedSearchTerm = searchTerm.toLowerCase().replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+      return updatedGroups;
+    });
+  };
 
-    const filteredData = attributeData.filter((obj) => {
-      const normalizedValue = obj.value.toLowerCase().replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+  const selectObjects = useCallback(async (api, objects) => {
+    const modelEntities = objects.reduce((acc, obj) => {
+      const model = acc.find(m => m.modelId === obj.modelId);
+      if (model) {
+        model.entityIds.push(obj.id);
+      } else {
+        acc.push({ modelId: obj.modelId, entityIds: [obj.id] });
+      }
+      return acc;
+    }, []);
+
+    // Isolate the selected objects (default behavior)
+    await api.viewer.isolateEntities(modelEntities);
+  }, []);
+
+  const selectModelsInViewer = useCallback(async (api, objects) => {
+    const modelsToSelect = [];
+
+    objects.forEach(obj => {
+      if (selectedGroups[obj.value]) {
+        modelsToSelect.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
+      }
+    });
+
+    if (modelsToSelect.length > 0) {
+      const objectSelector = {
+        modelObjectIds: modelsToSelect.map(m => ({
+          modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds
+        }))
+      };
+
+      await api.viewer.setSelection(objectSelector);
+    }
+  }, [selectedGroups]);
+
+  useEffect(() => {
+    const updateSelection = async () => {
+      const api = await dotConnect();
+      const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
+      if (selectionMode) {
+        await selectModelsInViewer(api, selectedData);
+      } else {
+        if (Object.keys(selectedGroups).length > 0) {
+          await selectObjects(api, selectedData);
+        } else {
+          await api.viewer.showAll();
+        }
+      }
+    };
+
+    if (Object.keys(selectedGroups).length > 0 || selectionMode) {
+      updateSelection();
+    }
+  }, [selectedGroups, selectionMode, attributeData, selectModelsInViewer, selectObjects]);
+
+  const toggleSelectionMode = () => {
+    setSelectionMode(!selectionMode);
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const normalizeString = (str) => {
+    return str
+      .toLowerCase()
+      .replace(/\s+/g, '')
+      .replace(/[^a-zA-Z0-9]/g, '');
+  };
+
+  const groupAttributeData = (data = attributeData) => {
+    const normalizedSearchTerm = normalizeString(searchTerm);
+
+    const filteredData = data.filter((obj) => {
+      const normalizedValue = normalizeString(obj.value);
       return normalizedValue.includes(normalizedSearchTerm);
     });
 
-    const sortedData = filteredData.sort((a, b) => {
-      const regex = /(\D+)(\d+)/;
-      const aMatch = a.value.match(regex);
-      const bMatch = b.value.match(regex);
-
-      if (aMatch && bMatch) {
-        if (aMatch[1] === bMatch[1]) {
-          return parseInt(aMatch[2]) - parseInt(bMatch[2]);
-        } else {
-          return aMatch[1].localeCompare(bMatch[1]);
-        }
-      }
-
-      return a.value.localeCompare(b.value);
-    });
+    const sortedData = sortAttributeData(filteredData);
 
     const groupedData = sortedData.reduce((acc, obj) => {
       const { value } = obj;
@@ -175,72 +206,54 @@ const App = () => {
     return Object.values(groupedData);
   };
 
+  const sortAttributeData = (data) => {
+    return data.sort((a, b) => {
+      const regex = /(\D+)(\d+)/;
+      const aMatch = a.value.match(regex);
+      const bMatch = b.value.match(regex);
+
+      if (aMatch && bMatch) {
+        if (aMatch[1] === bMatch[1]) {
+          return parseInt(aMatch[2]) - parseInt(bMatch[2]);
+        } else {
+          return aMatch[1].localeCompare(bMatch[1]);
+        }
+      }
+
+      return a.value.localeCompare(b.value);
+    });
+  };
+
   const renderGroupedAttributeObjects = () => {
     const groupedData = groupAttributeData();
-    
-    const selectedData = groupedData.filter((group) => selectedGroups[group.value]);
-    const nonSelectedData = groupedData.filter((group) => !selectedGroups[group.value]);
+    const selectedData = groupedData.filter(group => selectedGroups[group.value]);
+    const nonSelectedData = groupedData.filter(group => !selectedGroups[group.value]);
 
     return (
       <div className="attribute-cards">
-        {selectedData.map((group) => (
-          <div key={group.value} className="attribute-card selected" onClick={() => debouncedHandleGroupClick(group.value)}>
-            <strong>{group.value}</strong>
-            <br />
+        {selectedData.map(group => (
+          <div
+            key={group.value}
+            className="attribute-card selected"
+            onClick={() => handleGroupClick(group.value)}
+          >
+            <strong>{group.value}</strong><br />
             Antall: {group.antall}
           </div>
         ))}
         {selectedData.length > 0 && <hr className="separator" />}
-        {nonSelectedData.map((group) => (
-          <div key={group.value} className="attribute-card" onClick={() => debouncedHandleGroupClick(group.value)}>
-            <strong>{group.value}</strong>
-            <br />
+        {nonSelectedData.map(group => (
+          <div
+            key={group.value}
+            className="attribute-card"
+            onClick={() => handleGroupClick(group.value)}
+          >
+            <strong>{group.value}</strong><br />
             Antall: {group.antall}
           </div>
         ))}
       </div>
     );
-  };
-
-  const isolateObjects = async (api, objects) => {
-    if (objects.length === 0) return;
-
-    const modelEntities = objects.reduce((acc, obj) => {
-      const model = acc.find((m) => m.modelId === obj.modelId);
-      if (model) {
-        model.entityIds.push(obj.id);
-      } else {
-        acc.push({ modelId: obj.modelId, entityIds: [obj.id] });
-      }
-      return acc;
-    }, []);
-
-    // Skjuler alt annet ved å isolere kun de valgte objektene
-    await api.viewer.isolateEntities({ models: modelEntities });
-  };
-
-  // Funksjon for å velge modeller uten å skjule resten av modellen
-  const selectObjectsInViewer = async (api, objects) => {
-    const modelEntities = objects.reduce((acc, obj) => {
-      const model = acc.find((m) => m.modelId === obj.modelId);
-      if (model) {
-        model.entityIds.push(obj.id);
-      } else {
-        acc.push({ modelId: obj.modelId, entityIds: [obj.id] });
-      }
-      return acc;
-    }, []);
-
-    // Velger objektene uten å skjule resten av modellen
-    await api.viewer.setSelection({ models: modelEntities, clear: true });
-  };
-
-  const toggleSelectionMode = () => {
-    setSelectionMode(!selectionMode);
-  };
-
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
   };
 
   return (
@@ -291,7 +304,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.2.0</p>
+        <p>UTVIKLING 0.2.1</p>
       </footer>
     </div>
   );

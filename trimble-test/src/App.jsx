@@ -153,12 +153,25 @@ const App = () => {
       const api = await dotConnect();
       const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
       if (selectionMode) {
+        if (Object.keys(selectedGroups).length === 0) {
+          await api.viewer.clearSelection();
+        } else {
+          await selectModelsInViewer(api, selectedData);
+        }
+      } else {
+        if (Object.keys(selectedGroups).length > 0) {
+          await selectObjects(api, selectedData);
+        } else {
+          await api.viewer.showAll();
+        }
+      }
+      if (selectionMode) {
         await selectModelsInViewer(api, selectedData);
       } else {
         if (Object.keys(selectedGroups).length > 0) {
           await selectObjects(api, selectedData);
         } else {
-          await api.viewer.resetModel({ resetCamera: true }); // Use ModelResetCallback when no attribute cards are selected
+          await api.viewer.showAll(); // Reset model to show all when no attribute cards are selected
         }
       }
     };
@@ -304,7 +317,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.2.5</p>
+        <p>UTVIKLING 0.2.6</p>
       </footer>
     </div>
   );

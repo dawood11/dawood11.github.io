@@ -158,7 +158,7 @@ const App = () => {
         if (Object.keys(selectedGroups).length > 0) {
           await selectObjects(api, selectedData);
         } else {
-          await api.viewer.resetModel({ resetCamera: true }); // Use ModelResetCallback when no attribute cards are selected
+          await api.viewer.resetModel({ resetCamera: true }); // Reset model when no attribute cards are selected and toggle is off
         }
       }
     };
@@ -304,7 +304,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.2.7</p>
+        <p>UTVIKLING 0.2.8</p>
       </footer>
     </div>
   );

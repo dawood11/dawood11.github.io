@@ -158,9 +158,9 @@ const App = () => {
         if (Object.keys(selectedGroups).length > 0) {
           await selectObjects(api, selectedData);
         } else {
-          if (!Object.keys(selectedGroups).length && !selectionMode) {
-            await api.viewer.resetModel({ resetCamera: true });
-          } // Reset model when no attribute cards are selected and toggle is off
+          if (Object.keys(selectedGroups).length === 0 && !selectionMode) {
+            await api.viewer.onModelReset();
+          } // Use onModelReset to reset model when no attribute cards are selected and toggle is off
         }
       }
     };
@@ -304,7 +304,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.3.1</p>
+        <p>UTVIKLING 0.3.2</p>
       </footer>
     </div>
   );

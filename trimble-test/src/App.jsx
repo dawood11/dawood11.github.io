@@ -5,6 +5,7 @@ import { defineCustomElements } from '@trimble-oss/modus-web-components/loader';
 
 const App = () => {
   useEffect(() => {
+    // Load Modus Web Components
     defineCustomElements();
   }, []);
 
@@ -15,6 +16,7 @@ const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
 
   const dotConnect = async () => {
     return await Extensions.connect(
@@ -258,6 +260,16 @@ const App = () => {
     );
   };
 
+  // Example function that will trigger the alert
+  const showTestAlert = () => {
+    setShowAlert(true);
+  };
+
+  // Function to close the alert
+  const handleAlertDismiss = () => {
+    setShowAlert(false);
+  };
+
   return (
     <div className="container">
       <header className="header">
@@ -281,6 +293,9 @@ const App = () => {
                 className="nav-icon"
               />
             </a>
+            <a href="#" onClick={showTestAlert}>
+              Show Alert
+            </a>
           </nav>
         </div>
       </header>
@@ -303,10 +318,20 @@ const App = () => {
         )}
       </main>
 
+      {/* Modus Alert Component */}
+      {showAlert && (
+        <modus-alert
+          type="info"
+          message="This is an informational alert."
+          dismissible
+          onDismiss={handleAlertDismiss}
+        ></modus-alert>
+      )}
+
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.3.3</p>
+        <p>UTVIKLING 0.3.4</p>
       </footer>
     </div>
   );

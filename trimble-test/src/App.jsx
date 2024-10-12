@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import * as Extensions from 'trimble-connect-workspace-api';
 import './index.css';
 import { defineCustomElements } from '@trimble-oss/modus-web-components/loader';
+import '@trimble-oss/modus-web-components/dist/modus-web-components/modus-web-components.css';
 
 const App = () => {
   useEffect(() => {
@@ -309,7 +310,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.3.7</p>
+        <p>UTVIKLING 0.3.8</p>
       </footer>
     </div>
   );

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import * as Extensions from 'trimble-connect-workspace-api';
-import './index.css';
+// import './index.css';
 import { defineCustomElements } from '@trimble-oss/modus-web-components/loader';
-
 const App = () => {
   useEffect(() => {
     defineCustomElements();
@@ -15,6 +14,37 @@ const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
+  const [api, setApi] = useState(null);
+
+  useEffect(() => {
+    const initializeApi = async () => {
+      const connectedApi = await dotConnect();
+      setApi(connectedApi);
+    };
+    initializeApi();
+  }, []);
+
+  useEffect(() => {
+    const setupResetListener = async () => {
+      if (api) {
+        api.viewer.on('modelReset', () => {
+          console.log('Model reset triggered');
+          setSelectedGroups({});
+          setAttributeData([]);
+        });
+      }
+    };
+    setupResetListener();
+
+    return () => {
+      const cleanupListener = async () => {
+        if (api) {
+          api.viewer.off('modelReset');
+        }
+      };
+      cleanupListener();
+    };
+  }, [api]);
 
   const dotConnect = async () => {
     return await Extensions.connect(
@@ -33,18 +63,20 @@ const App = () => {
   };
 
   const getProjectId = async () => {
-    const api = await dotConnect();
-    const project = await api.project.getProject();
-    setProjectId(project.id);
-    return project.id;
+    if (api) {
+      const project = await api.project.getProject();
+      setProjectId(project.id);
+      return project.id;
+    }
   };
 
   const getModelName = async () => {
-    const api = await dotConnect();
-    const viewer = api.viewer;
-    const models = await viewer.getModels();
-    if (models.length > 0) {
-      setModelName(models[0].name);
+    if (api) {
+      const viewer = api.viewer;
+      const models = await viewer.getModels();
+      if (models.length > 0) {
+        setModelName(models[0].name);
+      }
     }
   };
 
@@ -52,7 +84,7 @@ const App = () => {
     setLoading(true);
 
     const posAttributes = ['Pos.nr.', 'Pos.nr', 'Pos nr.', 'Pos'];
-    const api = await dotConnect();
+    const objektIdAttribute = 'ObjektID';
     await getProjectId();
     await getModelName();
 
@@ -71,22 +103,27 @@ const App = () => {
         properties.forEach((propertySet) => {
           if (propertySet.properties) {
             let primaryAttribute = null;
+            let objektId = null;
 
             propertySet.properties.forEach((prop) => {
               prop.properties.forEach((subProp) => {
+                if (subProp.name.includes(objektIdAttribute)) {
+                  objektId = subProp.value;
+                }
                 if (posAttributes.some(attr => subProp.name.includes(attr))) {
                   primaryAttribute = {
                     modelId,
                     id: propertySet.id,
                     class: propertySet.class,
                     name: subProp.name,
-                    value: subProp.value
+                    value: subProp.value,
+                    objektId
                   };
                 }
               });
             });
 
-            if (primaryAttribute) {
+            if (primaryAttribute && objektId) {
               attributeObjects.push({ ...primaryAttribute });
             }
           }
@@ -94,7 +131,6 @@ const App = () => {
       }
     }
 
-    // Ensure loading is shown for at least 2 seconds
     setTimeout(() => {
       setAttributeData(attributeObjects);
       setLoading(false);
@@ -113,62 +149,60 @@ const App = () => {
     });
   };
 
-  const selectObjects = useCallback(async (api, objects) => {
-    const modelEntities = objects.reduce((acc, obj) => {
-      const model = acc.find(m => m.modelId === obj.modelId);
-      if (model) {
-        model.entityIds.push(obj.id);
-      } else {
-        acc.push({ modelId: obj.modelId, entityIds: [obj.id] });
-      }
-      return acc;
-    }, []);
+  const selectObjects = useCallback(async (objects) => {
+    if (api) {
+      const modelEntities = objects.reduce((acc, obj) => {
+        const model = acc.find(m => m.modelId === obj.modelId);
+        if (model) {
+          model.entityIds.push(obj.id);
+        } else {
+          acc.push({ modelId: obj.modelId, entityIds: [obj.id] });
+        }
+        return acc;
+      }, []);
 
-    // Isolate the selected objects (default behavior)
-    await api.viewer.isolateEntities(modelEntities);
-  }, []);
-
-  const selectModelsInViewer = useCallback(async (api, objects) => {
-    const modelsToSelect = [];
-
-    objects.forEach(obj => {
-      if (selectedGroups[obj.value]) {
-        modelsToSelect.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
-      }
-    });
-
-    if (modelsToSelect.length > 0) {
-      const objectSelector = {
-        modelObjectIds: modelsToSelect.map(m => ({
-          modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds
-        }))
-      };
-
-      await api.viewer.setSelection(objectSelector);
+      await api.viewer.isolateEntities(modelEntities);
     }
-  }, [selectedGroups]);
+  }, [api]);
+
+  const selectModelsInViewer = useCallback(async (objects) => {
+    if (api) {
+      const modelsToSelect = [];
+
+      objects.forEach(obj => {
+        if (selectedGroups[obj.value]) {
+          modelsToSelect.push({ modelId: obj.modelId, objectRuntimeIds: [obj.id] });
+        }
+      });
+
+      if (modelsToSelect.length > 0) {
+        const objectSelector = {
+          modelObjectIds: modelsToSelect.map(m => ({
+            modelId: m.modelId, objectRuntimeIds: m.objectRuntimeIds
+          }))
+        };
+
+        await api.viewer.setSelection(objectSelector);
+      }
+    }
+  }, [api, selectedGroups]);
 
   useEffect(() => {
     const updateSelection = async () => {
-      const api = await dotConnect();
-      const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
-      if (selectionMode) {
-        await selectModelsInViewer(api, selectedData);
-      } else {
-        if (Object.keys(selectedGroups).length > 0) {
-          await selectObjects(api, selectedData);
+      if (api) {
+        const selectedData = attributeData.filter(obj => selectedGroups[obj.value]);
+        if (selectionMode) {
+          await selectModelsInViewer(selectedData);
         } else {
-          if (Object.keys(selectedGroups).length === 0 && !selectionMode) {
-            api.viewer.onModelReset(() => {
-              console.log('Model reset triggered');
-            });
-          } // Properly reset the model when no attribute cards are selected and toggle is off
+          if (Object.keys(selectedGroups).length > 0) {
+            await selectObjects(selectedData);
+          }
         }
       }
     };
 
     updateSelection();
-  }, [selectedGroups, selectionMode, attributeData, selectModelsInViewer, selectObjects]);
+  }, [selectedGroups, selectionMode, attributeData, selectModelsInViewer, selectObjects, api]);
 
   const toggleSelectionMode = () => {
     setSelectionMode(!selectionMode);
@@ -196,12 +230,11 @@ const App = () => {
     const sortedData = sortAttributeData(filteredData);
 
     const groupedData = sortedData.reduce((acc, obj) => {
-      const { value } = obj;
-      if (!acc[value]) {
-        acc[value] = { value, antall: 0, models: [] };
+      const { objektId } = obj;
+      if (!acc[objektId]) {
+        acc[objektId] = { objektId, posNr: [] };
       }
-      acc[value].antall += 1;
-      acc[value].models.push(obj);
+      acc[objektId].posNr.push(obj);
       return acc;
     }, {});
 
@@ -228,30 +261,15 @@ const App = () => {
 
   const renderGroupedAttributeObjects = () => {
     const groupedData = groupAttributeData();
-    const selectedData = groupedData.filter(group => selectedGroups[group.value]);
-    const nonSelectedData = groupedData.filter(group => !selectedGroups[group.value]);
 
     return (
-      <div className="attribute-cards">
-        {selectedData.map(group => (
-          <div
-            key={group.value}
-            className="attribute-card selected"
-            onClick={() => handleGroupClick(group.value)}
-          >
-            <strong>{group.value}</strong><br />
-            Antall: {group.antall}
-          </div>
-        ))}
-        {selectedData.length > 0 && <hr className="separator" />}
-        {nonSelectedData.map(group => (
-          <div
-            key={group.value}
-            className="attribute-card"
-            onClick={() => handleGroupClick(group.value)}
-          >
-            <strong>{group.value}</strong><br />
-            Antall: {group.antall}
+      <div>
+        {groupedData.map(group => (
+          <div key={group.objektId} className="tree-item">
+          <strong>ObjektID: {group.objektId}</strong>
+            {group.posNr.map(pos => (
+              <div key={pos.id} className="tree-sub-item">Pos.nr: {pos.value}</div>
+            ))}
           </div>
         ))}
       </div>
@@ -306,7 +324,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.3.3</p>
+        <p>UTVIKLING 0.3.4</p>
       </footer>
     </div>
   );

@@ -102,6 +102,8 @@ const App = () => {
       }
     }
 
+    console.log('Fetched Attribute Data:', attributeObjects); // Debug output
+
     // Ensure loading is shown for at least 2 seconds
     setTimeout(() => {
       setAttributeData(attributeObjects);
@@ -201,6 +203,8 @@ const App = () => {
       return normalizedValue.includes(normalizedSearchTerm);
     });
 
+    console.log('Filtered Data:', filteredData); // Debug output
+
     const groupedData = filteredData.reduce((acc, obj) => {
       if (!acc[obj.objectId]) {
         acc[obj.objectId] = { objectId: obj.objectId, posNr: [] };
@@ -209,11 +213,17 @@ const App = () => {
       return acc;
     }, {});
 
+    console.log('Grouped Data:', groupedData); // Debug output
+
     return Object.values(groupedData);
   };
 
   const renderContentTree = () => {
     const groupedData = groupAttributeData();
+
+    if (groupedData.length === 0) {
+      return <div>No data available to display</div>; // Display message if no data
+    }
 
     return (
       <modus-content-tree multiSelection>
@@ -299,7 +309,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.3.6</p>
+        <p>UTVIKLING 0.3.7</p>
       </footer>
     </div>
   );

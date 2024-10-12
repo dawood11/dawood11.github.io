@@ -54,6 +54,7 @@ const App = () => {
     setLoading(true);
 
     const posAttributes = ['Pos.nr.', 'Pos.nr', 'Pos nr.', 'Pos'];
+    const objectIdAttributes = ['ObjektID', 'Objekt ID'];
     const api = await dotConnect();
     await getProjectId();
     await getModelName();
@@ -72,23 +73,28 @@ const App = () => {
 
         properties.forEach((propertySet) => {
           if (propertySet.properties) {
+            let objectId = null;
             let primaryAttribute = null;
 
             propertySet.properties.forEach((prop) => {
               prop.properties.forEach((subProp) => {
+                if (objectIdAttributes.some(attr => subProp.name.includes(attr))) {
+                  objectId = subProp.value;
+                }
                 if (posAttributes.some(attr => subProp.name.includes(attr))) {
                   primaryAttribute = {
                     modelId,
                     id: propertySet.id,
                     class: propertySet.class,
                     name: subProp.name,
-                    value: subProp.value
+                    value: subProp.value,
+                    objectId
                   };
                 }
               });
             });
 
-            if (primaryAttribute) {
+            if (primaryAttribute && objectId) {
               attributeObjects.push({ ...primaryAttribute });
             }
           }
@@ -196,10 +202,10 @@ const App = () => {
     });
 
     const groupedData = filteredData.reduce((acc, obj) => {
-      if (!acc[obj.id]) {
-        acc[obj.id] = { id: obj.id, posNr: [] };
+      if (!acc[obj.objectId]) {
+        acc[obj.objectId] = { objectId: obj.objectId, posNr: [] };
       }
-      acc[obj.id].posNr.push(obj);
+      acc[obj.objectId].posNr.push(obj);
       return acc;
     }, {});
 
@@ -212,9 +218,9 @@ const App = () => {
     return (
       <modus-content-tree multiSelection>
         {groupedData.map((group) => (
-          <modus-content-tree-item key={group.id} label={`Object ID: ${group.id}`}>
+          <modus-content-tree-item key={group.objectId} label={`Object ID: ${group.objectId}`}>
             {group.posNr.map((pos) => (
-              <modus-content-tree-item key={pos.value} label={`Pos.nr: ${pos.value}`} />
+              <modus-content-tree-item key={pos.id} label={`Pos.nr: ${pos.value}`} />
             ))}
           </modus-content-tree-item>
         ))}
@@ -293,7 +299,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.3.5</p>
+        <p>UTVIKLING 0.3.6</p>
       </footer>
     </div>
   );

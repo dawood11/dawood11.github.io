@@ -227,15 +227,15 @@ const App = () => {
     }
 
     return (
-      <modus-content-tree multiSelection>
+      <modus-tree-view multi-selection="true" checkbox-selection="true">
         {groupedData.map((group) => (
-          <modus-content-tree-item key={group.objectId} label={`Object ID: ${group.objectId}`}>
+          <modus-tree-view-item key={group.objectId} node-id={group.objectId} label={`Object ID: ${group.objectId}`}>
             {group.posNr.map((pos) => (
-              <modus-content-tree-item key={pos.id} label={`Pos.nr: ${pos.value}`} />
+              <modus-tree-view-item key={pos.id} node-id={pos.id} label={`Pos.nr: ${pos.value}`} />
             ))}
-          </modus-content-tree-item>
+          </modus-tree-view-item>
         ))}
-      </modus-content-tree>
+      </modus-tree-view>
     );
   };
 
@@ -310,7 +310,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.3.8</p>
+        <p>UTVIKLING 0.3.9</p>
       </footer>
     </div>
   );

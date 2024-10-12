@@ -195,68 +195,30 @@ const App = () => {
       return normalizedValue.includes(normalizedSearchTerm);
     });
 
-    const sortedData = sortAttributeData(filteredData);
-
-    const groupedData = sortedData.reduce((acc, obj) => {
-      const { value } = obj;
-      if (!acc[value]) {
-        acc[value] = { value, antall: 0, models: [] };
+    const groupedData = filteredData.reduce((acc, obj) => {
+      if (!acc[obj.id]) {
+        acc[obj.id] = { id: obj.id, posNr: [] };
       }
-      acc[value].antall += 1;
-      acc[value].models.push(obj);
+      acc[obj.id].posNr.push(obj);
       return acc;
     }, {});
 
     return Object.values(groupedData);
   };
 
-  const sortAttributeData = (data) => {
-    return data.sort((a, b) => {
-      const regex = /(\D+)(\d+)/;
-      const aMatch = a.value.match(regex);
-      const bMatch = b.value.match(regex);
-
-      if (aMatch && bMatch) {
-        if (aMatch[1] === bMatch[1]) {
-          return parseInt(aMatch[2]) - parseInt(bMatch[2]);
-        } else {
-          return aMatch[1].localeCompare(bMatch[1]);
-        }
-      }
-
-      return a.value.localeCompare(b.value);
-    });
-  };
-
-  const renderGroupedAttributeObjects = () => {
+  const renderContentTree = () => {
     const groupedData = groupAttributeData();
-    const selectedData = groupedData.filter(group => selectedGroups[group.value]);
-    const nonSelectedData = groupedData.filter(group => !selectedGroups[group.value]);
 
     return (
-      <div className="attribute-cards">
-        {selectedData.map(group => (
-          <div
-            key={group.value}
-            className="attribute-card selected"
-            onClick={() => handleGroupClick(group.value)}
-          >
-            <strong>{group.value}</strong><br />
-            Antall: {group.antall}
-          </div>
+      <modus-content-tree multiSelection>
+        {groupedData.map((group) => (
+          <modus-content-tree-item key={group.id} label={`Object ID: ${group.id}`}>
+            {group.posNr.map((pos) => (
+              <modus-content-tree-item key={pos.value} label={`Pos.nr: ${pos.value}`} />
+            ))}
+          </modus-content-tree-item>
         ))}
-        {selectedData.length > 0 && <hr className="separator" />}
-        {nonSelectedData.map(group => (
-          <div
-            key={group.value}
-            className="attribute-card"
-            onClick={() => handleGroupClick(group.value)}
-          >
-            <strong>{group.value}</strong><br />
-            Antall: {group.antall}
-          </div>
-        ))}
-      </div>
+      </modus-content-tree>
     );
   };
 
@@ -314,7 +276,7 @@ const App = () => {
         {loading ? (
           <div className="loading-message">Leser armeringen, vennligst vent...</div>
         ) : (
-          renderGroupedAttributeObjects()
+          renderContentTree()
         )}
       </main>
 
@@ -331,7 +293,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.3.4</p>
+        <p>UTVIKLING 0.3.5</p>
       </footer>
     </div>
   );

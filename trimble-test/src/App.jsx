@@ -20,17 +20,7 @@ const App = () => {
 
   return (
     <div className="container">
-      <header className="header">
-  <div className="header-content">
-    <div className="logo">
-      <h1>
-        <span className="pos">POS.</span>
-        <span className="flow">Flow</span>
-      </h1>
-    </div>
-  </div>
-</header>
-      <main className="content">
+      <main className="content content-panel">
         {/* Content Tree Component */}
         <modus-tree-view borderless="true">
           <modus-tree-view-item node-id="1" label="Object ID: 1">
@@ -42,10 +32,23 @@ const App = () => {
           </modus-tree-view-item>
         </modus-tree-view>
       </main>
+      <header className="header">
+        <div className="header-content">
+          <div className="logo">
+            <h1>
+              <span className="pos">POS.</span>
+              <span className="flow">Flow</span>
+            </h1>
+          </div>
+        </div>
+      </header>
+      <nav>
+        {/* Add navigation items here */}
+      </nav>
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.3.3</p>
+        <p>UTVIKLING 0.4.3</p>
       </footer>
     </div>
   );

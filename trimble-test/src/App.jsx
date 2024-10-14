@@ -20,14 +20,16 @@ const App = () => {
 
   return (
     <div className="container">
-      <modus-navbar id="navbar" color-scheme="blue">
-  <span slot="brand">POS.Flow</span>
-  <modus-navbar-menu slot="start">
-    <modus-navbar-item label="Home" id="home"></modus-navbar-item>
-    <modus-navbar-item label="About" id="about"></modus-navbar-item>
-    <modus-navbar-item label="Contact" id="contact"></modus-navbar-item>
-  </modus-navbar-menu>
-</modus-navbar>
+      <header className="header">
+  <div className="header-content">
+    <div className="logo">
+      <h1>
+        <span className="pos">POS.</span>
+        <span className="flow">Flow</span>
+      </h1>
+    </div>
+  </div>
+</header>
       <main className="content">
         {/* Content Tree Component */}
         <modus-tree-view borderless="true">
@@ -43,7 +45,7 @@ const App = () => {
       <footer>
         <img src="https://dawood11.github.io/trimble-test/src/assets/Logo_Haehre.png" alt="Logo" className="footer-logo" />
         <p>Utviklet av Yasin Rafiq</p>
-        <p>UTVIKLING 0.4.2</p>
+        <p>UTVIKLING 0.3.3</p>
       </footer>
     </div>
   );

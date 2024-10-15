@@ -14,7 +14,6 @@
 }
 
 body {
-  
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -22,20 +21,18 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background-color: #ffffff;
-  overflow-x: hidden; /* Prevent horizontal scroll */
-  padding: .75rem .5rem .75rem 1rem; /* Padding from image */
-
-  padding: .75rem .5rem .75rem 1rem !important; /* Always apply this padding */
+  overflow-x: hidden;
+  padding: .75rem .5rem .75rem 1rem !important;
 }
 
 .header {
   width: 100%;
   background-color: #003D6A;
   display: flex;
-  justify-content: space-between; /* Distribute space between logo and nav */
+  justify-content: space-between;
   align-items: center;
-  padding: 0.5em 1em; /* Adjust padding as needed */
-  box-sizing: border-box; /* Ensure padding is included in width */
+  padding: 0.5em 1em;
+  box-sizing: border-box;
 }
 
 .header-content {
@@ -52,42 +49,41 @@ header .logo {
 
 header .pos {
   font-weight: 700;
-  font-size: 1.2em; /* Adjusted font size */
+  font-size: 1.2em;
   color: #ffffff;
 }
 
 header .flow {
   font-weight: 300;
-  font-size: 1em; /* Adjusted font size */
+  font-size: 1em;
   color: #ffffff;
 }
 
 nav {
   display: flex;
-  gap: 1em; /* Adjusted gap */
-  justify-content: flex-end; /* Align nav items to the right */
-  flex-grow: 1; /* Allow nav to grow */
+  gap: 1em;
+  justify-content: flex-end;
+  flex-grow: 1;
 }
 
 footer {
   text-align: center;
   padding: 1em;
-  background-color: #ffffff; /* Set footer background to white */
+  background-color: #ffffff;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: #000000; /* Set footer text color to black */
-  position: static; /* Adjusted position */
+  color: #000000;
 }
 
 footer img {
-  width: 30px; /* Adjusted width */
+  width: 30px;
   height: auto;
 }
 
 footer p {
   margin: 5px 0 0 0;
-  font-size: 0.7em; /* Adjusted font size */
-  color: #000000; /* Set footer text color to black */
+  font-size: 0.7em;
+  color: #000000;
 }
